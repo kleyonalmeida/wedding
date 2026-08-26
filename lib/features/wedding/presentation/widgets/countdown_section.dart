@@ -48,29 +48,33 @@ class _CountdownSectionState extends State<CountdownSection> {
     final hours = (_duration.inHours % 24).toString().padLeft(2, '0');
     final minutes = (_duration.inMinutes % 60).toString().padLeft(2, '0');
     final seconds = (_duration.inSeconds % 60).toString().padLeft(2, '0');
+    final isMobile = MediaQuery.of(context).size.width < WeddingConstants.compactBreakpoint;
 
     return Container(
       color: AppColors.primary,
-      padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 16.0),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 48.0 : 64.0, horizontal: 8.0),
       child: Column(
         children: [
-          Text(
-            'Contagem Regressiva',
-            style: AppTextStyles.cursive.copyWith(
-              fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
-              color: AppColors.white,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              'Contagem Regressiva',
+              style: AppTextStyles.cursive.copyWith(
+                fontSize: isMobile ? 48 : 80,
+                color: AppColors.white,
+              ),
             ),
           ),
           const SizedBox(height: 40),
           Wrap(
-            spacing: 16.0,
+            spacing: isMobile ? 8.0 : 16.0,
             runSpacing: 16.0,
             alignment: WrapAlignment.center,
             children: [
-              _buildCard(days, 'DIAS'),
-              _buildCard(hours, 'HORAS'),
-              _buildCard(minutes, 'MINUTOS'),
-              _buildCard(seconds, 'SEGUNDOS'),
+              _buildCard(days, 'DIAS', isMobile),
+              _buildCard(hours, 'HORAS', isMobile),
+              _buildCard(minutes, 'MINUTOS', isMobile),
+              _buildCard(seconds, 'SEGUNDOS', isMobile),
             ],
           ),
         ],
@@ -78,13 +82,16 @@ class _CountdownSectionState extends State<CountdownSection> {
     );
   }
 
-  Widget _buildCard(String value, String label) {
+  Widget _buildCard(String value, String label, bool isMobile) {
+    final double cardSize = isMobile ? 76.0 : 112.0;
+    final double fontSize = isMobile ? 32.0 : 48.0;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 112,
-          height: 112,
+          width: cardSize,
+          height: cardSize,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
@@ -100,7 +107,7 @@ class _CountdownSectionState extends State<CountdownSection> {
             child: Text(
               value,
               style: AppTextStyles.serif.copyWith(
-                fontSize: 48,
+                fontSize: fontSize,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),

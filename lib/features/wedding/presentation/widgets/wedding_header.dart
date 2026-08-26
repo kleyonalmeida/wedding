@@ -51,13 +51,29 @@ class WeddingHeader extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'K&L',
-                style: AppTextStyles.serif.copyWith(
-                  fontSize: 24,
-                  letterSpacing: 4.0,
-                  color: isScrolled ? Theme.of(context).colorScheme.onSurface : AppColors.white,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (MediaQuery.of(context).size.width < WeddingConstants.expandedBreakpoint)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.menu,
+                          color: isScrolled ? Theme.of(context).colorScheme.onSurface : AppColors.white,
+                        ),
+                        onPressed: onMenuTap,
+                      ),
+                    ),
+                  Text(
+                    'K&L',
+                    style: AppTextStyles.serif.copyWith(
+                      fontSize: 24,
+                      letterSpacing: 4.0,
+                      color: isScrolled ? Theme.of(context).colorScheme.onSurface : AppColors.white,
+                    ),
+                  ),
+                ],
               ),
               if (MediaQuery.of(context).size.width >= WeddingConstants.expandedBreakpoint)
                 Row(
@@ -77,17 +93,6 @@ class WeddingHeader extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (MediaQuery.of(context).size.width < WeddingConstants.expandedBreakpoint)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.menu,
-                            color: isScrolled ? Theme.of(context).colorScheme.onSurface : AppColors.white,
-                          ),
-                          onPressed: onMenuTap,
-                        ),
-                      ),
                     ElevatedButton(
                       onPressed: onRsvpTap,
                       child: const Text('PRESENÇA'),

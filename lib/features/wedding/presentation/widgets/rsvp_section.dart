@@ -109,13 +109,16 @@ class _RsvpSectionState extends State<RsvpSection> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Text(
-                      'Confirme sua presença',
-                      style: AppTextStyles.cursive.copyWith(
-                        fontSize: MediaQuery.of(context).size.width >= 768 ? 84 : 56,
-                        color: AppColors.primary,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Confirme sua presença',
+                        style: AppTextStyles.cursive.copyWith(
+                          fontSize: MediaQuery.of(context).size.width >= 768 ? 76 : 44,
+                          color: AppColors.primary,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     Text(

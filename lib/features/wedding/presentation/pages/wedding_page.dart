@@ -21,6 +21,7 @@ class WeddingPage extends StatefulWidget {
 
 class _WeddingPageState extends State<WeddingPage> {
   final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollProgressNotifier = ValueNotifier<double>(0.0);
   bool _isScrolled = false;
 
   // GlobalKeys for navigation
@@ -40,9 +41,16 @@ class _WeddingPageState extends State<WeddingPage> {
 
   void _onScroll() {
     if (_scrollController.hasClients) {
-      if (_scrollController.offset > 100 && !_isScrolled) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.offset;
+      
+      if (maxScroll > 0) {
+        _scrollProgressNotifier.value = (currentScroll / maxScroll).clamp(0.0, 1.0);
+      }
+
+      if (currentScroll > 100 && !_isScrolled) {
         setState(() => _isScrolled = true);
-      } else if (_scrollController.offset <= 100 && _isScrolled) {
+      } else if (currentScroll <= 100 && _isScrolled) {
         setState(() => _isScrolled = false);
       }
     }
@@ -51,6 +59,7 @@ class _WeddingPageState extends State<WeddingPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _scrollProgressNotifier.dispose();
     super.dispose();
   }
 
@@ -79,6 +88,9 @@ class _WeddingPageState extends State<WeddingPage> {
 
   @override
   Widget build(BuildContext context) {
+    // We can use 900 as the mobile/tablet breakpoint, same as the header
+    final isMobile = MediaQuery.of(context).size.width < 900; 
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: WeddingSideMenu(
@@ -93,8 +105,8 @@ class _WeddingPageState extends State<WeddingPage> {
         children: [
           Scrollbar(
             controller: _scrollController,
-            thumbVisibility: true,
-            trackVisibility: true,
+            thumbVisibility: !isMobile, // Hide scrollbar on mobile
+            trackVisibility: !isMobile,
             child: CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(
@@ -156,6 +168,23 @@ class _WeddingPageState extends State<WeddingPage> {
             onRsvpTap: () => _scrollTo(_rsvpKey),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
+          if (isMobile)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ValueListenableBuilder<double>(
+                valueListenable: _scrollProgressNotifier,
+                builder: (context, progress, child) {
+                  return LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.transparent,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    minHeight: 4.0,
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );

@@ -16,19 +16,19 @@ class GodparentsSection extends StatelessWidget {
   final List<Godparent> godparents = [
     Godparent(
       role: 'Madrinha',
-      imageUrl: 'https://lh3.googleusercontent.com/aida/AEtjO1U0FJXQwNizB6g7QTGUA7mOhT8l4BAHeBU1N9KuywqWRUNYLsJiSTMAmXge6X8od2DF1m5zmi1jug_1cOoLziTUOqDnoLofB5yRRCHSSnST3uVL7QvmvxnmyPjc6bz41PlpmkNufoR0lHTI6-jpv7F_PtzjXSOR--8o89p4hGgWA2N0ijGLFA4e8TGVSX65GNgl3VIShYEYD6nORKRhN4qNF4uRzuN0h0BYRVX76h5NECk55gck9QhZdfw',
+      imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80',
     ),
     Godparent(
       role: 'Padrinho',
-      imageUrl: 'https://lh3.googleusercontent.com/aida/AEtjO1VOYzERucdhiGDI-RtVgJelfNoCoRaovurIO13A4ks6AuktlqsAmD5H6gqsF-Odm5m6ldwggN_JoSb9vbRU_TqV7Kgl5ZzBwyJP2EqL31EI-2qfyR7btXHmRLLYfcrVy7CczEZ1X3qc4Jel3eamLu6wC3RU-b5rDnoa0DUe1KK99Mv-2YegYBOD88xrGUFTtJCe87JW_P1zpj4kntcLEiAJzDeNtZTryixPSoCUOHTIWbumBtTguNI1SHw',
+      imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
     ),
     Godparent(
       role: 'Madrinha',
-      imageUrl: 'https://lh3.googleusercontent.com/aida/AEtjO1U0FJXQwNizB6g7QTGUA7mOhT8l4BAHeBU1N9KuywqWRUNYLsJiSTMAmXge6X8od2DF1m5zmi1jug_1cOoLziTUOqDnoLofB5yRRCHSSnST3uVL7QvmvxnmyPjc6bz41PlpmkNufoR0lHTI6-jpv7F_PtzjXSOR--8o89p4hGgWA2N0ijGLFA4e8TGVSX65GNgl3VIShYEYD6nORKRhN4qNF4uRzuN0h0BYRVX76h5NECk55gck9QhZdfw',
+      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
     ),
     Godparent(
       role: 'Padrinho',
-      imageUrl: 'https://lh3.googleusercontent.com/aida/AEtjO1VOYzERucdhiGDI-RtVgJelfNoCoRaovurIO13A4ks6AuktlqsAmD5H6gqsF-Odm5m6ldwggN_JoSb9vbRU_TqV7Kgl5ZzBwyJP2EqL31EI-2qfyR7btXHmRLLYfcrVy7CczEZ1X3qc4Jel3eamLu6wC3RU-b5rDnoa0DUe1KK99Mv-2YegYBOD88xrGUFTtJCe87JW_P1zpj4kntcLEiAJzDeNtZTryixPSoCUOHTIWbumBtTguNI1SHw',
+      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
     ),
   ];
 
@@ -39,11 +39,14 @@ class GodparentsSection extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 96.0, horizontal: 24.0),
         child: Column(
           children: [
-            Text(
-              'Padrinhos',
-              style: AppTextStyles.cursive.copyWith(
-                fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
-                color: AppColors.primary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'Padrinhos',
+                style: AppTextStyles.cursive.copyWith(
+                  fontSize: MediaQuery.of(context).size.width >= 768 ? 80 : 52,
+                  color: AppColors.primary,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -92,6 +95,10 @@ class GodparentsSection extends StatelessWidget {
                                 child: Image.network(
                                   godparent.imageUrl,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                                    'assets/images/hero.jpeg',
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),

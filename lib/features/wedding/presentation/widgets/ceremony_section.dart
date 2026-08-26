@@ -24,11 +24,14 @@ class CeremonySection extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 1152),
           child: Column(
             children: [
-              Text(
-                'Cerimônia',
-                style: AppTextStyles.cursive.copyWith(
-                  fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
-                  color: AppColors.primary,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Cerimônia',
+                  style: AppTextStyles.cursive.copyWith(
+                    fontSize: MediaQuery.of(context).size.width >= 768 ? 80 : 52,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 64),
@@ -137,8 +140,12 @@ class CeremonySection extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 4 / 3,
           child: Image.network(
-            'https://lh3.googleusercontent.com/aida/AEtjO1X3Icjz8TiRljPtYyp2brG1_mMGVFxFwsSmT10Hu8y94kTe0HqbSACGcthO6GlRBNdLugFryKvRkRAWWS8vuSu9QaZs3CxEhN9XKsT73exdL3bzNHdRSiDUCsAdOdXXJdd7m6yvHjcsH1uOQSC159w9hdXh1GjCXdaytiOCA3HjjcwDE2t61ibwrih6J9eVR8BPPrRfZbU00S0kUdwozr_3jjfMBwcRwxB1ZB7bTXQ_IiM3Pm87BrglWg',
+            'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/images/hero.jpeg',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),

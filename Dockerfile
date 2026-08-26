@@ -1,5 +1,29 @@
 # ── Stage 1: Build do Flutter Web ──────────────────────────────────────────────
-FROM ghcr.io/cirrusci/flutter:stable AS build-env
+FROM ubuntu:22.04 AS build-env
+
+# Evita interações durante a instalação de pacotes
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instala dependências básicas do sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Baixa o Flutter SDK diretamente do CDN oficial do Google
+WORKDIR /sdks
+RUN curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.29.0-stable.tar.xz \
+    && tar xf flutter_linux_3.29.0-stable.tar.xz \
+    && rm flutter_linux_3.29.0-stable.tar.xz
+
+ENV PATH="/sdks/flutter/bin:${PATH}"
+
+# Desabilita o envio de telemetria
+RUN flutter config --no-analytics
 
 WORKDIR /app
 

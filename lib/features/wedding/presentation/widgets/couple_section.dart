@@ -12,64 +12,47 @@ class CoupleSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 96.0, horizontal: 24.0),
       child: Column(
         children: [
-          Text(
-            'O Casal',
-            style: AppTextStyles.cursive.copyWith(
-              fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
-              color: AppColors.primary,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              'O Casal',
+              style: AppTextStyles.cursive.copyWith(
+                fontSize: MediaQuery.of(context).size.width >= 768 ? 80 : 52,
+                color: AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 64),
           LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth >= 600) {
-                return const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _Profile(
-                      name: 'Kleyon',
-                      imagePath: 'assets/images/noivo.png',
+              final isMobile = constraints.maxWidth < 600;
+              final double spacing = isMobile ? 16 : 48;
+              
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _Profile(
+                    name: 'Kleyon',
+                    imagePath: 'assets/images/noivo.png',
+                    isMobile: isMobile,
+                  ),
+                  SizedBox(width: spacing),
+                  Text(
+                    '♥',
+                    style: TextStyle(
+                      fontSize: isMobile ? 32 : 48,
+                      color: const Color(0xFF8C7362),
+                      fontFamily: 'Playfair Display',
                     ),
-                    SizedBox(width: 48),
-                    Text(
-                      '♥',
-                      style: TextStyle(
-                        fontSize: 48,
-                        color: Color(0xFF8C7362),
-                        fontFamily: 'Playfair Display',
-                      ),
-                    ),
-                    SizedBox(width: 48),
-                    _Profile(
-                      name: 'Liandra',
-                      imagePath: 'assets/images/noiva.png',
-                    ),
-                  ],
-                );
-              } else {
-                return const Column(
-                  children: [
-                    _Profile(
-                      name: 'Kleyon',
-                      imagePath: 'assets/images/noivo.png',
-                    ),
-                    SizedBox(height: 32),
-                    Text(
-                      '♥',
-                      style: TextStyle(
-                        fontSize: 48,
-                        color: Color(0xFF8C7362),
-                        fontFamily: 'Playfair Display',
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    _Profile(
-                      name: 'Liandra',
-                      imagePath: 'assets/images/noiva.png',
-                    ),
-                  ],
-                );
-              }
+                  ),
+                  SizedBox(width: spacing),
+                  _Profile(
+                    name: 'Liandra',
+                    imagePath: 'assets/images/noiva.png',
+                    isMobile: isMobile,
+                  ),
+                ],
+              );
             },
           ),
           const SizedBox(height: 64),
@@ -107,19 +90,22 @@ class CoupleSection extends StatelessWidget {
 class _Profile extends StatelessWidget {
   final String name;
   final String imagePath;
+  final bool isMobile;
 
-  const _Profile({required this.name, required this.imagePath});
+  const _Profile({required this.name, required this.imagePath, this.isMobile = false});
 
   @override
   Widget build(BuildContext context) {
+    final double size = isMobile ? 110 : 200;
+    
     return Column(
       children: [
         Container(
-          width: 200,
-          height: 200,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 8),
+            border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: isMobile ? 4 : 8),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(30),
@@ -135,11 +121,11 @@ class _Profile extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: isMobile ? 12 : 24),
         Text(
           name,
           style: AppTextStyles.serif.copyWith(
-            fontSize: 24,
+            fontSize: isMobile ? 18 : 24,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSurface,
           ),

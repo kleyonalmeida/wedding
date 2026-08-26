@@ -32,10 +32,14 @@ class WeddingSideMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Drawer(
-      backgroundColor: isDark ? AppColors.dark.withAlpha(245) : AppColors.surface.withAlpha(245),
-      child: SafeArea(
-        child: Column(
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.65,
+      child: Drawer(
+        backgroundColor: isDark ? AppColors.dark.withAlpha(245) : AppColors.surface.withAlpha(245),
+        child: SafeArea(
+          child: Transform.scale(
+            scale: 0.85,
+            child: Column(
           children: [
             const SizedBox(height: 32),
             Text(
@@ -109,10 +113,13 @@ class WeddingSideMenu extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildMenuItem(BuildContext context, String title, VoidCallback onTap) {
     return InkWell(
