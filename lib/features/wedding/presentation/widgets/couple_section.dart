@@ -8,7 +8,7 @@ class CoupleSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 96.0, horizontal: 24.0),
       child: Column(
         children: [
@@ -91,7 +91,7 @@ class CoupleSection extends StatelessWidget {
                   style: AppTextStyles.sans.copyWith(
                     fontSize: 16,
                     height: 1.6,
-                    color: AppColors.dark.withAlpha(178), // ~0.7
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -119,7 +119,7 @@ class _Profile extends StatelessWidget {
           height: 192,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.white, width: 8),
+            border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 8),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(25),
@@ -140,7 +140,7 @@ class _Profile extends StatelessWidget {
           name,
           style: AppTextStyles.serif.copyWith(
             fontSize: 24,
-            color: AppColors.dark,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],

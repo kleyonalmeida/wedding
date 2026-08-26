@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class TexturedBackground extends StatelessWidget {
   final Widget child;
@@ -11,13 +10,15 @@ class TexturedBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
         image: DecorationImage(
-          image: AssetImage('assets/images/texture.png'),
+          image: const AssetImage('assets/images/texture.png'),
           repeat: ImageRepeat.repeat,
-          opacity: 0.7,
+          opacity: isDark ? 0.3 : 0.7,
         ),
       ),
       child: child,

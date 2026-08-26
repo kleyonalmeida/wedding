@@ -52,7 +52,7 @@ class GodparentsSection extends StatelessWidget {
               style: AppTextStyles.sans.copyWith(
                 fontSize: 12,
                 letterSpacing: 2.0,
-                color: AppColors.dark.withAlpha(153), // ~0.6
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
               ),
             ),
             const SizedBox(height: 80),
@@ -79,7 +79,7 @@ class GodparentsSection extends StatelessWidget {
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.white, width: 4),
+                                border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 4),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withAlpha(25),
@@ -102,7 +102,7 @@ class GodparentsSection extends StatelessWidget {
                           godparent.role,
                           style: AppTextStyles.serif.copyWith(
                             fontSize: 18,
-                            color: AppColors.dark,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],

@@ -86,7 +86,7 @@ class _CountdownSectionState extends State<CountdownSection> {
           width: 96,
           height: 96,
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(

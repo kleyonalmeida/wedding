@@ -1,0 +1,19 @@
+# Arquivo de secrets — NUNCA versionar
+.env
+
+# Build artifacts
+**/bin/
+**/obj/
+
+# Rider / VS
+.idea/
+*.user
+*.suo
+.vs/
+
+# Logs
+*.log
+
+# Dados locais do EF Core
+*.db
+*.db-journal

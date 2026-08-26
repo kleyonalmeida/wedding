@@ -16,7 +16,7 @@ class CeremonySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.surface,
+      color: Theme.of(context).scaffoldBackgroundColor,
       padding: const EdgeInsets.symmetric(vertical: 96.0, horizontal: 24.0),
       child: Center(
         child: ConstrainedBox(
@@ -43,11 +43,13 @@ class CeremonySection extends StatelessWidget {
                           child: Column(
                             children: [
                               _buildCard(
+                                context,
                                 title: 'Data e Horário',
                                 description: 'Sábado, 26 de Dezembro de 2026 às 16:00 horas.',
                               ),
                               const SizedBox(height: 32),
                               _buildCard(
+                                context,
                                 title: 'Localização',
                                 description: 'Espaço Villa Real - Av. das Flores, 1234 - Jardim Botânico.',
                                 showMapButton: true,
@@ -63,11 +65,13 @@ class CeremonySection extends StatelessWidget {
                         _buildImage(),
                         const SizedBox(height: 48),
                         _buildCard(
+                          context,
                           title: 'Data e Horário',
                           description: 'Sábado, 26 de Dezembro de 2026 às 16:00 horas.',
                         ),
                         const SizedBox(height: 32),
                         _buildCard(
+                          context,
                           title: 'Localização',
                           description: 'Espaço Villa Real - Av. das Flores, 1234 - Jardim Botânico.',
                           showMapButton: true,
@@ -109,12 +113,12 @@ class CeremonySection extends StatelessWidget {
     );
   }
 
-  Widget _buildCard({required String title, required String description, bool showMapButton = false}) {
+  Widget _buildCard(BuildContext context, {required String title, required String description, bool showMapButton = false}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32.0),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -138,7 +142,7 @@ class CeremonySection extends StatelessWidget {
             description,
             style: AppTextStyles.sans.copyWith(
               fontSize: 16,
-              color: AppColors.dark.withAlpha(178), // ~0.7
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
               height: 1.5,
             ),
           ),

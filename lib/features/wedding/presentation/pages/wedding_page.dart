@@ -51,13 +51,15 @@ class _WeddingPageState extends State<WeddingPage> {
   }
 
   void _scrollTo(GlobalKey key) {
-    if (key.currentContext != null) {
-      Scrollable.ensureVisible(
-        key.currentContext!,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
+    final ctx = key.currentContext;
+    if (ctx == null) return;
+    final box = ctx.findRenderObject() as RenderBox;
+    final offset = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject()).dy;
+    _scrollController.animateTo(
+      _scrollController.offset + offset - 80, // 80 is the header height when scrolled
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeInOutCubic,
+    );
   }
 
   @override
@@ -67,9 +69,9 @@ class _WeddingPageState extends State<WeddingPage> {
         children: [
           WebSmoothScroll(
             controller: _scrollController,
-            scrollSpeed: 4.0,
-            scrollAnimationLength: 800,
-            curve: Curves.easeOutExpo,
+            scrollSpeed: 1.0,           // multiplicador do delta nativo (~100px/tick)
+            scrollAnimationLength: 300, // completa antes do próximo tick (evita ping-pong)
+            curve: Curves.easeOutCubic,
             child: CustomScrollView(
               controller: _scrollController,
               physics: const NeverScrollableScrollPhysics(),
@@ -100,7 +102,7 @@ class _WeddingPageState extends State<WeddingPage> {
                 key: _listaKey,
                 child: Container(
                   height: 300,
-                  color: AppColors.surface,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   child: const Center(
                     child: Text(
                       "Lista de Presentes (Em breve)",
