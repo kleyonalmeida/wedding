@@ -26,9 +26,9 @@ RUN dotnet publish -c Release -o /app/publish \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# Cria usuário não-root para reduzir superfície de ataque.
-# O processo da API não rodará como root mesmo dentro do container.
-RUN groupadd -r appgroup \
+# Instala curl (necessário para o healthcheck do Docker Compose) e cria usuário não-root
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
+ && groupadd -r appgroup \
  && useradd -r -g appgroup -s /sbin/nologin appuser
 
 
