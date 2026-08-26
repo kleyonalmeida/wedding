@@ -32,7 +32,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
         duration: const Duration(milliseconds: 300),
         transform: Matrix4.translationValues(0, _isHovered ? -4 : 0, 0),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.outlineVariant.withOpacity(0.6), width: 1.2),
           boxShadow: [
@@ -54,15 +54,15 @@ class _GiftProductCardState extends State<GiftProductCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildImageSection(),
+              _buildImageSection(context),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildTitle(),
-                      _buildPriceSection(),
+                      _buildTitle(context),
+                      _buildPriceSection(context),
                     ],
                   ),
                 ),
@@ -74,13 +74,14 @@ class _GiftProductCardState extends State<GiftProductCard> {
     );
   }
 
-  Widget _buildImageSection() {
+  Widget _buildImageSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
         Container(
           height: 192,
           width: double.infinity,
-          color: AppColors.surfaceContainerLow,
+          color: isDark ? Colors.grey[900] : AppColors.surfaceContainerLow,
           padding: const EdgeInsets.all(16),
           child: AnimatedScale(
             scale: _isHovered ? 1.05 : 1.0,
@@ -111,7 +112,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 colors: [
-                  AppColors.surfaceContainerLow.withOpacity(0.5),
+                  isDark ? Colors.grey[900]!.withOpacity(0.5) : AppColors.surfaceContainerLow.withOpacity(0.5),
                   Colors.transparent,
                 ],
               ),
@@ -142,7 +143,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     return SizedBox(
       height: 48, // Fix height to exactly 2 lines (18 * 1.2 * 2 ≈ 43.2, rounded up to 48 for safety)
       child: Align(
@@ -152,18 +153,18 @@ class _GiftProductCardState extends State<GiftProductCard> {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Bodoni Moda',
             fontSize: 18,
             height: 1.2,
-            color: AppColors.dark,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPriceSection() {
+  Widget _buildPriceSection(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -176,10 +177,10 @@ class _GiftProductCardState extends State<GiftProductCard> {
                 padding: const EdgeInsets.only(right: 8.0, bottom: 2.0),
                 child: Text(
                   _formatCurrency(widget.product.originalPrice),
-                  style: const TextStyle(
+                  style: TextStyle(
                     decoration: TextDecoration.lineThrough,
                     fontSize: 12,
-                    color: AppColors.outline,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ),
               ),
@@ -196,9 +197,9 @@ class _GiftProductCardState extends State<GiftProductCard> {
         const SizedBox(height: 4),
         Text(
           '${widget.product.installments}x de ${_formatCurrency(widget.product.installmentValue)} sem juros',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 16),

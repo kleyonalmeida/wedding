@@ -24,8 +24,8 @@ class GiftSortSelector extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Text(
               'Encontramos $totalResults produtos especiais para você',
-              style: const TextStyle(
-                color: AppColors.onSurfaceVariant,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w300,
@@ -72,7 +72,7 @@ class GiftSortSelector extends StatelessWidget {
             color: isSelected ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.5),
           ),
           borderRadius: BorderRadius.circular(20),
-          color: isSelected ? AppColors.surfaceContainer : Colors.transparent,
+          color: isSelected ? Theme.of(context).colorScheme.surface : Colors.transparent,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -81,7 +81,7 @@ class GiftSortSelector extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: isSelected ? AppColors.primary : AppColors.dark,
+                color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -89,7 +89,7 @@ class GiftSortSelector extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? AppColors.primary : AppColors.dark,
+              color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
             ),
           ],
         ),

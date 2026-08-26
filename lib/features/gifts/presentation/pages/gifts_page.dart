@@ -111,7 +111,7 @@ class _GiftsPageState extends State<GiftsPage> {
                                     icon: const Icon(Icons.filter_list, size: 20),
                                     label: const Text('Filtros'),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.dark,
+                                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                                       side: const BorderSide(color: AppColors.outlineVariant),
                                     ),
                                   ),

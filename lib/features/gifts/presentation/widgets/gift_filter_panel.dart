@@ -15,7 +15,7 @@ class GiftFilterPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -30,7 +30,7 @@ class GiftFilterPanel extends StatelessWidget {
               const Text(
                 'FILTROS ATIVOS:',
                 style: TextStyle(
-                  color: AppColors.dark,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.5,
@@ -79,20 +79,21 @@ class GiftFilterPanel extends StatelessWidget {
     required List<String> selectedItems,
     required ValueChanged<String> onToggle,
   }) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Theme(
-      data: ThemeData(dividerColor: Colors.transparent),
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         title: Text(
           title,
-          style: const TextStyle(
-            color: AppColors.dark,
+          style: TextStyle(
+            color: onSurface,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
         ),
-        iconColor: AppColors.dark,
-        collapsedIconColor: AppColors.dark,
+        iconColor: onSurface,
+        collapsedIconColor: onSurface,
         initiallyExpanded: true,
         children: items.map((item) {
           final isSelected = selectedItems.contains(item);
@@ -117,7 +118,7 @@ class GiftFilterPanel extends StatelessWidget {
                     item,
                     style: TextStyle(
                       fontSize: 14,
-                      color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
+                      color: isSelected ? AppColors.primary : onSurface.withOpacity(0.7),
                     ),
                   ),
                 ],
