@@ -22,8 +22,10 @@ RUN curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable
 
 ENV PATH="/sdks/flutter/bin:${PATH}"
 
-# Desabilita o envio de telemetria
-RUN flutter config --no-analytics
+# Configura exceção de diretório seguro do Git e desabilita telemetria
+RUN git config --global --add safe.directory /sdks/flutter \
+ && git config --global --add safe.directory /app \
+ && flutter config --no-analytics
 
 WORKDIR /app
 
