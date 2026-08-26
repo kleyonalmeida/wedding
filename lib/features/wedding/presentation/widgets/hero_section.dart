@@ -14,8 +14,8 @@ class HeroSection extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuCbTV5pYldy7v1C_yVER9kTyWSOWIPrjK6fBBjA1zIFpCLDiHcPkaCrAR97zOABlGduX9GBUun2sSSghAJRS0hfdXBThUy7IQWszuRauyH4xdJVW_T0WDRROWObX_MAzC_JzBB3q-aRcv5gkIG4Xv3n1FKCeq24d5PImP99FMwUAwOysF4Qb-gNHnXh0ng-XS1nKvso6oV0DXmoMydS8dH40LrJAcfYDdhRo07UfWCE2R4g6PLNsEleeYy4NP72_NQ6Lw',
+          Image.asset(
+            'assets/images/hero.jpeg',
             fit: BoxFit.cover,
           ),
           Container(

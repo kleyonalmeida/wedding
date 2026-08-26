@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import '../widgets/wedding_header.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/welcome_section.dart';
@@ -64,9 +65,15 @@ class _WeddingPageState extends State<WeddingPage> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(
+          WebSmoothScroll(
             controller: _scrollController,
-            slivers: [
+            scrollSpeed: 4.0,
+            scrollAnimationLength: 800,
+            curve: Curves.easeOutExpo,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const NeverScrollableScrollPhysics(),
+              slivers: [
               SliverToBoxAdapter(
                 key: _homeKey,
                 child: const HeroSection(),
@@ -110,6 +117,7 @@ class _WeddingPageState extends State<WeddingPage> {
                 child: WeddingFooter(),
               ),
             ],
+          ),
           ),
           WeddingHeader(
             isScrolled: _isScrolled,
