@@ -28,8 +28,9 @@ WORKDIR /app
 
 # Cria usuário não-root para reduzir superfície de ataque.
 # O processo da API não rodará como root mesmo dentro do container.
-RUN addgroup --system appgroup \
- && adduser --system --ingroup appgroup --no-create-home appuser
+RUN groupadd -r appgroup \
+ && useradd -r -g appgroup -s /sbin/nologin appuser
+
 
 # Copia os artefatos publicados do stage de build
 COPY --from=build /app/publish .
