@@ -13,6 +13,7 @@ class WeddingHeader extends StatelessWidget {
   final VoidCallback onRecepcaoTap;
   final VoidCallback onListaTap;
   final VoidCallback onRsvpTap;
+  final VoidCallback? onMenuTap; // Callback for hamburger menu
 
   const WeddingHeader({
     super.key,
@@ -23,6 +24,7 @@ class WeddingHeader extends StatelessWidget {
     required this.onRecepcaoTap,
     required this.onListaTap,
     required this.onRsvpTap,
+    this.onMenuTap,
   });
 
   @override
@@ -72,13 +74,24 @@ class WeddingHeader extends StatelessWidget {
                     _buildMenuItem(context, 'LISTA DE PRESENTES', onListaTap, isScrolled),
                   ],
                 ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                    onPressed: onRsvpTap,
-                    child: const Text('PRESENÇA'),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (MediaQuery.of(context).size.width < WeddingConstants.expandedBreakpoint)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.menu,
+                            color: isScrolled ? Theme.of(context).colorScheme.onSurface : AppColors.white,
+                          ),
+                          onPressed: onMenuTap,
+                        ),
+                      ),
+                    ElevatedButton(
+                      onPressed: onRsvpTap,
+                      child: const Text('PRESENÇA'),
+                    ),
                   const SizedBox(width: 16),
                   ThemeSwitcher(
                     builder: (context) {

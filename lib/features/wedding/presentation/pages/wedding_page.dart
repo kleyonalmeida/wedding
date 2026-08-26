@@ -10,6 +10,7 @@ import '../widgets/godparents_section.dart';
 import '../widgets/ceremony_section.dart';
 import '../widgets/rsvp_section.dart';
 import '../widgets/wedding_footer.dart';
+import '../widgets/wedding_side_menu.dart';
 
 class WeddingPage extends StatefulWidget {
   const WeddingPage({super.key});
@@ -23,6 +24,7 @@ class _WeddingPageState extends State<WeddingPage> {
   bool _isScrolled = false;
 
   // GlobalKeys for navigation
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey _homeKey = GlobalKey();
   final GlobalKey _casalKey = GlobalKey();
   final GlobalKey _padrinhosKey = GlobalKey();
@@ -78,6 +80,15 @@ class _WeddingPageState extends State<WeddingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: WeddingSideMenu(
+        onHomeTap: () => _scrollTo(_homeKey),
+        onCasalTap: () => _scrollTo(_casalKey),
+        onPadrinhosTap: () => _scrollTo(_padrinhosKey),
+        onRecepcaoTap: () => _scrollTo(_recepcaoKey),
+        onListaTap: () => _scrollTo(_listaKey),
+        onRsvpTap: () => _scrollTo(_rsvpKey),
+      ),
       body: Stack(
         children: [
           Scrollbar(
@@ -143,6 +154,7 @@ class _WeddingPageState extends State<WeddingPage> {
             onRecepcaoTap: () => _scrollTo(_recepcaoKey),
             onListaTap: () => _scrollTo(_listaKey),
             onRsvpTap: () => _scrollTo(_rsvpKey),
+            onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ],
       ),

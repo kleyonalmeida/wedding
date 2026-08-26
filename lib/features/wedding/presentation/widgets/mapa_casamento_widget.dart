@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
-import 'dart:ui_web' as ui_web;
-
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'map_view_fallback.dart' if (dart.library.html) 'map_view_web.dart';
 class MapaCasamentoWidget extends StatefulWidget {
   final String mapSrc;
   final double height;
@@ -23,16 +22,8 @@ class _MapaCasamentoWidgetState extends State<MapaCasamentoWidget> {
   @override
   void initState() {
     super.initState();
-    if (!_isRegistered) {
-      ui_web.platformViewRegistry.registerViewFactory(
-        _viewType,
-        (int viewId) => html.IFrameElement()
-          ..src = widget.mapSrc
-          ..style.border = 'none'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..allowFullscreen = true,
-      );
+    if (!_isRegistered && kIsWeb) {
+      registerGoogleMapView(_viewType, widget.mapSrc);
       _isRegistered = true;
     }
   }
