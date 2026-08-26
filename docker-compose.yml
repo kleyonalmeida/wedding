@@ -27,6 +27,12 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Jwt__Secret: "${JWT_SECRET}"
+      Jwt__Issuer: "${JWT_ISSUER:-wedding-rsvp-api}"
+      Admin__Username: "${ADMIN_USERNAME}"
+      Admin__PasswordHash: "${ADMIN_PASSWORD_HASH}"
+      AllowedOrigin: "${ALLOWED_ORIGIN}"
     ports:
       - "5000:8080"
     healthcheck:
