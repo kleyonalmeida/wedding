@@ -38,7 +38,7 @@ class HeroSection extends StatelessWidget {
                 Text(
                   'Save the date',
                   style: AppTextStyles.cursive.copyWith(
-                    fontSize: 48,
+                    fontSize: MediaQuery.of(context).size.width >= 768 ? 84 : 56,
                     color: AppColors.secondary,
                   ),
                 ),

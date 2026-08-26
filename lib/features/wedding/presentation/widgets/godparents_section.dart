@@ -42,7 +42,7 @@ class GodparentsSection extends StatelessWidget {
             Text(
               'Padrinhos',
               style: AppTextStyles.cursive.copyWith(
-                fontSize: 48,
+                fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
                 color: AppColors.primary,
               ),
             ),

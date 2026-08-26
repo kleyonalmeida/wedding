@@ -20,6 +20,26 @@ class AppTheme {
         bodyLarge: AppTextStyles.sans,
         bodySmall: AppTextStyles.sans,
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: AppTextStyles.sans.copyWith(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.8,
+          color: AppColors.dark,
+        ),
+        floatingLabelStyle: AppTextStyles.sans.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.8,
+          color: AppColors.primary,
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF8C7362), width: 1.2),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.dark, width: 2.0),
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -50,6 +70,26 @@ class AppTheme {
         bodyMedium: AppTextStyles.sans.copyWith(color: const Color(0xFFF5F5F5)),
         bodyLarge: AppTextStyles.sans.copyWith(color: const Color(0xFFF5F5F5)),
         bodySmall: AppTextStyles.sans.copyWith(color: const Color(0xFFF5F5F5)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: AppTextStyles.sans.copyWith(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.8,
+          color: const Color(0xFFF5F5F5),
+        ),
+        floatingLabelStyle: AppTextStyles.sans.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.8,
+          color: const Color(0xFFE5D5C8),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF8C7362), width: 1.2),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFF5F5F5), width: 2.0),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

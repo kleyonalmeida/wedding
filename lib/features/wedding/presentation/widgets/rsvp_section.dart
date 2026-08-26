@@ -112,7 +112,7 @@ class _RsvpSectionState extends State<RsvpSection> {
                     Text(
                       'Confirme sua presença',
                       style: AppTextStyles.cursive.copyWith(
-                        fontSize: 48,
+                        fontSize: MediaQuery.of(context).size.width >= 768 ? 84 : 56,
                         color: AppColors.primary,
                       ),
                       textAlign: TextAlign.center,
@@ -123,7 +123,8 @@ class _RsvpSectionState extends State<RsvpSection> {
                       style: AppTextStyles.sans.copyWith(
                         fontSize: 12,
                         letterSpacing: 2.0,
-                        color: Theme.of(context).colorScheme.onSurface.withAlpha(127),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -157,9 +158,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'NOME COMPLETO',
-                        labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                       ),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: AppTextStyles.sans.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
                       onSaved: (value) => _name = value!,
                     ),
@@ -168,7 +172,15 @@ class _RsvpSectionState extends State<RsvpSection> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('VOCÊ IRÁ AO EVENTO?', style: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                        Text(
+                          'VOCÊ IRÁ AO EVENTO?',
+                          style: AppTextStyles.sans.copyWith(
+                            fontSize: 11,
+                            letterSpacing: 1.8,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 16,
@@ -182,7 +194,14 @@ class _RsvpSectionState extends State<RsvpSection> {
                                   onChanged: (value) => setState(() => _attending = value),
                                   activeColor: AppColors.primary,
                                 ),
-                                const Text('Sim, confirmarei'),
+                                Text(
+                                  'Sim, confirmarei',
+                                  style: AppTextStyles.sans.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
                               ],
                             ),
                             Row(
@@ -194,7 +213,14 @@ class _RsvpSectionState extends State<RsvpSection> {
                                   onChanged: (value) => setState(() => _attending = value),
                                   activeColor: AppColors.primary,
                                 ),
-                                const Text('Não poderei ir'),
+                                Text(
+                                  'Não poderei ir',
+                                  style: AppTextStyles.sans.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -209,9 +235,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                           child: DropdownButtonFormField<int>(
                             decoration: const InputDecoration(
                               labelText: 'ADULTOS',
-                              labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                             ),
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            style: AppTextStyles.sans.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                             dropdownColor: Theme.of(context).colorScheme.surface,
                             value: _adults,
                             items: [1, 2, 3, 4].map((e) => DropdownMenuItem(value: e, child: Text(e.toString()))).toList(),
@@ -223,9 +252,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                           child: DropdownButtonFormField<int>(
                             decoration: const InputDecoration(
                               labelText: 'CRIANÇAS (ATÉ 10 ANOS)',
-                              labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                             ),
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            style: AppTextStyles.sans.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                             dropdownColor: Theme.of(context).colorScheme.surface,
                             value: _children,
                             items: [0, 1, 2, 3].map((e) => DropdownMenuItem(value: e, child: Text(e.toString()))).toList(),
@@ -239,9 +271,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'E-MAIL',
-                        labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                       ),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: AppTextStyles.sans.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       keyboardType: TextInputType.emailAddress,
                       onSaved: (value) => _email = value ?? '',
                     ),
@@ -250,9 +285,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'TELEFONE / WHATSAPP',
-                        labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                       ),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: AppTextStyles.sans.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       keyboardType: TextInputType.phone,
                       onSaved: (value) => _phone = value ?? '',
                     ),
@@ -261,9 +299,12 @@ class _RsvpSectionState extends State<RsvpSection> {
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'MENSAGEM / OBSERVAÇÕES',
-                        labelStyle: TextStyle(fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold),
                       ),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: AppTextStyles.sans.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       maxLines: 3,
                       onSaved: (value) => _message = value ?? '',
                     ),
@@ -272,7 +313,14 @@ class _RsvpSectionState extends State<RsvpSection> {
                     CheckboxListTile(
                       value: _acceptTerms,
                       onChanged: (value) => setState(() => _acceptTerms = value ?? false),
-                      title: const Text('Li e aceito os termos de uso.', style: TextStyle(fontSize: 12)),
+                      title: Text(
+                        'Li e aceito os termos de uso.',
+                        style: AppTextStyles.sans.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: AppColors.primary,
                       contentPadding: EdgeInsets.zero,
@@ -280,7 +328,14 @@ class _RsvpSectionState extends State<RsvpSection> {
                     CheckboxListTile(
                       value: _acceptUpdates,
                       onChanged: (value) => setState(() => _acceptUpdates = value ?? false),
-                      title: const Text('Desejo receber atualizações sobre o evento.', style: TextStyle(fontSize: 12)),
+                      title: Text(
+                        'Desejo receber atualizações sobre o evento.',
+                        style: AppTextStyles.sans.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: AppColors.primary,
                       contentPadding: EdgeInsets.zero,

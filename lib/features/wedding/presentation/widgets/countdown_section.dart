@@ -57,7 +57,7 @@ class _CountdownSectionState extends State<CountdownSection> {
           Text(
             'Contagem Regressiva',
             style: AppTextStyles.cursive.copyWith(
-              fontSize: 48,
+              fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
               color: AppColors.white,
             ),
           ),
@@ -83,15 +83,15 @@ class _CountdownSectionState extends State<CountdownSection> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 96,
-          height: 96,
+          width: 112,
+          height: 112,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(25),
-                blurRadius: 10,
+                blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -100,19 +100,21 @@ class _CountdownSectionState extends State<CountdownSection> {
             child: Text(
               value,
               style: AppTextStyles.serif.copyWith(
-                fontSize: 36,
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           label,
           style: AppTextStyles.sans.copyWith(
-            fontSize: 10,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             letterSpacing: 2.0,
-            color: AppColors.white.withAlpha(204), // ~0.8
+            color: AppColors.white.withOpacity(0.9),
           ),
         ),
       ],

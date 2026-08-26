@@ -15,7 +15,7 @@ class CoupleSection extends StatelessWidget {
           Text(
             'O Casal',
             style: AppTextStyles.cursive.copyWith(
-              fontSize: 48,
+              fontSize: MediaQuery.of(context).size.width >= 768 ? 96 : 64,
               color: AppColors.primary,
             ),
           ),
@@ -28,21 +28,21 @@ class CoupleSection extends StatelessWidget {
                   children: [
                     _Profile(
                       name: 'Kleyon',
-                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZqdu8IjxxpBS8oT3U79TV38rRvPPMbJxHV2D-sIPNjtsBxeTohd1e9LLKxmQH1Pd9KnI737yGAKsgZUW7jjkEy8_iJ-X25vK4dQmG3LJlzZKWl8vv27VhWV5QsRQOMd6WnIyD_khD6A6Y5znRRhfeReQ-QlchPCdz0mX6O3YcOTaEkMSZ6j0-YPTU1PC7Rnm5oUEpI1WqqIc4zD2TCiwjDCmZR1B6Mpzvp7msv3v0wWDqJmssr2knudPQrnDD2jgM0Q',
+                      imagePath: 'assets/images/noivo.png',
                     ),
                     SizedBox(width: 48),
                     Text(
                       '♥',
                       style: TextStyle(
                         fontSize: 48,
-                        color: Color(0x33B8A291), // AppColors.primary with 20% opacity
+                        color: Color(0xFF8C7362),
                         fontFamily: 'Playfair Display',
                       ),
                     ),
                     SizedBox(width: 48),
                     _Profile(
                       name: 'Liandra',
-                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCo8fpihHw2l8ykih5pZxOh2GCXVx2JjoEltr8MWz6NR3tyGERIS7C7OSl8OIKilkjhtZqV7wZy7pDAVUbIXyG9YZtl_PwefdEGNbmTmX84HKXr8-qXiiwT2_-sLZH0kA49oN6YZKySEcrrxiU1BFF6L7yY-90Xw9yvPxwfZUuaNpEGG2H9or_OHdjkTKb5Baz3SAUuz_LPyK0ETQBaTyngudNj6abpAuNxk9RMr8PbpKOk_Jb4IyV7wN3sIvilGT8mDg',
+                      imagePath: 'assets/images/noiva.png',
                     ),
                   ],
                 );
@@ -51,21 +51,21 @@ class CoupleSection extends StatelessWidget {
                   children: [
                     _Profile(
                       name: 'Kleyon',
-                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZqdu8IjxxpBS8oT3U79TV38rRvPPMbJxHV2D-sIPNjtsBxeTohd1e9LLKxmQH1Pd9KnI737yGAKsgZUW7jjkEy8_iJ-X25vK4dQmG3LJlzZKWl8vv27VhWV5QsRQOMd6WnIyD_khD6A6Y5znRRhfeReQ-QlchPCdz0mX6O3YcOTaEkMSZ6j0-YPTU1PC7Rnm5oUEpI1WqqIc4zD2TCiwjDCmZR1B6Mpzvp7msv3v0wWDqJmssr2knudPQrnDD2jgM0Q',
+                      imagePath: 'assets/images/noivo.png',
                     ),
                     SizedBox(height: 32),
                     Text(
                       '♥',
                       style: TextStyle(
                         fontSize: 48,
-                        color: Color(0x33B8A291),
+                        color: Color(0xFF8C7362),
                         fontFamily: 'Playfair Display',
                       ),
                     ),
                     SizedBox(height: 32),
                     _Profile(
                       name: 'Liandra',
-                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCo8fpihHw2l8ykih5pZxOh2GCXVx2JjoEltr8MWz6NR3tyGERIS7C7OSl8OIKilkjhtZqV7wZy7pDAVUbIXyG9YZtl_PwefdEGNbmTmX84HKXr8-qXiiwT2_-sLZH0kA49oN6YZKySEcrrxiU1BFF6L7yY-90Xw9yvPxwfZUuaNpEGG2H9or_OHdjkTKb5Baz3SAUuz_LPyK0ETQBaTyngudNj6abpAuNxk9RMr8PbpKOk_Jb4IyV7wN3sIvilGT8mDg',
+                      imagePath: 'assets/images/noiva.png',
                     ),
                   ],
                 );
@@ -91,7 +91,7 @@ class CoupleSection extends StatelessWidget {
                   style: AppTextStyles.sans.copyWith(
                     fontSize: 16,
                     height: 1.6,
-                    color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -106,31 +106,31 @@ class CoupleSection extends StatelessWidget {
 
 class _Profile extends StatelessWidget {
   final String name;
-  final String imageUrl;
+  final String imagePath;
 
-  const _Profile({required this.name, required this.imageUrl});
+  const _Profile({required this.name, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          width: 192,
-          height: 192,
+          width: 200,
+          height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(25),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: Colors.black.withAlpha(30),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
           child: ClipOval(
-            child: Image.network(
-              imageUrl,
+            child: Image.asset(
+              imagePath,
               fit: BoxFit.cover,
             ),
           ),
@@ -140,6 +140,7 @@ class _Profile extends StatelessWidget {
           name,
           style: AppTextStyles.serif.copyWith(
             fontSize: 24,
+            fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),

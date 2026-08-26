@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
   static TextStyle get serif => GoogleFonts.playfairDisplay(
-        color: AppColors.dark,
+        fontWeight: FontWeight.w600,
       );
 
   static TextStyle get cursive => GoogleFonts.greatVibes(
-        color: AppColors.primary,
+        fontWeight: FontWeight.normal,
       );
 
-  static TextStyle get sans => GoogleFonts.workSans(
-        color: AppColors.dark,
+  static TextStyle get sans => GoogleFonts.plusJakartaSans(
+        fontWeight: FontWeight.w500,
       );
 }
