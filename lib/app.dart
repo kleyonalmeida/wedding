@@ -3,6 +3,7 @@ import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'dart:ui';
 import 'core/theme/app_theme.dart';
 import 'features/wedding/presentation/pages/wedding_page.dart';
+import 'features/gifts/presentation/pages/gifts_page.dart';
 
 class WeddingScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -30,7 +31,23 @@ class WeddingApp extends StatelessWidget {
           title: 'Kleyon & Liandra - Casamento',
           theme: myTheme,
           scrollBehavior: WeddingScrollBehavior(),
-          home: const WeddingPage(),
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            switch (settings.name) {
+              case '/':
+                return MaterialPageRoute(builder: (_) => const WeddingPage());
+              case '/presentes':
+                return PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => const GiftsPage(),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  transitionDuration: const Duration(milliseconds: 500),
+                );
+              default:
+                return MaterialPageRoute(builder: (_) => const WeddingPage());
+            }
+          },
           debugShowCheckedModeBanner: false,
         );
       },

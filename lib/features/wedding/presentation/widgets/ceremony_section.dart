@@ -8,7 +8,7 @@ class CeremonySection extends StatelessWidget {
   const CeremonySection({super.key});
 
   Future<void> _openMap() async {
-    final Uri url = Uri.parse('https://share.google/0Zp6f0NKpPhjc4ajj');
+    final Uri url = Uri.parse('https://www.google.com/maps/dir//\'\'/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x714394b936e986b:0xa864eee30a0d49e8!3e0?g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       debugPrint('Could not launch $url');
     }

@@ -38,12 +38,17 @@ dependencies:
   url_launcher: ^6.3.2
   web_smooth_scroll: ^2.0.0
   animated_theme_switcher: ^2.0.10
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  mockito: ^5.8.1
+  build_runner: ^2.16.0
+  mocktail: ^1.0.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

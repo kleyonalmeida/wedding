@@ -18,7 +18,10 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<Rsvp>(entity =>
         {
-            entity.ToTable("rsvps");
+            if (Database.IsRelational())
+            {
+                entity.ToTable("rsvps");
+            }
             entity.HasKey(e => e.Id);
 
             // Limites de tamanho reforçados no banco (dupla camada de proteção)
@@ -38,13 +41,20 @@ public class AppDbContext : DbContext
                 .HasMaxLength(500);
 
             // Índice único em Email: garante que cada pessoa confirme apenas uma vez
-            entity.HasIndex(e => e.Email)
-                .IsUnique()
-                .HasDatabaseName("ix_rsvps_email");
+            var index = entity.HasIndex(e => e.Email)
+                .IsUnique();
+            
+            if (Database.IsRelational())
+            {
+                index.HasDatabaseName("ix_rsvps_email");
+            }
 
             // Timestamp gerado com precisão UTC pelo PostgreSQL
-            entity.Property(e => e.CriadoEm)
-                .HasDefaultValueSql("NOW()");
+            if (Database.IsRelational())
+            {
+                entity.Property(e => e.CriadoEm)
+                    .HasDefaultValueSql("NOW()");
+            }
         });
     }
 }

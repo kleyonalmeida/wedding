@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kleyon &amp; Liandra - Gift Registry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Work+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#303030",
+                        "secondary-fixed-dim": "#e9c349",
+                        "outline-variant": "#d1c4bb",
+                        "surface-bright": "#fbf9f8",
+                        "background": "#fbf9f8",
+                        "secondary-fixed": "#ffe088",
+                        "on-secondary-fixed-variant": "#574500",
+                        "surface-container-highest": "#e4e2e1",
+                        "inverse-on-surface": "#f3f0f0",
+                        "on-background": "#1b1c1c",
+                        "on-primary-container": "#48392c",
+                        "surface-dim": "#dcd9d9",
+                        "outline": "#80756e",
+                        "tertiary-container": "#a8a6a3",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#3c3c39",
+                        "primary-fixed": "#f7decb",
+                        "on-secondary-fixed": "#241a00",
+                        "tertiary-fixed": "#e5e2de",
+                        "surface-container": "#f0eded",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-container": "#fed65b",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#b8a291",
+                        "surface-variant": "#e4e2e1",
+                        "tertiary": "#5f5e5b",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#4e453f",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#dac2b0",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#6d5b4c",
+                        "on-primary-fixed": "#26190e",
+                        "on-tertiary-fixed-variant": "#474744",
+                        "on-secondary-container": "#745c00",
+                        "on-surface": "#1b1c1c",
+                        "surface": "#fbf9f8",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#eae8e7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#1c1c1a",
+                        "tertiary-fixed-dim": "#c8c6c2",
+                        "on-primary-fixed-variant": "#544436",
+                        "inverse-primary": "#dac2b0",
+                        "secondary": "#735c00",
+                        "primary": "#6d5b4c",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-padding": "80px",
+                        "margin-mobile": "20px",
+                        "unit-base": "8px",
+                        "container-max": "1200px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Playfair Display"],
+                        "body-md": ["Work Sans"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "section-title": ["Bodoni Moda"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "600" }],
+                        "headline-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "section-title": ["36px", { "lineHeight": "44px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .texture-bg {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 Q 25 25 50 50 T 100 50' fill='none' stroke='%23d1c4bb' stroke-width='0.5' stroke-dasharray='5,5' opacity='0.2'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1c4bb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased texture-bg min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface/90 backdrop-blur-md text-primary font-label-caps text-label-caps fixed top-0 w-full z-50 border-b border-outline-variant/30 flex justify-between items-center px-8 py-4 max-w-container-max mx-auto transition-all ease-in-out duration-300">
+<div class="font-headline-lg text-headline-lg-mobile text-primary">Kleyon &amp; Liandra</div>
+<div class="hidden md:flex space-x-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:text-secondary duration-300" href="#">Home</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:text-secondary duration-300" href="#">Our Story</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:text-secondary duration-300" href="#">Wedding Party</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:text-secondary duration-300" href="#">Ceremony</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:text-secondary duration-300" href="#">RSVP</a>
+<a class="text-secondary border-b border-secondary pb-1 hover:text-secondary duration-300" href="#">Gift Registry</a>
+</div>
+<button class="hidden md:block bg-primary text-on-primary px-6 py-2 uppercase tracking-wider hover:bg-primary-container transition-colors">RSVP</button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</nav>
+<main class="flex-grow pt-24 pb-section-padding px-4 md:px-8 max-w-container-max mx-auto w-full flex flex-col lg:flex-row gap-8">
+<!-- SideNavBar / Filters -->
+<aside class="w-full lg:w-64 flex-shrink-0">
+<div class="bg-surface-container-low text-primary font-body-md text-body-md h-full w-full lg:w-64 lg:block border-r border-outline-variant/20 flex flex-col gap-4 p-6 duration-200 ease-linear rounded-lg">
+<div class="mb-6">
+<h2 class="font-label-caps text-label-caps text-secondary mb-1 uppercase tracking-widest">Onde será a entrega?</h2>
+<div class="relative mt-2">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">location_on</span>
+<input class="w-full bg-surface-container-lowest border-b border-outline-variant/50 focus:border-primary focus:ring-0 pl-10 pr-4 py-2 text-sm bg-transparent outline-none transition-colors placeholder:text-outline-variant" placeholder="Digite seu CEP" type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
+<span class="material-symbols-outlined text-sm">search</span>
+</button>
+</div>
+</div>
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-label-caps text-on-background uppercase">Filtros ativos:</h3>
+<button class="text-xs text-secondary underline hover:text-primary transition-colors">Limpar todos os filtros</button>
+</div>
+<!-- Accordion 1 -->
+<div class="border-t border-outline-variant/30 py-4">
+<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<span>Ocasiões</span>
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<div class="space-y-2 mt-3 pl-2">
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Agradecimento (12)</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Amizade (16)</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Aniversário (8)</span>
+</label>
+</div>
+</div>
+<!-- Accordion 2 -->
+<div class="border-t border-outline-variant/30 py-4">
+<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<span>Presentes</span>
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<div class="space-y-2 mt-3 pl-2">
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Balões (3)</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Bebidas (9)</span>
+</label>
+<label class="flex items-center space-x-3 cursor-pointer group">
+<input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
+<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Chocolates (18)</span>
+</label>
+</div>
+</div>
+<!-- Accordion 3 -->
+<div class="border-t border-outline-variant/30 py-4">
+<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<span>Tipo de flor</span>
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<section class="flex-grow">
+<!-- Top Action Bar -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+<p class="text-on-surface-variant text-sm font-light italic">Encontramos 29 produtos especiais para você</p>
+<div class="flex flex-wrap gap-2">
+<button class="flex items-center gap-1 px-4 py-1.5 rounded-full border border-outline-variant/50 text-sm text-on-background hover:border-primary hover:bg-surface-container transition-all">
+                        Mais Vendido
+                        <span class="material-symbols-outlined text-[16px]">favorite_border</span>
+</button>
+<button class="flex items-center gap-1 px-4 py-1.5 rounded-full border border-outline-variant/50 text-sm text-on-background hover:border-primary hover:bg-surface-container transition-all">
+                        Maior Preço
+                        <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+</button>
+<button class="flex items-center gap-1 px-4 py-1.5 rounded-full border border-outline-variant/50 text-sm text-on-background hover:border-primary hover:bg-surface-container transition-all">
+                        Menor Preço
+                        <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</button>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Product Card 1 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden flex flex-col relative group transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(184,162,145,0.1)]">
+<div class="absolute top-3 left-3 bg-primary-container text-on-primary-container text-xs font-bold px-2 py-1 rounded">
+                        -12%
+                    </div>
+<div class="h-48 w-full bg-surface-container-low flex items-center justify-center p-4 relative overflow-hidden">
+<img alt="Piquenique de Margaridinhas Brancas" class="object-contain h-full w-full z-10 transition-transform duration-500 group-hover:scale-105" data-alt="A beautiful woven basket filled with vibrant white daisies, tied with an elegant silver satin ribbon. The setting is bright and clean, studio lighting, soft shadows, reflecting a modern minimalist aesthetic with romantic undertones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAe_DnVtUnJqpYSq9oCP36ZgfPfHlv5IAFE4OEoBKdf2rHo6chtfnKT9tiGDKfU77_DrE00qom5btMQoC5VFGRmDJwmFT1PzsLzXMd7C85fKaoxM6SJONCcjr4POk1C1mTCfAcyCa9NMZgzDfQVxLsASSqqzqT-2rjj8An5ol7msipyf0ayPOAQrmdSOVABrBRVhlHBY3vXPIaGFTDOGk8l-L-3tbQF0RvhDrL5YiRPVfrObnV74cgf"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low/50 to-transparent z-0"></div>
+</div>
+<div class="p-5 flex-grow flex flex-col justify-between text-center">
+<div>
+<h3 class="font-section-title text-lg leading-tight mb-2 text-on-background line-clamp-2">Piquenique de Margaridinhas Brancas</h3>
+</div>
+<div class="mt-4">
+<div class="flex justify-center items-end gap-2 mb-1">
+<span class="line-through text-xs text-outline">R$ 203,30</span>
+<span class="font-bold text-lg text-primary">R$ 178,90</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">3x de R$ 59,63 sem juros</p>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 uppercase tracking-widest hover:bg-surface-tint transition-colors">Presentear</button>
+</div>
+</div>
+</article>
+<!-- Product Card 2 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden flex flex-col relative group transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(184,162,145,0.1)]">
+<div class="absolute top-3 left-3 bg-primary-container text-on-primary-container text-xs font-bold px-2 py-1 rounded">
+                        -15%
+                    </div>
+<div class="h-48 w-full bg-surface-container-low flex items-center justify-center p-4 relative overflow-hidden">
+<img alt="Cesta de Chocolates Ferrero Rocher" class="object-contain h-full w-full z-10 transition-transform duration-500 group-hover:scale-105" data-alt="An elegant gift basket containing a selection of premium Ferrero Rocher chocolates, a gourmet coffee blend, and a sophisticated book titled 'Café com Deus Pai'. Arranged meticulously in a woven wicker basket with soft, high-key lighting emphasizing a modern luxury feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAME1MoFaqBg1h20LGm8mcme045JykmTXgCh5Z6cDGeQyGO0buyBGNfnwjBKObCroir3vhK0I_uxgW4vp1NS76jYQy4cOor79o9ssv_Z01_sDMyyZFukHLzcH-dbfovyHZFcp6qSDTE76hzNNPJABILzf5zfS9qVEDXbtJfHeNSuA1WXqG5LCvLPVMK4RBT71Ek8oZuPyBHaFj0iSvi2G-Zrb0qSjdGkSdU3l2V34U02HRF4zg9-td8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low/50 to-transparent z-0"></div>
+</div>
+<div class="p-5 flex-grow flex flex-col justify-between text-center">
+<div>
+<h3 class="font-section-title text-lg leading-tight mb-2 text-on-background line-clamp-2">Cesta de Chocolates e Café Premium</h3>
+</div>
+<div class="mt-4">
+<div class="flex justify-center items-end gap-2 mb-1">
+<span class="line-through text-xs text-outline">R$ 340,90</span>
+<span class="font-bold text-lg text-primary">R$ 298,90</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">3x de R$ 99,63 sem juros</p>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 uppercase tracking-widest hover:bg-surface-tint transition-colors">Presentear</button>
+</div>
+</div>
+</article>
+<!-- Product Card 3 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden flex flex-col relative group transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(184,162,145,0.1)]">
+<div class="absolute top-3 left-3 bg-primary-container text-on-primary-container text-xs font-bold px-2 py-1 rounded">
+                        -10%
+                    </div>
+<div class="h-48 w-full bg-surface-container-low flex items-center justify-center p-4 relative overflow-hidden">
+<img alt="Box Eterno Amor" class="object-contain h-full w-full z-10 transition-transform duration-500 group-hover:scale-105" data-alt="A sophisticated black cylindrical gift box filled with vibrant red roses, a bottle of fine red wine, and a selection of premium dark chocolates. Studio lighting highlights the rich reds and deep blacks against a clean white background, conveying quiet luxury and romance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT_coe-W3UfbViDlR8Zf7lSM6qiw7B_u0u9RK1lqtqg63LqB4_tUlj4HDmoj2xru5cYyQgbASmwa5cymJw0Gb92AOiN26IJhhi8R5FwZEVdzhEgWxr6nuA8hM3ZedFwb_27sjEsmEq-5bj9aQV1PyBa5dXzTucjMhvKiLzH4SseTGF-DGPFiGwAhconoiJhxoDK78M0u3qOUxmk-Kfanm2wOjH4XNGOV6PhXw2E75LiS4UgnOL5nwQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low/50 to-transparent z-0"></div>
+</div>
+<div class="p-5 flex-grow flex flex-col justify-between text-center">
+<div>
+<h3 class="font-section-title text-lg leading-tight mb-2 text-on-background line-clamp-2">Box Eterno Amor</h3>
+</div>
+<div class="mt-4">
+<div class="flex justify-center items-end gap-2 mb-1">
+<span class="line-through text-xs text-outline">R$ 349,90</span>
+<span class="font-bold text-lg text-primary">R$ 314,91</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">3x de R$ 104,97 sem juros</p>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 uppercase tracking-widest hover:bg-surface-tint transition-colors">Presentear</button>
+</div>
+</div>
+</article>
+<!-- Product Card 4 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden flex flex-col relative group transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(184,162,145,0.1)]">
+<div class="absolute top-3 left-3 bg-primary-container text-on-primary-container text-xs font-bold px-2 py-1 rounded">
+                        -32%
+                    </div>
+<div class="h-48 w-full bg-surface-container-low flex items-center justify-center p-4 relative overflow-hidden">
+<img alt="Box Florescer com Pelúcia" class="object-contain h-full w-full z-10 transition-transform duration-500 group-hover:scale-105" data-alt="A delightful romantic gift set featuring a plush teddy bear, a box of artisanal cookies, a delicate floral arrangement, and a red heart-shaped balloon saying 'I Love You'. Presented in a light floral-patterned box, softly lit to enhance a bright, romantic, and elegant mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAcFXauUGjfWkybY-bTxmFClWJlWV3UdjOIxCGPz8u5xa66eNojQZvLBD4Cbfy9MfC0egpdcwRx3KWa2EBq07EiSlBGhp8rrV8ZesZFnkEShV-bFkmkgxI9MFLY54YwkwSbp6rhraoaWgZ1WxiUZOLaYDrQvZdtiEPr5WeAz-ke451bdAZvxsRn_-KgCfwOXdC4Y1oOR-5B7VtFhkZUJ51_qulpsfsGEaditGjDVI94bTHVkXT4Rqi"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low/50 to-transparent z-0"></div>
+</div>
+<div class="p-5 flex-grow flex flex-col justify-between text-center">
+<div>
+<h3 class="font-section-title text-lg leading-tight mb-2 text-on-background line-clamp-2">Box Florescer com Pelúcia e Biscoitê e Balão</h3>
+</div>
+<div class="mt-4">
+<div class="flex justify-center items-end gap-2 mb-1">
+<span class="line-through text-xs text-outline">R$ 391,90</span>
+<span class="font-bold text-lg text-primary">R$ 267,90</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">3x de R$ 89,30 sem juros</p>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 uppercase tracking-widest hover:bg-surface-tint transition-colors">Presentear</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination / Load More (Optional/implied) -->
+<div class="mt-12 flex justify-center">
+<button class="border border-secondary text-secondary font-label-caps text-label-caps px-8 py-3 uppercase tracking-widest hover:bg-secondary-fixed/10 transition-colors">Carregar Mais</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest text-on-surface-variant font-body-md text-body-md w-full py-20 border-t border-secondary-fixed flex flex-col items-center justify-center space-y-8 px-margin-mobile text-center">
+<div class="font-section-title text-section-title text-primary">Kleyon &amp; Liandra</div>
+<div class="flex space-x-6">
+<a class="text-on-surface-variant hover:text-secondary opacity-80 hover:opacity-100 transition-opacity" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-secondary opacity-80 hover:opacity-100 transition-opacity" href="#">Contact Us</a>
+<a class="text-on-surface-variant hover:text-secondary opacity-80 hover:opacity-100 transition-opacity" href="#">Guest Info</a>
+</div>
+<p class="text-sm">© 2024 Kleyon &amp; Liandra. Crafted with love.</p>
+</footer>
+</body></html>

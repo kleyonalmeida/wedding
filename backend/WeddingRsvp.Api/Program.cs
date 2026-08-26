@@ -12,6 +12,14 @@ using WeddingRsvp.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (IsTesting)
+{
+    builder.Configuration["Jwt:Secret"] = "chave_secreta_super_segura_para_testes_12345";
+    builder.Configuration["Jwt:Issuer"] = "wedding-rsvp-api";
+    builder.Configuration["Admin:Username"] = "admin";
+    builder.Configuration["Admin:PasswordHash"] = "$2a$11$eI26Vg3laC9LPxOVG4CYRudN4nn5weEPy83K8GTx.pl4VrrIn3v4C"; // Hash para 'senha_teste'
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // DATABASE — EF Core com PostgreSQL
 // Queries 100% parametrizadas por design — SQL Injection eliminado por padrão.
@@ -20,10 +28,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' não configurada.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsql =>
+{
+    if (Program.IsTesting)
     {
-        npgsql.CommandTimeout(30); // Cancela queries lentas — proteção contra DoS
-    }));
+        options.UseInMemoryDatabase("InMemoryDbForTesting");
+    }
+    else
+    {
+        options.UseNpgsql(connectionString, npgsql =>
+        {
+            npgsql.CommandTimeout(30); // Cancela queries lentas — proteção contra DoS
+        });
+    }
+});
 
 // ════════════════════════════════════════════════════════════════════════════
 // FLUENT VALIDATION
@@ -156,7 +173,14 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    if (Program.IsTesting)
+    {
+        db.Database.EnsureCreated();
+    }
+    else if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -171,3 +195,9 @@ app.MapRsvpEndpoints("RsvpPolicy");
 app.MapAdminEndpoints("AdminPolicy");
 
 app.Run();
+
+// Necessário para testes de integração (WebApplicationFactory)
+public partial class Program 
+{
+    public static bool IsTesting { get; set; } = false;
+}
