@@ -23,7 +23,8 @@ class WeddingPage extends StatefulWidget {
 class _WeddingPageState extends State<WeddingPage> {
   // Controlador único: compartilhado entre WebSmoothScroll e CustomScrollView
   final ScrollController _scrollController = ScrollController();
-  final ValueNotifier<double> _scrollProgressNotifier = ValueNotifier<double>(0.0);
+  final ValueNotifier<double> _scrollProgressNotifier =
+      ValueNotifier<double>(0.0);
   bool _isScrolled = false;
 
   // GlobalKeys para navegação por menu
@@ -46,7 +47,8 @@ class _WeddingPageState extends State<WeddingPage> {
       final currentScroll = _scrollController.offset;
 
       if (maxScroll > 0) {
-        _scrollProgressNotifier.value = (currentScroll / maxScroll).clamp(0.0, 1.0);
+        _scrollProgressNotifier.value =
+            (currentScroll / maxScroll).clamp(0.0, 1.0);
       }
 
       if (currentScroll > 100 && !_isScrolled) {
@@ -97,14 +99,14 @@ class _WeddingPageState extends State<WeddingPage> {
     final Widget innerScrollView = CustomScrollView(
       controller: _scrollController,
       physics: isDesktopWeb
-          ? const NeverScrollableScrollPhysics() // Obrigatório: desativa o scroll nativo "duro"
+          ? const NeverScrollableScrollPhysics()
           : const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
       slivers: [
         SliverToBoxAdapter(
           key: _homeKey,
-          child: const HeroSection(),
+          child: HeroSection(scrollController: _scrollController),
         ),
         const SliverToBoxAdapter(
           child: WelcomeSection(),
@@ -147,9 +149,11 @@ class _WeddingPageState extends State<WeddingPage> {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
-                    onPressed: () => Navigator.of(context).pushNamed('/presentes'),
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed('/presentes'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 16),
                     ),
                     child: const Text('VER LISTA DE PRESENTES'),
                   ),
@@ -172,9 +176,10 @@ class _WeddingPageState extends State<WeddingPage> {
     // no mobile usa o CustomScrollView diretamente (física nativa já é suave).
     final Widget scrollArea = isDesktopWeb
         ? SmoothWebScroll(
-            controller: _scrollController, 
-            scrollAmount: 80,              // Distância reduzida por tick do mouse
-            animationDuration: const Duration(milliseconds: 500), // Duração da inércia
+            controller: _scrollController,
+            scrollAmount: 80, // Distância reduzida por tick do mouse
+            animationDuration:
+                const Duration(milliseconds: 500), // Duração da inércia
             child: innerScrollView,
           )
         : innerScrollView;
@@ -219,7 +224,8 @@ class _WeddingPageState extends State<WeddingPage> {
                   return LinearProgressIndicator(
                     value: progress,
                     backgroundColor: Colors.transparent,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(AppColors.primary),
                     minHeight: 4.0,
                   );
                 },

@@ -26,10 +26,16 @@ class WeddingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ThemeProvider(
       initTheme: AppTheme.lightTheme,
+      duration: const Duration(milliseconds: 1500),
       builder: (context, myTheme) {
         return MaterialApp(
           title: 'Kleyon & Liandra - Casamento',
           theme: myTheme,
+          builder: (context, child) {
+            return ThemeSwitchingArea(
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
           scrollBehavior: WeddingScrollBehavior(),
           initialRoute: '/',
           onGenerateRoute: (settings) {
@@ -38,8 +44,10 @@ class WeddingApp extends StatelessWidget {
                 return MaterialPageRoute(builder: (_) => const WeddingPage());
               case '/presentes':
                 return PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const GiftsPage(),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const GiftsPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
                     return FadeTransition(opacity: animation, child: child);
                   },
                   transitionDuration: const Duration(milliseconds: 500),

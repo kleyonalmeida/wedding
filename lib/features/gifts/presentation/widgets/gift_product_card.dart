@@ -34,7 +34,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.outlineVariant.withOpacity(0.6), width: 1.2),
+          border: Border.all(
+              color: AppColors.outlineVariant.withOpacity(0.6), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -57,7 +58,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
               _buildImageSection(context),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -89,6 +91,11 @@ class _GiftProductCardState extends State<GiftProductCard> {
             child: Image.network(
               widget.product.imageUrl,
               fit: BoxFit.contain,
+              cacheWidth: (280 * MediaQuery.devicePixelRatioOf(context))
+                  .round()
+                  .clamp(280, 840)
+                  .toInt(),
+              filterQuality: FilterQuality.medium,
               errorBuilder: (context, error, stackTrace) => const Icon(
                 Icons.image_not_supported,
                 color: AppColors.outlineVariant,
@@ -96,7 +103,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
               ),
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
-                return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                return const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2));
               },
             ),
           ),
@@ -112,7 +120,9 @@ class _GiftProductCardState extends State<GiftProductCard> {
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 colors: [
-                  isDark ? Colors.grey[900]!.withOpacity(0.5) : AppColors.surfaceContainerLow.withOpacity(0.5),
+                  isDark
+                      ? Colors.grey[900]!.withOpacity(0.5)
+                      : AppColors.surfaceContainerLow.withOpacity(0.5),
                   Colors.transparent,
                 ],
               ),
@@ -125,7 +135,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
 
   Widget _buildTitle(BuildContext context) {
     return SizedBox(
-      height: 48, // Fix height to exactly 2 lines (18 * 1.2 * 2 ≈ 43.2, rounded up to 48 for safety)
+      height:
+          48, // Fix height to exactly 2 lines (18 * 1.2 * 2 ≈ 43.2, rounded up to 48 for safety)
       child: Align(
         alignment: Alignment.topCenter,
         child: Text(
@@ -168,7 +179,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
           child: ElevatedButton(
             onPressed: widget.onGiftPressed,
             style: ButtonStyle(
-              padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 16)),
+              padding: MaterialStateProperty.all(
+                  const EdgeInsets.symmetric(vertical: 16)),
               elevation: MaterialStateProperty.all(0),
               backgroundColor: MaterialStateProperty.resolveWith((states) {
                 if (states.contains(MaterialState.hovered)) {

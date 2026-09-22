@@ -78,38 +78,7 @@ class WeddingSideMenu extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(24.0),
-              child: ThemeSwitcher(
-                builder: (context) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        isDark ? 'Modo Claro' : 'Modo Escuro',
-                        style: AppTextStyles.sans.copyWith(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Icon(
-                            isDark ? Icons.light_mode : Icons.dark_mode,
-                            key: ValueKey(isDark),
-                            color: Colors.white,
-                          ),
-                        ),
-                        onPressed: () {
-                          ThemeSwitcher.of(context).changeTheme(
-                            theme: isDark ? AppTheme.lightTheme : AppTheme.darkTheme,
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
+              child: _ThemeToggleButton(isDark: isDark),
             ),
           ],
           ),
@@ -140,3 +109,76 @@ class WeddingSideMenu extends StatelessWidget {
     );
   }
 }
+
+// ── Widget de Toggle de Tema com posição correta para animação ────────────────
+class _ThemeToggleButton extends StatefulWidget {
+  final bool isDark;
+
+  const _ThemeToggleButton({required this.isDark});
+
+  @override
+  State<_ThemeToggleButton> createState() => _ThemeToggleButtonState();
+}
+
+class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
+  /// GlobalKey para capturar a posição exata do botão na tela.
+  final GlobalKey _buttonKey = GlobalKey();
+
+  /// Retorna o offset central do botão em coordenadas globais (tela).
+  Offset _getButtonOffset() {
+    final renderBox =
+        _buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return Offset.zero;
+    final position = renderBox.localToGlobal(Offset.zero);
+    return Offset(
+      position.dx + renderBox.size.width / 2,
+      position.dy + renderBox.size.height / 2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+
+    return ThemeSwitcher(
+      builder: (context) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              isDark ? 'Modo Claro' : 'Modo Escuro',
+              style: AppTextStyles.sans.copyWith(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            IconButton(
+              key: _buttonKey,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => RotationTransition(
+                  turns: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                  key: ValueKey(isDark),
+                  color: Colors.white,
+                ),
+              ),
+              onPressed: () {
+                final offset = _getButtonOffset();
+                ThemeSwitcher.of(context).changeTheme(
+                  theme: isDark ? AppTheme.lightTheme : AppTheme.darkTheme,
+                  offset: offset,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+

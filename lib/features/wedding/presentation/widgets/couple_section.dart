@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import 'cover_flow_carousel.dart';
 
 class CoupleSection extends StatelessWidget {
   const CoupleSection({super.key});
@@ -23,39 +24,6 @@ class CoupleSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 64),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isMobile = constraints.maxWidth < 600;
-              final double spacing = isMobile ? 16 : 48;
-              
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _Profile(
-                    name: 'Kleyon',
-                    imagePath: 'assets/images/noivo.png',
-                    isMobile: isMobile,
-                  ),
-                  SizedBox(width: spacing),
-                  Text(
-                    '♥',
-                    style: TextStyle(
-                      fontSize: isMobile ? 32 : 48,
-                      color: const Color(0xFF8C7362),
-                      fontFamily: 'Playfair Display',
-                    ),
-                  ),
-                  SizedBox(width: spacing),
-                  _Profile(
-                    name: 'Liandra',
-                    imagePath: 'assets/images/noiva.png',
-                    isMobile: isMobile,
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 64),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 672),
             child: Column(
@@ -74,63 +42,35 @@ class CoupleSection extends StatelessWidget {
                   style: AppTextStyles.sans.copyWith(
                     fontSize: 16,
                     height: 1.6,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.8),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 96),
+          CoverFlowCarousel(
+            items: const [
+              CarouselItem(imagePath: 'assets/images/_MG_1085.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1064.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1152.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1229.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1248.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1288.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1304.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1333.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1337.jpg'),
+              CarouselItem(imagePath: 'assets/images/_MG_1341.jpg'),
+            ],
+            height: 420,
+            initialPage: 3, // Inicia no _MG_1229.jpg
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _Profile extends StatelessWidget {
-  final String name;
-  final String imagePath;
-  final bool isMobile;
-
-  const _Profile({required this.name, required this.imagePath, this.isMobile = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final double size = isMobile ? 110 : 200;
-    
-    return Column(
-      children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: isMobile ? 4 : 8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(30),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        SizedBox(height: isMobile ? 12 : 24),
-        Text(
-          name,
-          style: AppTextStyles.serif.copyWith(
-            fontSize: isMobile ? 18 : 24,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ],
     );
   }
 }

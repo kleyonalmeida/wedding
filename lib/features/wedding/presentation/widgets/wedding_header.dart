@@ -31,8 +31,10 @@ class WeddingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surface.withAlpha(240);
+    final bgColor =
+        backgroundColor ?? Theme.of(context).colorScheme.surface.withAlpha(240);
     final fgColor = foregroundColor ?? Theme.of(context).colorScheme.onSurface;
+    final isCompact = MediaQuery.sizeOf(context).width < 500;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
@@ -63,7 +65,8 @@ class WeddingHeader extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (MediaQuery.of(context).size.width < WeddingConstants.expandedBreakpoint)
+                      if (MediaQuery.of(context).size.width <
+                          WeddingConstants.expandedBreakpoint)
                         Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: IconButton(
@@ -86,17 +89,22 @@ class WeddingHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              if (MediaQuery.of(context).size.width >= WeddingConstants.expandedBreakpoint)
+              if (MediaQuery.of(context).size.width >=
+                  WeddingConstants.expandedBreakpoint)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildMenuItem(context, 'HOME', onHomeTap, isScrolled, fgColor),
+                    _buildMenuItem(
+                        context, 'HOME', onHomeTap, isScrolled, fgColor),
                     const SizedBox(width: 32),
-                    _buildMenuItem(context, 'O CASAL', onCasalTap, isScrolled, fgColor),
+                    _buildMenuItem(
+                        context, 'O CASAL', onCasalTap, isScrolled, fgColor),
                     const SizedBox(width: 32),
-                    _buildMenuItem(context, 'RECEPÇÃO', onRecepcaoTap, isScrolled, fgColor),
+                    _buildMenuItem(context, 'RECEPÇÃO', onRecepcaoTap,
+                        isScrolled, fgColor),
                     const SizedBox(width: 32),
-                    _buildMenuItem(context, 'LISTA DE PRESENTES', onListaTap, isScrolled, fgColor),
+                    _buildMenuItem(context, 'LISTA DE PRESENTES', onListaTap,
+                        isScrolled, fgColor),
                   ],
                 ),
               // Right Side: RSVP + Theme
@@ -106,20 +114,31 @@ class WeddingHeader extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ElevatedButton(
-                        onPressed: onRsvpTap,
-                        style: foregroundColor != null && isScrolled
-                            ? ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: backgroundColor,
-                              )
-                            : null,
-                        child: const Text('PRESENÇA'),
-                      ),
-                      const SizedBox(width: 16),
+                      if (isCompact)
+                        IconButton(
+                          tooltip: 'Confirmar presença',
+                          onPressed: onRsvpTap,
+                          icon: Icon(
+                            Icons.event_available_outlined,
+                            color: isScrolled ? fgColor : AppColors.white,
+                          ),
+                        )
+                      else
+                        ElevatedButton(
+                          onPressed: onRsvpTap,
+                          style: foregroundColor != null && isScrolled
+                              ? ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: backgroundColor,
+                                )
+                              : null,
+                          child: const Text('PRESENÇA'),
+                        ),
+                      SizedBox(width: isCompact ? 4 : 16),
                       ThemeSwitcher(
                         builder: (context) {
-                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                          final isDark =
+                              Theme.of(context).brightness == Brightness.dark;
                           return IconButton(
                             icon: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 300),
@@ -131,7 +150,9 @@ class WeddingHeader extends StatelessWidget {
                             ),
                             onPressed: () {
                               ThemeSwitcher.of(context).changeTheme(
-                                theme: isDark ? AppTheme.lightTheme : AppTheme.darkTheme,
+                                theme: isDark
+                                    ? AppTheme.lightTheme
+                                    : AppTheme.darkTheme,
                               );
                             },
                           );
@@ -148,7 +169,8 @@ class WeddingHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, String title, VoidCallback onTap, bool isScrolled, Color fgColor) {
+  Widget _buildMenuItem(BuildContext context, String title, VoidCallback onTap,
+      bool isScrolled, Color fgColor) {
     return InkWell(
       onTap: onTap,
       child: Text(

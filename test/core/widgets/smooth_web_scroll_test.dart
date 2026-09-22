@@ -30,7 +30,8 @@ void main() {
       expect(find.text('Test Child'), findsOneWidget);
     });
 
-    testWidgets('Scrolls when pointer scroll event is triggered', (WidgetTester tester) async {
+    testWidgets('Scrolls when pointer scroll event is triggered',
+        (WidgetTester tester) async {
       // Cria um container com altura grande para permitir rolagem
       await tester.pumpWidget(
         MaterialApp(
@@ -56,12 +57,13 @@ void main() {
 
       // Dispara um PointerScrollEvent simulando o scroll do mouse para baixo
       final center = tester.getCenter(find.byType(SmoothWebScroll));
-      final gesture = await tester.startGesture(center, kind: PointerDeviceKind.mouse);
+      final gesture =
+          await tester.startGesture(center, kind: PointerDeviceKind.mouse);
       await tester.sendEventToBinding(PointerScrollEvent(
         position: center,
         scrollDelta: const Offset(0, 50), // Mouse scroll down
       ));
-      
+
       // Avança a animação
       await tester.pumpAndSettle();
 
@@ -81,7 +83,8 @@ void main() {
                 controller: controller,
                 physics: const NeverScrollableScrollPhysics(),
                 child: Container(
-                  height: 1000, // Altura total é 1000, mas a tela ocupa parte (ex: 600), maxScroll < 1000
+                  height:
+                      1000, // Altura total é 1000, mas a tela ocupa parte (ex: 600), maxScroll < 1000
                   color: Colors.blue,
                 ),
               ),
@@ -94,12 +97,13 @@ void main() {
 
       // Dispara o evento de scroll para baixo
       final center = tester.getCenter(find.byType(SmoothWebScroll));
-      final gesture = await tester.startGesture(center, kind: PointerDeviceKind.mouse);
+      final gesture =
+          await tester.startGesture(center, kind: PointerDeviceKind.mouse);
       await tester.sendEventToBinding(PointerScrollEvent(
         position: center,
         scrollDelta: const Offset(0, 50), // Mouse scroll down
       ));
-      
+
       await tester.pumpAndSettle();
 
       // O offset não deve ser 2000, deve ser travado no maxScrollExtent

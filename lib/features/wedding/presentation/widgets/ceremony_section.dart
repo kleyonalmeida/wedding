@@ -8,7 +8,8 @@ class CeremonySection extends StatelessWidget {
   const CeremonySection({super.key});
 
   Future<void> _openMap() async {
-    final Uri url = Uri.parse('https://www.google.com/maps/dir//\'\'/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x714394b936e986b:0xa864eee30a0d49e8!3e0?g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF');
+    final Uri url = Uri.parse(
+        'https://www.google.com/maps/dir//\'\'/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x714394b936e986b:0xa864eee30a0d49e8!3e0?g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       debugPrint('Could not launch $url');
     }
@@ -29,7 +30,8 @@ class CeremonySection extends StatelessWidget {
                 child: Text(
                   'Cerimônia',
                   style: AppTextStyles.cursive.copyWith(
-                    fontSize: MediaQuery.of(context).size.width >= 768 ? 80 : 52,
+                    fontSize:
+                        MediaQuery.of(context).size.width >= 768 ? 80 : 52,
                     color: AppColors.primary,
                   ),
                 ),
@@ -99,7 +101,8 @@ class CeremonySection extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
+                      const Icon(Icons.map_outlined,
+                          color: AppColors.primary, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'MAPA INTERATIVO',
@@ -142,9 +145,13 @@ class CeremonySection extends StatelessWidget {
           child: Image.network(
             'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
             fit: BoxFit.cover,
+            cacheWidth: 1200,
+            filterQuality: FilterQuality.medium,
             errorBuilder: (context, error, stackTrace) => Image.asset(
               'assets/images/hero.jpeg',
               fit: BoxFit.cover,
+              cacheWidth: 1200,
+              filterQuality: FilterQuality.medium,
             ),
           ),
         ),
