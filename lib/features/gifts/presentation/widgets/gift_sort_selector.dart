@@ -38,12 +38,6 @@ class GiftSortSelector extends StatelessWidget {
           children: [
             _buildSortButton(
               context,
-              label: 'Mais Vendido',
-              icon: Icons.favorite_border,
-              order: GiftSortOrder.bestSeller,
-            ),
-            _buildSortButton(
-              context,
               label: 'Maior Preço',
               icon: Icons.arrow_upward,
               order: GiftSortOrder.highestPrice,

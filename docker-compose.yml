@@ -4,6 +4,8 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     env_file:
       - ./.env
     volumes:
@@ -13,6 +15,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
 
   # ── API .NET 8 ─────────────────────────────────────────────────────────────
   api:

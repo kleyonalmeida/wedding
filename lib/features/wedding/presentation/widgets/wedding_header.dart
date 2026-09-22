@@ -53,18 +53,14 @@ class WeddingHeader extends StatelessWidget {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: MediaQuery.of(context).size.width - 48,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Left Side: Menu + Logo
-                  Row(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left Side: Menu + Logo
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (MediaQuery.of(context).size.width < WeddingConstants.expandedBreakpoint)
@@ -88,21 +84,26 @@ class WeddingHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (MediaQuery.of(context).size.width >= WeddingConstants.expandedBreakpoint)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildMenuItem(context, 'HOME', onHomeTap, isScrolled, fgColor),
-                        const SizedBox(width: 32),
-                        _buildMenuItem(context, 'O CASAL', onCasalTap, isScrolled, fgColor),
-                        const SizedBox(width: 32),
-                        _buildMenuItem(context, 'RECEPÇÃO', onRecepcaoTap, isScrolled, fgColor),
-                        const SizedBox(width: 32),
-                        _buildMenuItem(context, 'LISTA DE PRESENTES', onListaTap, isScrolled, fgColor),
-                      ],
-                    ),
-                  // Right Side: RSVP + Theme
-                  Row(
+                ),
+              ),
+              if (MediaQuery.of(context).size.width >= WeddingConstants.expandedBreakpoint)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildMenuItem(context, 'HOME', onHomeTap, isScrolled, fgColor),
+                    const SizedBox(width: 32),
+                    _buildMenuItem(context, 'O CASAL', onCasalTap, isScrolled, fgColor),
+                    const SizedBox(width: 32),
+                    _buildMenuItem(context, 'RECEPÇÃO', onRecepcaoTap, isScrolled, fgColor),
+                    const SizedBox(width: 32),
+                    _buildMenuItem(context, 'LISTA DE PRESENTES', onListaTap, isScrolled, fgColor),
+                  ],
+                ),
+              // Right Side: RSVP + Theme
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ElevatedButton(
@@ -138,9 +139,9 @@ class WeddingHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

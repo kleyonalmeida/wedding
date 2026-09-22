@@ -7,10 +7,13 @@ import '../../../wedding/presentation/widgets/wedding_side_menu.dart';
 import '../../../wedding/presentation/widgets/wedding_footer.dart';
 import '../../../wedding/presentation/widgets/textured_background.dart';
 import '../controllers/gift_catalog_controller.dart';
+import '../controllers/cart_controller.dart';
 import '../widgets/gift_filter_panel.dart';
 import '../widgets/gift_filter_sheet.dart';
 import '../widgets/gift_sort_selector.dart';
 import '../widgets/gift_product_grid.dart';
+import '../widgets/cart_dialog.dart';
+import '../widgets/checkout_dialog.dart';
 
 class GiftsPage extends StatefulWidget {
   const GiftsPage({super.key});
@@ -23,6 +26,7 @@ class _GiftsPageState extends State<GiftsPage> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GiftCatalogController _catalogController = GiftCatalogController();
+  final CartController _cartController = CartController();
   bool _isScrolled = false;
 
   @override
@@ -46,6 +50,7 @@ class _GiftsPageState extends State<GiftsPage> {
   void dispose() {
     _scrollController.dispose();
     _catalogController.dispose();
+    _cartController.dispose();
     super.dispose();
   }
 
@@ -126,6 +131,7 @@ class _GiftsPageState extends State<GiftsPage> {
                             onLoadMore: () => _catalogController.loadProducts(),
                             error: _catalogController.error,
                             onRetry: () => _catalogController.loadProducts(refresh: true),
+                            cartController: _cartController,
                           ),
                         ],
                       ),
@@ -135,6 +141,9 @@ class _GiftsPageState extends State<GiftsPage> {
               },
             ),
           ),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 120), // Extra spacing to push the footer down
         ),
         const SliverToBoxAdapter(
           child: WeddingFooter(),
@@ -160,6 +169,41 @@ class _GiftsPageState extends State<GiftsPage> {
         onRecepcaoTap: () => _navigateHome(context),
         onListaTap: () {}, // Already here
         onRsvpTap: () => _navigateHome(context),
+      ),
+      floatingActionButton: ListenableBuilder(
+        listenable: _cartController,
+        builder: (context, _) {
+          if (_cartController.items.isEmpty) return const SizedBox.shrink();
+          return FloatingActionButton.extended(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => CartDialog(
+                  cartController: _cartController,
+                  onCheckout: () {
+                    Navigator.of(ctx).pop();
+                    showDialog(
+                      context: context,
+                      builder: (ctx2) => CheckoutDialog(
+                        cartController: _cartController,
+                        onBack: () {
+                          Navigator.of(ctx2).pop();
+                          // To truly go back to cart, we'd open the cart dialog again, but standard is just closing it for now or triggering the FAB.
+                        },
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            backgroundColor: AppColors.primary,
+            icon: const Icon(Icons.shopping_cart, color: Colors.white),
+            label: Text(
+              '${_cartController.itemCount} itens',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          );
+        },
       ),
       body: Stack(
         children: [

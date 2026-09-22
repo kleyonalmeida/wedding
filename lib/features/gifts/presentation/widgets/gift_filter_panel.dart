@@ -13,6 +13,7 @@ class GiftFilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -22,15 +23,13 @@ class GiftFilterPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PostalCodeField(),
-          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'FILTROS ATIVOS:',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: onSurface,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.5,
@@ -57,12 +56,14 @@ class GiftFilterPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _buildAccordion(
+            context: context,
             title: 'Ocasiões',
             items: ['Agradecimento', 'Amizade', 'Aniversário'],
             selectedItems: controller.currentFilter.occasions,
             onToggle: controller.toggleOccasion,
           ),
           _buildAccordion(
+            context: context,
             title: 'Presentes',
             items: ['Balões', 'Bebidas', 'Chocolates', 'Flores'],
             selectedItems: controller.currentFilter.categories,
@@ -74,6 +75,7 @@ class GiftFilterPanel extends StatelessWidget {
   }
 
   Widget _buildAccordion({
+    required BuildContext context,
     required String title,
     required List<String> items,
     required List<String> selectedItems,

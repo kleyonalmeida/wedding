@@ -9,13 +9,12 @@ WORKDIR /src
 # Copia apenas o .csproj primeiro para aproveitar cache de layers do Docker.
 # As dependências só são re-baixadas se o .csproj mudar.
 COPY WeddingRsvp.Api/WeddingRsvp.Api.csproj WeddingRsvp.Api/
-RUN dotnet restore WeddingRsvp.Api/WeddingRsvp.Api.csproj --no-cache
+RUN dotnet restore WeddingRsvp.Api/WeddingRsvp.Api.csproj
 
 # Copia o restante do código-fonte e publica
 COPY WeddingRsvp.Api/ WeddingRsvp.Api/
 WORKDIR /src/WeddingRsvp.Api
 RUN dotnet publish -c Release -o /app/publish \
-    --no-restore \
     --no-self-contained
 
 # ════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,9 @@
+.git/
+.github/
+.dart_tool/
+build/
+.env
+backend/**/bin/
+backend/**/obj/
+.vscode/
+.idea/

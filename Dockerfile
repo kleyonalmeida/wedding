@@ -16,9 +16,9 @@ RUN apt-get update && apt-get install -y \
 
 # Baixa o Flutter SDK diretamente do CDN oficial do Google
 WORKDIR /sdks
-RUN curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.29.0-stable.tar.xz \
-    && tar xf flutter_linux_3.29.0-stable.tar.xz \
-    && rm flutter_linux_3.29.0-stable.tar.xz
+RUN curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.47.1-stable.tar.xz \
+    && tar xf flutter_linux_3.47.1-stable.tar.xz \
+    && rm flutter_linux_3.47.1-stable.tar.xz
 
 ENV PATH="/sdks/flutter/bin:${PATH}"
 

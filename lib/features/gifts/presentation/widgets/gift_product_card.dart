@@ -57,7 +57,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
               _buildImageSection(context),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -79,7 +79,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
     return Stack(
       children: [
         Container(
-          height: 192,
+          height: 170,
           width: double.infinity,
           color: isDark ? Colors.grey[900] : AppColors.surfaceContainerLow,
           padding: const EdgeInsets.all(16),
@@ -119,26 +119,6 @@ class _GiftProductCardState extends State<GiftProductCard> {
             ),
           ),
         ),
-        if (widget.product.discountPercentage > 0)
-          Positioned(
-            top: 12,
-            left: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '-${widget.product.discountPercentage}%',
-                style: const TextStyle(
-                  color: AppColors.onPrimaryContainer,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -172,18 +152,6 @@ class _GiftProductCardState extends State<GiftProductCard> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (widget.product.originalPrice > widget.product.currentPrice)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0, bottom: 2.0),
-                child: Text(
-                  _formatCurrency(widget.product.originalPrice),
-                  style: TextStyle(
-                    decoration: TextDecoration.lineThrough,
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                ),
-              ),
             Text(
               _formatCurrency(widget.product.currentPrice),
               style: const TextStyle(
@@ -194,23 +162,21 @@ class _GiftProductCardState extends State<GiftProductCard> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          '${widget.product.installments}x de ${_formatCurrency(widget.product.installmentValue)} sem juros',
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-          ),
-        ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             onPressed: widget.onGiftPressed,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              elevation: 0,
-              backgroundColor: AppColors.primary,
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 16)),
+              elevation: MaterialStateProperty.all(0),
+              backgroundColor: MaterialStateProperty.resolveWith((states) {
+                if (states.contains(MaterialState.hovered)) {
+                  // Mix primary with 20% black to make a darker brown
+                  return Color.lerp(AppColors.primary, Colors.black, 0.2);
+                }
+                return AppColors.primary;
+              }),
             ),
             child: const Text(
               'PRESENTEAR',
@@ -218,6 +184,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 2.0,
+                color: Colors.white,
               ),
             ),
           ),

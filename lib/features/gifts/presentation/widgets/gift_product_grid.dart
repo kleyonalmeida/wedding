@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
+import '../controllers/cart_controller.dart';
 import 'gift_product_card.dart';
+import 'cart_dialog.dart';
+import 'checkout_dialog.dart';
 
 class GiftProductGrid extends StatelessWidget {
   final List<GiftProduct> products;
@@ -11,6 +13,7 @@ class GiftProductGrid extends StatelessWidget {
   final VoidCallback onLoadMore;
   final String? error;
   final VoidCallback onRetry;
+  final CartController cartController;
 
   const GiftProductGrid({
     super.key,
@@ -20,19 +23,29 @@ class GiftProductGrid extends StatelessWidget {
     required this.onLoadMore,
     this.error,
     required this.onRetry,
+    required this.cartController,
   });
 
-  Future<void> _handleGiftPressed(BuildContext context, GiftProduct product) async {
-    final uri = Uri.tryParse(product.giftUrl);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível abrir o link do presente.')),
-        );
-      }
-    }
+  void _handleGiftPressed(BuildContext context, GiftProduct product) {
+    cartController.addItem(product);
+    showDialog(
+      context: context,
+      builder: (ctx) => CartDialog(
+        cartController: cartController,
+        onCheckout: () {
+          Navigator.of(ctx).pop();
+          showDialog(
+            context: context,
+            builder: (ctx2) => CheckoutDialog(
+              cartController: cartController,
+              onBack: () {
+                Navigator.of(ctx2).pop();
+              },
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
