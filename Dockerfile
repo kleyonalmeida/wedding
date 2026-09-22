@@ -37,7 +37,7 @@ RUN flutter pub get
 COPY . .
 
 # Compila com WebAssembly e mantém o fallback JavaScript gerado pelo Flutter.
-RUN flutter build web --wasm
+RUN flutter build web
 
 # ── Stage 2: Nginx para servir a aplicação ────────────────────────────────────
 FROM nginx:alpine
