@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'dart:ui';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/theme_wave_transition.dart';
 import 'features/wedding/presentation/pages/wedding_page.dart';
 import 'features/gifts/presentation/pages/gifts_page.dart';
 
@@ -32,7 +33,7 @@ class WeddingApp extends StatelessWidget {
           title: 'Kleyon & Liandra - Casamento',
           theme: myTheme,
           builder: (context, child) {
-            return ThemeSwitchingArea(
+            return ThemeWaveTransition(
               child: child ?? const SizedBox.shrink(),
             );
           },

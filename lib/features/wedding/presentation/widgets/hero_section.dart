@@ -31,7 +31,7 @@ class HeroSection extends StatelessWidget {
         animation: scrollController ?? const _IdleListenable(),
         child: RepaintBoundary(
           child: Image.asset(
-            'assets/images/_MG_1167.jpg',
+            'assets/images/hero-2880.webp',
             fit: BoxFit.cover,
             alignment: Alignment.center,
             cacheWidth: targetWidth.clamp(640, 2560).toInt(),
@@ -143,7 +143,7 @@ class HeroSection extends StatelessWidget {
 
                   // ── Indicador de Rolagem (Seta Animada) ───────────────────
                   const SizedBox(height: 48),
-                  const _ScrollIndicator(),
+                  _ScrollIndicator(scrollController: scrollController),
                 ],
               ),
             ),
@@ -166,7 +166,9 @@ class _IdleListenable implements Listenable {
 
 // ── Widget da Seta Animada ────────────────────────────────────────────────────
 class _ScrollIndicator extends StatefulWidget {
-  const _ScrollIndicator();
+  final ScrollController? scrollController;
+
+  const _ScrollIndicator({required this.scrollController});
 
   @override
   State<_ScrollIndicator> createState() => _ScrollIndicatorState();
@@ -176,6 +178,7 @@ class _ScrollIndicatorState extends State<_ScrollIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _bounceAnim;
+  bool _disableAnimations = false;
 
   @override
   void initState() {
@@ -183,33 +186,69 @@ class _ScrollIndicatorState extends State<_ScrollIndicator>
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
+    );
 
     _bounceAnim = Tween<double>(begin: 0, end: 18).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeInOutSine),
     );
+    widget.scrollController?.addListener(_syncAnimation);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _disableAnimations = MediaQuery.disableAnimationsOf(context);
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ScrollIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController?.removeListener(_syncAnimation);
+      widget.scrollController?.addListener(_syncAnimation);
+      _syncAnimation();
+    }
+  }
+
+  void _syncAnimation() {
+    final controller = widget.scrollController;
+    final isAtTop = controller == null ||
+        !controller.hasClients ||
+        controller.offset < 24.0;
+
+    if (isAtTop && !_disableAnimations) {
+      if (!_animController.isAnimating) {
+        _animController.repeat(reverse: true);
+      }
+    } else if (_animController.isAnimating) {
+      _animController.stop();
+    }
   }
 
   @override
   void dispose() {
+    widget.scrollController?.removeListener(_syncAnimation);
     _animController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _bounceAnim,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _bounceAnim.value),
-          child: child,
-        );
-      },
-      child: Icon(
-        Icons.keyboard_arrow_down_rounded,
-        color: AppColors.white.withAlpha(178),
-        size: 32,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _bounceAnim,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _bounceAnim.value),
+            child: child,
+          );
+        },
+        child: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: AppColors.white.withAlpha(178),
+          size: 32,
+        ),
       ),
     );
   }

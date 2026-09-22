@@ -36,8 +36,8 @@ RUN flutter pub get
 # Copia o código-fonte da aplicação
 COPY . .
 
-# Compila a versão web em modo release
-RUN flutter build web --release
+# Compila com WebAssembly e mantém o fallback JavaScript gerado pelo Flutter.
+RUN flutter build web --wasm
 
 # ── Stage 2: Nginx para servir a aplicação ────────────────────────────────────
 FROM nginx:alpine

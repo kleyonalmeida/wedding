@@ -38,6 +38,7 @@ dependencies:
   url_launcher: ^6.3.2
   web_smooth_scroll: ^2.0.0
   animated_theme_switcher: ^2.0.10
+  web: ^1.1.1
   flutter_web_plugins:
     sdk: flutter
 
@@ -63,6 +64,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/carousel/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

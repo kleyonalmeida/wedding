@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -29,7 +28,7 @@ class WeddingSideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.65,
       child: Drawer(
@@ -38,58 +37,62 @@ class WeddingSideMenu extends StatelessWidget {
           child: Transform.scale(
             scale: 0.85,
             child: Column(
-          children: [
-            const SizedBox(height: 32),
-            Text(
-              'K&L',
-              style: AppTextStyles.serif.copyWith(
-                fontSize: 32,
-                letterSpacing: 6.0,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: 50,
-              height: 2,
-              color: Colors.white70,
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  _buildMenuItem(context, 'HOME', () => _handleNavigation(context, onHomeTap)),
-                  _buildMenuItem(context, 'O CASAL', () => _handleNavigation(context, onCasalTap)),
-                  _buildMenuItem(context, 'RECEPÇÃO', () => _handleNavigation(context, onRecepcaoTap)),
-                  _buildMenuItem(context, 'LISTA DE PRESENTES', () => _handleNavigation(context, onListaTap)),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => _handleNavigation(context, onRsvpTap),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF957E6E),
-                    ),
-                    child: const Text('PRESENÇA'),
+              children: [
+                const SizedBox(height: 32),
+                Text(
+                  'K&L',
+                  style: AppTextStyles.serif.copyWith(
+                    fontSize: 32,
+                    letterSpacing: 6.0,
+                    color: Colors.white,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: 50,
+                  height: 2,
+                  color: Colors.white70,
+                ),
+                const SizedBox(height: 32),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    children: [
+                      _buildMenuItem(context, 'HOME',
+                          () => _handleNavigation(context, onHomeTap)),
+                      _buildMenuItem(context, 'O CASAL',
+                          () => _handleNavigation(context, onCasalTap)),
+                      _buildMenuItem(context, 'RECEPÇÃO',
+                          () => _handleNavigation(context, onRecepcaoTap)),
+                      _buildMenuItem(context, 'LISTA DE PRESENTES',
+                          () => _handleNavigation(context, onListaTap)),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => _handleNavigation(context, onRsvpTap),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF957E6E),
+                        ),
+                        child: const Text('PRESENÇA'),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: _ThemeToggleButton(isDark: isDark),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: _ThemeToggleButton(isDark: isDark),
-            ),
-          ],
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  Widget _buildMenuItem(BuildContext context, String title, VoidCallback onTap) {
+  Widget _buildMenuItem(
+      BuildContext context, String title, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -121,40 +124,24 @@ class _ThemeToggleButton extends StatefulWidget {
 }
 
 class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
-  /// GlobalKey para capturar a posição exata do botão na tela.
-  final GlobalKey _buttonKey = GlobalKey();
-
-  /// Retorna o offset central do botão em coordenadas globais (tela).
-  Offset _getButtonOffset() {
-    final renderBox =
-        _buttonKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return Offset.zero;
-    final position = renderBox.localToGlobal(Offset.zero);
-    return Offset(
-      position.dx + renderBox.size.width / 2,
-      position.dy + renderBox.size.height / 2,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
 
-    return ThemeSwitcher(
-      builder: (context) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              isDark ? 'Modo Claro' : 'Modo Escuro',
-              style: AppTextStyles.sans.copyWith(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              key: _buttonKey,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          isDark ? 'Modo Claro' : 'Modo Escuro',
+          style: AppTextStyles.sans.copyWith(
+            fontSize: 14,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 12),
+        ThemeSwitcher(
+          builder: (switcherContext) {
+            return IconButton(
               icon: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: (child, animation) => RotationTransition(
@@ -168,17 +155,14 @@ class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
                 ),
               ),
               onPressed: () {
-                final offset = _getButtonOffset();
-                ThemeSwitcher.of(context).changeTheme(
+                ThemeSwitcher.of(switcherContext).changeTheme(
                   theme: isDark ? AppTheme.lightTheme : AppTheme.darkTheme,
-                  offset: offset,
                 );
               },
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 }
-

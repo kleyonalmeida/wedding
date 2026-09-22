@@ -45,7 +45,7 @@ class CoupleSection extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withOpacity(0.8),
+                        .withValues(alpha: 0.8),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -55,19 +55,49 @@ class CoupleSection extends StatelessWidget {
           const SizedBox(height: 96),
           CoverFlowCarousel(
             items: const [
-              CarouselItem(imagePath: 'assets/images/_MG_1085.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1064.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1152.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1229.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1248.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1288.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1304.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1333.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1337.jpg'),
-              CarouselItem(imagePath: 'assets/images/_MG_1341.jpg'),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1085.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1085.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1064.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1064.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1152.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1152.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1229.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1229.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1248.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1248.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1288.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1288.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1304.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1304.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1333.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1333.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1337.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1337.webp',
+              ),
+              CarouselItem(
+                imagePath: 'assets/images/_MG_1341.jpg',
+                thumbnailPath: 'assets/images/carousel/_MG_1341.webp',
+              ),
             ],
             height: 420,
-            initialPage: 3, // Inicia no _MG_1229.jpg
+            initialPage: 5, // _MG_1288.jpg sempre inicia no centro.
           ),
         ],
       ),

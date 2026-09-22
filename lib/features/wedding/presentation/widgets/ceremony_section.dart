@@ -142,17 +142,11 @@ class CeremonySection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: AspectRatio(
           aspectRatio: 4 / 3,
-          child: Image.network(
-            'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
+          child: Image.asset(
+            'assets/images/ceremony-1600.webp',
             fit: BoxFit.cover,
             cacheWidth: 1200,
             filterQuality: FilterQuality.medium,
-            errorBuilder: (context, error, stackTrace) => Image.asset(
-              'assets/images/hero.jpeg',
-              fit: BoxFit.cover,
-              cacheWidth: 1200,
-              filterQuality: FilterQuality.medium,
-            ),
           ),
         ),
       ),
@@ -223,7 +217,10 @@ class CeremonySection extends StatelessWidget {
             style: AppTextStyles.sans.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.7),
             ),
           ),
           if (showMapButton) ...[

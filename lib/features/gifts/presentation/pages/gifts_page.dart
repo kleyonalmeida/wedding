@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/web_scroll_mode.dart';
 import '../../../wedding/presentation/widgets/wedding_header.dart';
 import '../../../wedding/presentation/widgets/wedding_side_menu.dart';
 import '../../../wedding/presentation/widgets/wedding_footer.dart';
@@ -62,14 +63,20 @@ class _GiftsPageState extends State<GiftsPage> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isDesktopWeb = kIsWeb && !isMobile;
+    final useSmoothWebScroll = isDesktopWeb &&
+        resolveWebScrollMode() == WebScrollMode.smooth;
 
     final innerScrollView = CustomScrollView(
       controller: _scrollController,
-      physics: isDesktopWeb
+      physics: useSmoothWebScroll
           ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
+          : isDesktopWeb
+              ? const ClampingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                )
+              : const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
       slivers: [
         SliverToBoxAdapter(
           child: Container(
@@ -151,7 +158,7 @@ class _GiftsPageState extends State<GiftsPage> {
       ],
     );
 
-    final scrollArea = isDesktopWeb
+    final scrollArea = useSmoothWebScroll
         ? WebSmoothScroll(
             controller: _scrollController,
             scrollSpeed: 60,

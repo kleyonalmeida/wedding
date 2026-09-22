@@ -76,9 +76,8 @@ class _SmoothWebScrollState extends State<SmoothWebScroll>
       // ainda percorre exatamente scrollAmount quando não encontra um limite.
       _velocity += direction * widget.scrollAmount / timeConstant;
 
-      _restingOffset = (current + _velocity * timeConstant)
-          .clamp(0.0, maxScroll)
-          .toDouble();
+      _restingOffset =
+          (current + _velocity * timeConstant).clamp(0.0, maxScroll).toDouble();
       _velocity = (_restingOffset - current) / timeConstant;
 
       if (!_ticker.isActive) {

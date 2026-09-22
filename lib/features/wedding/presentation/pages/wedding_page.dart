@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../core/widgets/smooth_web_scroll.dart';
+import '../../../../core/widgets/web_scroll_mode.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/wedding_header.dart';
 import '../widgets/hero_section.dart';
@@ -93,16 +94,22 @@ class _WeddingPageState extends State<WeddingPage> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isDesktopWeb = kIsWeb && !isMobile;
+    final useSmoothWebScroll =
+        isDesktopWeb && resolveWebScrollMode() == WebScrollMode.smooth;
 
     // Widget de rolagem interno — usa NeverScrollableScrollPhysics no desktop web
     // para que o WebSmoothScroll assuma o controle exclusivo do scroll.
     final Widget innerScrollView = CustomScrollView(
       controller: _scrollController,
-      physics: isDesktopWeb
+      physics: useSmoothWebScroll
           ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
+          : isDesktopWeb
+              ? const ClampingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                )
+              : const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
       slivers: [
         SliverToBoxAdapter(
           key: _homeKey,
@@ -174,7 +181,7 @@ class _WeddingPageState extends State<WeddingPage> {
 
     // Widget pai de scroll: no desktop web usa SmoothWebScroll,
     // no mobile usa o CustomScrollView diretamente (física nativa já é suave).
-    final Widget scrollArea = isDesktopWeb
+    final Widget scrollArea = useSmoothWebScroll
         ? SmoothWebScroll(
             controller: _scrollController,
             scrollAmount: 80, // Distância reduzida por tick do mouse

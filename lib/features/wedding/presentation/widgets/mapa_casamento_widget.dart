@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'map_view_fallback.dart' if (dart.library.html) 'map_view_web.dart';
+import 'map_view_fallback.dart'
+    if (dart.library.js_interop) 'map_view_web.dart';
 
 class MapaCasamentoWidget extends StatefulWidget {
   final String mapSrc;
@@ -22,7 +21,6 @@ class MapaCasamentoWidget extends StatefulWidget {
 class _MapaCasamentoWidgetState extends State<MapaCasamentoWidget> {
   static const String _viewType = 'google-map-iframe';
   static bool _isRegistered = false;
-  Timer? _loadTimer;
   bool _showInteractiveMap = false;
 
   @override
@@ -32,25 +30,6 @@ class _MapaCasamentoWidgetState extends State<MapaCasamentoWidget> {
       registerGoogleMapView(_viewType, widget.mapSrc);
       _isRegistered = true;
     }
-    _scheduleMapLoad();
-  }
-
-  void _scheduleMapLoad() {
-    _loadTimer?.cancel();
-    _loadTimer = Timer(const Duration(milliseconds: 250), () {
-      if (!mounted) return;
-      if (Scrollable.recommendDeferredLoadingForContext(context)) {
-        _scheduleMapLoad();
-        return;
-      }
-      setState(() => _showInteractiveMap = true);
-    });
-  }
-
-  @override
-  void dispose() {
-    _loadTimer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -70,21 +49,56 @@ class _MapaCasamentoWidgetState extends State<MapaCasamentoWidget> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: _showInteractiveMap && kIsWeb
-              ? const HtmlElementView(
-                  key: ValueKey('interactive-map'),
-                  viewType: _viewType,
-                )
-              : ColoredBox(
-                  key: const ValueKey('map-placeholder'),
-                  color: Theme.of(context).colorScheme.surface,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
+        child: _showInteractiveMap && kIsWeb
+            ? Column(
+                children: [
+                  Material(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.map_outlined),
+                      title: const Text('Mapa interativo ativo'),
+                      trailing: TextButton.icon(
+                        onPressed: () =>
+                            setState(() => _showInteractiveMap = false),
+                        icon: const Icon(Icons.close, size: 18),
+                        label: const Text('FECHAR'),
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: HtmlElementView(viewType: _viewType),
+                  ),
+                ],
+              )
+            : ColoredBox(
+                color: Theme.of(context).colorScheme.surface,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 56,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Casa da Mangueira Eventos',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: kIsWeb
+                            ? () => setState(() => _showInteractiveMap = true)
+                            : null,
+                        icon: const Icon(Icons.map_outlined),
+                        label: const Text('CARREGAR MAPA INTERATIVO'),
+                      ),
+                    ],
                   ),
                 ),
-        ),
+              ),
       ),
     );
   }
