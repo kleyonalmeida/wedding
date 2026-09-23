@@ -86,6 +86,8 @@ class _RsvpSectionState extends State<RsvpSection> {
   @override
   Widget build(BuildContext context) {
     return TexturedBackground(
+      textureAssetPath: 'assets/images/texture_3x3.png',
+      textureFit: BoxFit.none,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 96.0, horizontal: 24.0),
         child: Center(

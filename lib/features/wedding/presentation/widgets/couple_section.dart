@@ -17,6 +17,7 @@ class CoupleSection extends StatefulWidget {
 
 class _CoupleSectionState extends State<CoupleSection> {
   static const _initialPage = 5;
+  static const _edgeColor = Color(0xFF392A23);
   static const _items = <CarouselItem>[
     CarouselItem(
       imagePath: 'assets/images/_MG_1085.jpg',
@@ -123,6 +124,9 @@ class _CoupleSectionState extends State<CoupleSection> {
         final photoWidth = isMobile
             ? constraints.maxWidth
             : math.min(760.0, constraints.maxWidth * 0.72);
+        final photoStart =
+            (constraints.maxWidth - photoWidth) / (2 * constraints.maxWidth);
+        final edgeFadeWidth = math.min(120.0, photoWidth * 0.15);
 
         return SizedBox(
           height: sectionHeight,
@@ -130,42 +134,97 @@ class _CoupleSectionState extends State<CoupleSection> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const ColoredBox(color: Color(0xFF251D1B)),
+              if (isMobile)
+                const ColoredBox(color: _edgeColor)
+              else
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: const [
+                        Color(0xFF17110F),
+                        _edgeColor,
+                        Color(0xFF49352C),
+                        _edgeColor,
+                        Color(0xFF17110F),
+                      ],
+                      stops: [
+                        0,
+                        photoStart,
+                        0.5,
+                        1 - photoStart,
+                        1,
+                      ],
+                    ),
+                  ),
+                ),
               Center(
                 child: SizedBox(
                   width: photoWidth,
                   height: sectionHeight,
-                  child: ValueListenableBuilder<int>(
-                    valueListenable: _selectedIndex,
-                    builder: (context, selectedIndex, _) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 650),
-                        child: SizedBox.expand(
-                          key: ValueKey<int>(selectedIndex),
-                          child: Image.asset(
-                            _items[selectedIndex].thumbnailPath,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            filterQuality: FilterQuality.medium,
-                            excludeFromSemantics: true,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ValueListenableBuilder<int>(
+                        valueListenable: _selectedIndex,
+                        builder: (context, selectedIndex, _) {
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 650),
+                            child: SizedBox.expand(
+                              key: ValueKey<int>(selectedIndex),
+                              child: Image.asset(
+                                _items[selectedIndex].thumbnailPath,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                filterQuality: FilterQuality.medium,
+                                excludeFromSemantics: true,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xB8000000),
+                              Color(0x85000000),
+                              Color(0xB8000000),
+                            ],
+                            stops: [0.0, 0.48, 1.0],
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xB8000000),
-                      Color(0x85000000),
-                      Color(0xB8000000),
+                      ),
+                      if (!isMobile) ...[
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          left: 0,
+                          width: edgeFadeWidth,
+                          child: const DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [_edgeColor, Colors.transparent],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          right: 0,
+                          width: edgeFadeWidth,
+                          child: const DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.transparent, _edgeColor],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
-                    stops: [0.0, 0.48, 1.0],
                   ),
                 ),
               ),
