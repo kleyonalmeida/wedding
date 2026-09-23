@@ -100,7 +100,7 @@ class _RsvpSectionState extends State<RsvpSection> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withAlpha(50),
-                    blurRadius: 30,
+                    blurRadius: 8,
                     offset: const Offset(0, 10),
                   ),
                 ],

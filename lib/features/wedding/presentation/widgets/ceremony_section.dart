@@ -133,7 +133,7 @@ class CeremonySection extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(40),
-            blurRadius: 24,
+            blurRadius: 12,
             offset: const Offset(0, 12),
           ),
         ],
@@ -173,7 +173,7 @@ class CeremonySection extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(20),
-            blurRadius: 16,
+            blurRadius: 0,
             offset: const Offset(0, 6),
           ),
         ],
