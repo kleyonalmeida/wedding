@@ -123,7 +123,7 @@ class _WeddingPageState extends State<WeddingPage> {
         ),
         SliverToBoxAdapter(
           key: _casalKey,
-          child: const CoupleSection(),
+          child: CoupleSection(scrollController: _scrollController),
         ),
         SliverToBoxAdapter(
           key: _recepcaoKey,

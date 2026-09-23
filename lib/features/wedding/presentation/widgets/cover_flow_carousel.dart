@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -17,12 +18,16 @@ class CoverFlowCarousel extends StatefulWidget {
   final List<CarouselItem> items;
   final double height;
   final int initialPage;
+  final bool autoPlay;
+  final ValueChanged<int>? onPageChanged;
 
   const CoverFlowCarousel({
     super.key,
     required this.items,
     this.height = 420.0,
     this.initialPage = 0,
+    this.autoPlay = false,
+    this.onPageChanged,
   });
 
   @override
@@ -37,6 +42,8 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
   int? _cachedImageHeight;
   String? _cachedItemsSignature;
   int _precacheGeneration = 0;
+  Timer? _autoPlayTimer;
+  late int _selectedIndex;
   final int _loopOffset =
       10000; // Offset alto para permitir scroll infinito para a esquerda
 
@@ -47,11 +54,44 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
     final int startPage =
         (_loopOffset * widget.items.length) + widget.initialPage;
     _currentPage = startPage.toDouble();
+    _selectedIndex = widget.initialPage % widget.items.length;
     _pageController = PageController(
       initialPage: startPage,
       viewportFraction: 1.0,
     );
     _pageController.addListener(_handleScroll);
+    _syncAutoPlay();
+  }
+
+  @override
+  void didUpdateWidget(covariant CoverFlowCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.autoPlay != widget.autoPlay) _syncAutoPlay();
+  }
+
+  void _syncAutoPlay() {
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = null;
+    if (!widget.autoPlay || widget.items.length < 2) return;
+
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted ||
+          !_imagesReady ||
+          !_pageController.hasClients ||
+          _pageController.position.isScrollingNotifier.value ||
+          MediaQuery.disableAnimationsOf(context) ||
+          ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  void _restartAutoPlay() {
+    if (widget.autoPlay) _syncAutoPlay();
   }
 
   @override
@@ -105,20 +145,27 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
   }
 
   void _handleScroll() {
+    final page = _pageController.page ?? _pageController.initialPage.toDouble();
     setState(() {
-      _currentPage =
-          _pageController.page ?? _pageController.initialPage.toDouble();
+      _currentPage = page;
     });
+    final selectedIndex = page.round() % widget.items.length;
+    if (selectedIndex != _selectedIndex) {
+      _selectedIndex = selectedIndex;
+      widget.onPageChanged?.call(selectedIndex);
+    }
   }
 
   @override
   void dispose() {
+    _autoPlayTimer?.cancel();
     _pageController.removeListener(_handleScroll);
     _pageController.dispose();
     super.dispose();
   }
 
   void _nextPage() {
+    _restartAutoPlay();
     _pageController.nextPage(
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutCubic,
@@ -126,6 +173,7 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
   }
 
   void _previousPage() {
+    _restartAutoPlay();
     _pageController.previousPage(
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutCubic,
@@ -198,7 +246,8 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
         final cardHeight = isMobile ? widget.height * 0.7 : widget.height;
-        final cardWidth = isMobile ? 220.0 : 340.0;
+        final sizeFactor = widget.height / 420.0;
+        final cardWidth = (isMobile ? 220.0 : 340.0) * sizeFactor;
 
         if (!_imagesReady) {
           return SizedBox(
@@ -211,7 +260,7 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
 
         // Reduzimos o espaçamento no desktop para que as cartas fiquem mais concentradas
         // no centro e não esbarrem nas setas laterais.
-        final baseSpacing = isMobile ? 120.0 : 160.0;
+        final baseSpacing = (isMobile ? 120.0 : 160.0) * sizeFactor;
 
         // Cinco cards cobrem a área útil e reduzem drasticamente a quantidade
         // de camadas com perspectiva, sombra, clipping e opacidade.
@@ -302,22 +351,40 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
               PageView.builder(
                 controller: _pageController,
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    behavior: HitTestBehavior
-                        .opaque, // Garante que a área transparente receba o clique
-                    onTap: () {
-                      final int initialPageOffset =
-                          (_loopOffset * widget.items.length) +
-                              widget.initialPage;
-                      final int currentPageInt =
-                          _pageController.page?.round() ?? initialPageOffset;
-                      if (currentPageInt == index) {
-                        final realIndex = index % widget.items.length;
-                        _showExpandedImage(
-                            context, widget.items[realIndex].imagePath);
-                      }
-                    },
-                    child: const SizedBox.expand(),
+                  return LayoutBuilder(
+                    builder: (context, pageConstraints) => GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapUp: (details) {
+                        int? tappedIndex;
+                        for (final cardIndex in visibleIndices.reversed) {
+                          final distance = (cardIndex - _currentPage).abs();
+                          final scale =
+                              (1.0 - distance * 0.15).clamp(0.70, 1.0);
+                          final centerX = pageConstraints.maxWidth / 2 +
+                              (cardIndex - _currentPage) * baseSpacing;
+                          if ((details.localPosition.dx - centerX).abs() <=
+                              cardWidth * scale / 2) {
+                            tappedIndex = cardIndex;
+                            break;
+                          }
+                        }
+                        if (tappedIndex == null) return;
+
+                        if (tappedIndex == _currentPage.round()) {
+                          final realIndex = tappedIndex % widget.items.length;
+                          _showExpandedImage(
+                              context, widget.items[realIndex].imagePath);
+                        } else {
+                          _restartAutoPlay();
+                          _pageController.animateToPage(
+                            tappedIndex,
+                            duration: const Duration(milliseconds: 600),
+                            curve: Curves.easeOutCubic,
+                          );
+                        }
+                      },
+                      child: const SizedBox.expand(),
+                    ),
                   );
                 },
               ),
@@ -380,10 +447,10 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(8.0),
           child: Icon(
             icon,
-            size: 32,
+            size: 24,
             color: iconColor,
           ),
         ),
