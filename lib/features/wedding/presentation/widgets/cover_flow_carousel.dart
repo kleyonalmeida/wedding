@@ -266,32 +266,30 @@ class _CoverFlowCarouselState extends State<CoverFlowCarousel> {
                       ..rotateY(rotateY)
                       ..scaleByDouble(scale, scale, scale, 1.0),
                     alignment: Alignment.center,
-                    child: Opacity(
-                      opacity: opacity,
-                      child: RepaintBoundary(
-                        child: Container(
-                          width: cardWidth,
-                          height: cardHeight,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black
-                                    .withAlpha((40 * opacity).toInt()),
-                                blurRadius: 16,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image(
-                              image: _cardImageProviders[realIndex],
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.high,
-                              gaplessPlayback: true,
-                              isAntiAlias: true,
+                    child: RepaintBoundary(
+                      child: Container(
+                        width: cardWidth,
+                        height: cardHeight,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withAlpha((40 * opacity * opacity).toInt()),
+                              blurRadius: index == centerIndex ? 16 : 0,
+                              offset: const Offset(0, 8),
                             ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image(
+                            image: _cardImageProviders[realIndex],
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.medium,
+                            opacity: AlwaysStoppedAnimation<double>(opacity),
+                            gaplessPlayback: true,
+                            isAntiAlias: true,
                           ),
                         ),
                       ),
