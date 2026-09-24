@@ -9,6 +9,12 @@ using WeddingRsvp.Api.Data;
 using WeddingRsvp.Api.Endpoints;
 using WeddingRsvp.Api.Models;
 using WeddingRsvp.Api.Validators;
+using Microsoft.AspNetCore.Identity;
+using WeddingRsvp.Api.Entities;
+using WeddingRsvp.Api.Services;
+using WeddingRsvp.Api.Payments;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,31 +55,56 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IValidator<RsvpRequest>, RsvpRequestValidator>();
 
 // ════════════════════════════════════════════════════════════════════════════
-// JWT AUTHENTICATION
+// IDENTITY & AUTHENTICATION
 // ════════════════════════════════════════════════════════════════════════════
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? throw new InvalidOperationException("Jwt:Secret não configurado.");
-var jwtIssuer = builder.Configuration["Jwt:Issuer"]
-    ?? throw new InvalidOperationException("Jwt:Issuer não configurado.");
+builder.Services.AddIdentity<AdminUser, IdentityRole<Guid>>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+var keyPath = builder.Configuration["DataProtectionKeyPath"] ?? "/tmp/wedding-dpkeys";
+Directory.CreateDirectory(keyPath);
+builder.Services.AddDataProtection().SetApplicationName("WeddingAdmin")
+    .PersistKeysToFileSystem(new DirectoryInfo(keyPath));
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = ".Wedding.Admin";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Requer HTTPS
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8); // Conforme plano, teto de tempo
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer           = true,
-            ValidateAudience         = true,
-            ValidateLifetime         = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer              = jwtIssuer,
-            ValidAudience            = jwtIssuer,
-            IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            // Sem tolerância de clock — token expirado é imediatamente inválido
-            ClockSkew                = TimeSpan.Zero
-        };
-    });
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
 
-builder.Services.AddAuthorization();
+// CSRF / Antiforgery
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN"; // Header usado pelo frontend
+});
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("SuperAdmin", policy => policy.RequireRole("SuperAdmin"));
 
 // ════════════════════════════════════════════════════════════════════════════
 // CORS — Política restrita
@@ -83,13 +114,21 @@ builder.Services.AddAuthorization();
 var allowedOrigin = builder.Configuration["AllowedOrigin"]
     ?? throw new InvalidOperationException("AllowedOrigin não configurado.");
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddSingleton<GiftImageStore>();
+
+builder.Services.AddHttpClient<IPaymentGateway, AsaasPaymentGateway>();
+builder.Services.AddHostedService<WebhookProcessor>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FlutterWebPolicy", policy =>
         policy
             .WithOrigins(allowedOrigin)
-            .WithMethods("GET", "POST", "OPTIONS")
-            .WithHeaders("Content-Type", "Authorization")
+            .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            .WithHeaders("Content-Type", "Authorization", "X-CSRF-TOKEN")
+            .AllowCredentials()
             // Cache preflight por 10 minutos — reduz requisições OPTIONS desnecessárias
             .SetPreflightMaxAge(TimeSpan.FromMinutes(10)));
 });
@@ -115,6 +154,13 @@ builder.Services.AddRateLimiter(options =>
         limiter.PermitLimit = 30;
         limiter.QueueLimit  = 0;
     });
+
+    options.AddPolicy("OrderPolicy", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1), PermitLimit = 10, QueueLimit = 0
+        }));
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
@@ -143,7 +189,39 @@ if (app.Environment.IsDevelopment())
 app.UseCors("FlutterWebPolicy");
 app.UseRateLimiter();
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/admin"))
+    {
+        var path = context.Request.Path.Value ?? string.Empty;
+        if (!Program.IsTesting && context.User.Identity?.IsAuthenticated == true &&
+            !path.StartsWith("/api/admin/auth/", StringComparison.OrdinalIgnoreCase) &&
+            !path.StartsWith("/api/admin/security/", StringComparison.OrdinalIgnoreCase))
+        {
+            var userManager = context.RequestServices.GetRequiredService<UserManager<AdminUser>>();
+            var user = await userManager.GetUserAsync(context.User);
+            if (user == null || user.MustChangePassword || !user.TwoFactorEnabled)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return;
+            }
+        }
+        if (context.User.Identity?.IsAuthenticated == true &&
+            (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method) ||
+             HttpMethods.IsPatch(context.Request.Method) || HttpMethods.IsDelete(context.Request.Method)))
+        {
+            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+            if (!await antiforgery.IsRequestValidAsync(context))
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                return;
+            }
+        }
+    }
+    await next(context);
+});
 app.UseAuthorization();
+app.UseAntiforgery();
 
 // ════════════════════════════════════════════════════════════════════════════
 // MIGRATION AUTOMÁTICA — Aplica migrations pendentes no startup
@@ -160,6 +238,14 @@ using (var scope = app.Services.CreateScope())
     {
         db.Database.Migrate();
     }
+
+    if (app.Environment.IsDevelopment() && !Program.IsTesting)
+    {
+        DbSeeder.SeedGiftsAsync(db).GetAwaiter().GetResult();
+    }
+
+    // Seed do SuperAdmin
+    WeddingRsvp.Api.Services.AdminSeedService.SeedSuperAdminAsync(scope.ServiceProvider, app.Configuration).GetAwaiter().GetResult();
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -170,13 +256,28 @@ app.MapHealthChecks("/healthz");
 // RSVP público — rate limiting aplicado dentro do grupo de endpoints
 app.MapRsvpEndpoints("RsvpPolicy");
 
+// Public Gifts and Orders
+app.MapPublicGiftEndpoints();
+app.MapGiftOrderEndpoints();
+app.MapAsaasWebhookEndpoints();
+
+// Admin Auth - Sem rate limit do RSVP
+app.MapAdminAuthEndpoints();
+app.MapAdminSecurityEndpoints();
+app.MapAdminAuditEndpoints();
+app.MapAdminAttendanceEndpoints();
+app.MapAdminDashboardEndpoints();
+app.MapAdminProductEndpoints();
+app.MapAdminPaymentEndpoints();
+app.MapAdminSettingsEndpoints();
+
 // Admin — rate limiting próprio aplicado dentro do grupo
 app.MapAdminEndpoints("AdminPolicy");
 
 app.Run();
 
 // Necessário para testes de integração (WebApplicationFactory)
-public partial class Program 
+public partial class Program
 {
     public static bool IsTesting { get; set; } = false;
 }

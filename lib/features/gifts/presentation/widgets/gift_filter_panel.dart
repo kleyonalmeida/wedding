@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/gift_catalog_controller.dart';
-import 'postal_code_field.dart';
 
 class GiftFilterPanel extends StatelessWidget {
   final GiftCatalogController controller;
@@ -57,15 +56,8 @@ class GiftFilterPanel extends StatelessWidget {
           const SizedBox(height: 16),
           _buildAccordion(
             context: context,
-            title: 'Ocasiões',
-            items: ['Agradecimento', 'Amizade', 'Aniversário'],
-            selectedItems: controller.currentFilter.occasions,
-            onToggle: controller.toggleOccasion,
-          ),
-          _buildAccordion(
-            context: context,
             title: 'Presentes',
-            items: ['Balões', 'Bebidas', 'Chocolates', 'Flores'],
+            items: controller.categories,
             selectedItems: controller.currentFilter.categories,
             onToggle: controller.toggleCategory,
           ),

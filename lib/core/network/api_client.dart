@@ -1,0 +1,72 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart'
+    as platform;
+
+class ApiException implements Exception {
+  final int statusCode;
+  const ApiException(this.statusCode);
+
+  @override
+  String toString() => 'HTTP $statusCode';
+}
+
+class ApiClient {
+  // In development flutter web, we can use the same host via relative URL, or point to localhost:5001
+  static const String baseUrl = kReleaseMode ? '' : 'http://localhost:5001';
+
+  final http.Client _client = platform.createHttpClient();
+  String? _csrfToken;
+
+  Uri _uri(String endpoint) => Uri.parse('$baseUrl$endpoint');
+
+  Future<dynamic> get(String endpoint) async =>
+      _decode(await _client.get(_uri(endpoint)));
+
+  Future<void> fetchCsrf() async {
+    final data = await get('/api/admin/auth/csrf');
+    _csrfToken = data['token'] as String;
+  }
+
+  Future<dynamic> post(String endpoint, Map<String, dynamic> body) async =>
+      _json('POST', endpoint, body);
+  Future<dynamic> put(String endpoint, Map<String, dynamic> body) async =>
+      _json('PUT', endpoint, body);
+  Future<dynamic> patch(String endpoint, Map<String, dynamic> body) async =>
+      _json('PATCH', endpoint, body);
+
+  Future<void> delete(String endpoint) async {
+    final request = http.Request('DELETE', _uri(endpoint));
+    if (_csrfToken != null) request.headers['X-CSRF-TOKEN'] = _csrfToken!;
+    _decode(await http.Response.fromStream(await _client.send(request)));
+  }
+
+  Future<dynamic> _json(
+      String method, String endpoint, Map<String, dynamic> body) async {
+    final request = http.Request(method, _uri(endpoint));
+    request.headers['Content-Type'] = 'application/json';
+    if (_csrfToken != null) request.headers['X-CSRF-TOKEN'] = _csrfToken!;
+    request.body = jsonEncode(body);
+    return _decode(await http.Response.fromStream(await _client.send(request)));
+  }
+
+  Future<dynamic> upload(
+      String endpoint, Uint8List bytes, String filename) async {
+    final request = http.MultipartRequest('POST', _uri(endpoint));
+    if (_csrfToken != null) request.headers['X-CSRF-TOKEN'] = _csrfToken!;
+    request.files
+        .add(http.MultipartFile.fromBytes('image', bytes, filename: filename));
+    return _decode(await http.Response.fromStream(await _client.send(request)));
+  }
+
+  dynamic _decode(http.Response response) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(response.statusCode);
+    }
+    if (response.body.isEmpty) return null;
+    return jsonDecode(response.body);
+  }
+
+  void dispose() => _client.close();
+}

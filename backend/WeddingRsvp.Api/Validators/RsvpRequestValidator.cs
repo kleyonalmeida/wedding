@@ -40,12 +40,16 @@ public class RsvpRequestValidator : AbstractValidator<RsvpRequest>
         // Mínimo 1: pelo menos o próprio convidado
         RuleFor(x => x.QtdAdultos)
             .InclusiveBetween(1, 20)
-            .WithMessage("Quantidade de adultos deve ser entre 1 e 20.");
+            .WithMessage("Quantidade de adultos deve ser entre 1 e 20.")
+            .When(x => x.VaiComparecer);
+        RuleFor(x => x.QtdAdultos).Equal(0).When(x => !x.VaiComparecer);
 
         // ── QtdCriancas ───────────────────────────────────────────────────────
         RuleFor(x => x.QtdCriancas)
             .InclusiveBetween(0, 15)
-            .WithMessage("Quantidade de crianças deve ser entre 0 e 15.");
+            .WithMessage("Quantidade de crianças deve ser entre 0 e 15.")
+            .When(x => x.VaiComparecer);
+        RuleFor(x => x.QtdCriancas).Equal(0).When(x => !x.VaiComparecer);
 
         // ── Observações ───────────────────────────────────────────────────────
         // Campo opcional — limita tamanho para evitar abuso de memória

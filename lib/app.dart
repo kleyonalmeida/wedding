@@ -5,6 +5,8 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/theme_wave_transition.dart';
 import 'features/wedding/presentation/pages/wedding_page.dart';
 import 'features/gifts/presentation/pages/gifts_page.dart';
+import 'features/gifts/presentation/pages/payment_return_page.dart';
+import 'features/admin/presentation/admin_page.dart';
 
 class WeddingScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -38,7 +40,6 @@ class WeddingApp extends StatelessWidget {
             );
           },
           scrollBehavior: WeddingScrollBehavior(),
-          initialRoute: '/',
           onGenerateRoute: (settings) {
             switch (settings.name) {
               case '/':
@@ -53,8 +54,16 @@ class WeddingApp extends StatelessWidget {
                   },
                   transitionDuration: const Duration(milliseconds: 500),
                 );
+              case '/admin':
+                return MaterialPageRoute(builder: (_) => const AdminPage());
+              case '/pagamento/retorno':
+                return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: Uri.base.queryParameters['id'] ?? ''));
               default:
-                return MaterialPageRoute(builder: (_) => const WeddingPage());
+                if (settings.name?.startsWith('/pagamento/retorno') ?? false) {
+                  final uri = Uri.parse(settings.name!);
+                  return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: uri.queryParameters['id'] ?? Uri.base.queryParameters['id'] ?? ''));
+                }
+                return MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text('Página não encontrada'))));
             }
           },
           debugShowCheckedModeBanner: false,

@@ -64,7 +64,7 @@ class _RsvpSectionState extends State<RsvpSection> {
         ),
       );
       setState(() {
-        _successMessage = 'Sua presença foi confirmada com sucesso!';
+        _successMessage = _attending! ? 'Sua presença foi confirmada com sucesso!' : 'Sua resposta foi registrada com sucesso.';
       });
       _formKey.currentState!.reset();
       setState(() {

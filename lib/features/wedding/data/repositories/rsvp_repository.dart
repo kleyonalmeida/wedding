@@ -1,16 +1,21 @@
 import '../models/rsvp_data.dart';
+import '../../../../core/network/api_client.dart';
 
 class RsvpRepository {
+  final ApiClient _api = ApiClient();
+
   Future<void> submitRsvp(RsvpData data) async {
-    // Fake repository implementation
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Simular algum caso de erro se necessário
     if (!data.acceptTerms) {
       throw Exception('Você precisa aceitar os termos.');
     }
-    
-    // Sucesso
-    return;
+    await _api.post('/api/rsvp', {
+      'nome': data.name,
+      'email': data.email,
+      'telefone': data.phone,
+      'vaiComparecer': data.attending,
+      'qtdAdultos': data.adults,
+      'qtdCriancas': data.children,
+      'observacoes': data.message.isEmpty ? null : data.message,
+    });
   }
 }

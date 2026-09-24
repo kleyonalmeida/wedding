@@ -7,6 +7,7 @@ class GiftCatalogController extends ChangeNotifier {
   final GiftRepository _repository = GiftRepository();
   
   List<GiftProduct> products = [];
+  List<String> categories = [];
   bool isLoading = false;
   String? error;
   
@@ -19,6 +20,14 @@ class GiftCatalogController extends ChangeNotifier {
 
   GiftCatalogController() {
     loadProducts(refresh: true);
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      categories = await _repository.getCategories();
+      notifyListeners();
+    } catch (_) { /* Catalog error is shown by loadProducts. */ }
   }
 
   Future<void> loadProducts({bool refresh = false}) async {

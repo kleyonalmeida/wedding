@@ -41,6 +41,7 @@ dependencies:
   web: ^1.1.1
   flutter_web_plugins:
     sdk: flutter
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

@@ -17,45 +17,9 @@ public static class AdminEndpoints
             .WithTags("Admin")
             .RequireRateLimiting(rateLimitPolicy);
 
-        // ── POST /api/admin/login ─────────────────────────────────────────────
-        // Autentica o administrador e retorna um JWT com validade de 8h.
-        // BCrypt.Verify usa comparação de tempo constante — resistente a timing attacks.
-        group.MapPost("/login", (AdminLoginRequest request, IConfiguration config) =>
-        {
-            var expectedUsername = config["Admin:Username"];
-            var expectedPasswordHash = config["Admin:PasswordHash"];
-            var jwtSecret = config["Jwt:Secret"]!;
-            var jwtIssuer = config["Jwt:Issuer"]!;
-
-            // Valida credenciais — ambas as verificações ocorrem sempre (sem short-circuit)
-            // para evitar que um atacante determine o username correto por timing
-            bool usernameOk = string.Equals(request.Username, expectedUsername, StringComparison.Ordinal);
-            bool passwordOk = !string.IsNullOrEmpty(expectedPasswordHash)
-                              && BCrypt.Net.BCrypt.Verify(request.Password, expectedPasswordHash);
-
-            if (!usernameOk || !passwordOk)
-            {
-                // Resposta genérica — não revela qual campo está errado
-                return Results.Unauthorized();
-            }
-
-            var token = GenerateJwtToken(jwtSecret, jwtIssuer);
-
-            return Results.Ok(new
-            {
-                token,
-                expiresAt = DateTime.UtcNow.AddHours(8)
-            });
-        })
-        .AllowAnonymous()
-        .WithName("AdminLogin")
-        .WithSummary("Autentica o administrador e retorna token JWT")
-        .Produces<object>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized);
-
         // ── GET /api/admin/rsvps ──────────────────────────────────────────────
         // Lista todos os RSVPs com resumo estatístico.
-        // Protegido por JWT — exige header: Authorization: Bearer <token>
+        // Protegido por Cookie (Policy SuperAdmin)
         group.MapGet("/rsvps", async (AppDbContext db) =>
         {
             var rsvps = await db.Rsvps
@@ -94,39 +58,12 @@ public static class AdminEndpoints
                 rsvps
             });
         })
-        .RequireAuthorization()
+        .RequireAuthorization("SuperAdmin")
         .WithName("ListRsvps")
         .WithSummary("Lista todos os RSVPs (admin)")
         .Produces<object>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized);
 
         return app;
-    }
-
-    /// <summary>
-    /// Gera um token JWT assinado com HMAC-SHA256.
-    /// Validade de 8 horas — suficiente para uma sessão de trabalho do admin.
-    /// </summary>
-    private static string GenerateJwtToken(string secret, string issuer)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Role, "Admin"),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer:             issuer,
-            audience:           issuer,
-            claims:             claims,
-            notBefore:          DateTime.UtcNow,
-            expires:            DateTime.UtcNow.AddHours(8),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

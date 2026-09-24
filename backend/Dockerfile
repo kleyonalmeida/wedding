@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 COPY --from=build /app/publish .
 
 # Transfere propriedade dos arquivos para o usuário não-root
-RUN chown -R appuser:appgroup /app
+RUN mkdir -p /data/gift-images /data/keys && chown -R appuser:appgroup /app /data/gift-images /data/keys
 
 USER appuser
 

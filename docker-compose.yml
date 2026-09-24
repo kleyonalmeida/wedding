@@ -4,8 +4,6 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     env_file:
       - ./.env
     volumes:
@@ -31,13 +29,18 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
-      Jwt__Secret: "${JWT_SECRET}"
-      Jwt__Issuer: "${JWT_ISSUER:-wedding-rsvp-api}"
-      Admin__Username: "${ADMIN_USERNAME}"
-      Admin__PasswordHash: "${ADMIN_PASSWORD_HASH}"
+      SUPERADMIN_EMAIL: "${SUPERADMIN_EMAIL:?Set SUPERADMIN_EMAIL}"
+      SUPERADMIN_INITIAL_PASSWORD: "${SUPERADMIN_INITIAL_PASSWORD:-}"
+      Asaas__ApiKey: "${ASAAS_API_KEY:?Set ASAAS_API_KEY}"
+      Asaas__WebhookAuthToken: "${ASAAS_WEBHOOK_AUTH_TOKEN:?Set ASAAS_WEBHOOK_AUTH_TOKEN}"
+      Asaas__Environment: "${ASAAS_ENVIRONMENT:-Sandbox}"
+      PublicBaseUrl: "${PUBLIC_BASE_URL:?Set PUBLIC_BASE_URL}"
+      GiftImagePath: /data/gift-images
+      DataProtectionKeyPath: /data/keys
       AllowedOrigin: "${ALLOWED_ORIGIN}"
-    ports:
-      - "5001:8080"
+    volumes:
+      - gift_images:/data/gift-images
+      - protection_keys:/data/keys
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
       interval: 30s
@@ -55,8 +58,12 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
 
 volumes:
   postgres_data:
+    driver: local
+  gift_images:
+    driver: local
+  protection_keys:
     driver: local

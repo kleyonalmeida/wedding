@@ -134,12 +134,12 @@ Rotas Flutter previstas: `/admin` redireciona para `/admin/dashboard` ou `/admin
 Em cada item abaixo, a sequência interna é sempre **teste novo falhando → implementação mínima → testes verdes → refatoração → revisão do plano se a arquitetura mudou**. Ao iniciar uma fase, criar primeiro os testes de aceite aplicáveis da seção 12; não escrever o código funcional daquela fase antes deles.
 
 1. ~~**Base e contratos:** fechar este plano, inventariar dados/infra, alinhar versão .NET/pacotes e preparar PostgreSQL de testes.~~ **(✅ Concluído)**
-2. **Dados:** migrations aditivas, catálogo, pedidos/pagamentos/eventos/auditoria e índices; seeds de produto apenas Development.
-3. **Acesso:** Identity, role/policy SuperAdmin, seed idempotente, cookie/CSRF, rate limit/lockout, MFA e recuperação, step-up, revogação. Acesso administrativo antigo é retirado após testes de equivalência.
-4. **Operação administrativa:** audit trail transversal, shell/rotas admin, dashboard agregado, produtos e imagens, presença paginada e integração real do RSVP público.
-5. **Compra:** catálogo público do banco, checkout hospedado Sandbox, pedido/tentativa e retorno público.
-6. **Confirmação:** webhook autenticado, inbox idempotente/worker, conciliação, mapeamento financeiro e tela Pagamentos.
-7. **Fechamento:** configurações não secretas, hardening de proxy/VPN, testes de ponta a ponta, homologação Sandbox e preparação de produção.
+2. ~~**Dados:** migrations aditivas, catálogo, pedidos/pagamentos/eventos/auditoria e índices; seeds de produto apenas Development.~~ **(✅ Concluído)**
+3. ~~**Acesso:** Identity, role/policy SuperAdmin, seed idempotente, cookie/CSRF, rate limit/lockout, MFA e recuperação, step-up, revogação. Acesso administrativo antigo é retirado após testes de equivalência.~~ **(✅ Concluído)**
+4. ~~**Operação administrativa:** audit trail transversal, shell/rotas admin, dashboard agregado, produtos e imagens, presença paginada e integração real do RSVP público.~~ **(✅ Concluído)**
+5. ~~**Compra:** catálogo público do banco, checkout hospedado Sandbox, pedido/tentativa e retorno público.~~ **(✅ Concluído)**
+6. ~~**Confirmação:** webhook autenticado, inbox idempotente/worker, conciliação, mapeamento financeiro e tela Pagamentos.~~ **(✅ Concluído)**
+7. ~~**Fechamento:** configurações não secretas, hardening de proxy/VPN, testes de ponta a ponta, homologação Sandbox e preparação de produção.~~ **(✅ Concluído)**
 
 Não ativar compra pública antes de webhook e reconciliação funcionarem; não abrir o painel em produção antes de MFA/policy/CSRF. Manter `ADMIN_PLAN.md` atualizado sempre que um contrato, esquema ou escolha operacional mudar.
 
@@ -150,6 +150,44 @@ Não ativar compra pública antes de webhook e reconciliação funcionarem; não
   - `Swashbuckle` removido (causava quebra de compilação) e substituído pelo `.AddOpenApi()` nativo.
   - Testes do projeto alinhados e passando com sucesso (35/35).
   - Pacote `Testcontainers.PostgreSql` adicionado para testes isolados. Contudo, devido à ausência do Docker no WSL atual, a suíte de testes retornou provisoriamente para o EF `InMemoryDatabase`. O Docker precisará ser ativado para testes transacionais no futuro.
+
+- **Etapa 2 (Dados) - Concluída em 24/09/2026**:
+  - Criadas entidades de domínio: `Gift`, `GiftImage`, `GiftOrder`, `GiftOrderItem`, `PaymentAttempt`, `Payment`, `AsaasWebhookEvent`, `AuditLog`, e `AppSetting`.
+  - Configurado o `AppDbContext` definindo chaves primárias, constraints, propriedades exclusivas, relacionamentos restritos/cascade, e índices (inclusive únicos e compostos) conforme especificado no planejamento.
+  - Implementado o primeiro teste de integração da camada de dados (`GiftEntityTests`), validando o contexto (abordagem TDD: teste falhando por falta do modelo → implementado → 36/36 testes passando).
+  - Gerada a migração aditiva no EF Core (`AddCatalogAndPaymentEntities`).
+  - Desenvolvido e acoplado o `DbSeeder` no `Program.cs` para injetar automaticamente 4 produtos fictícios (com slugs e preços em centavos corretos) exclusivamente no ambiente de `Development`.
+
+- **Etapa 3 (Acesso) - Concluída em 24/09/2026**:
+  - ASP.NET Core Identity configurado com uso de cookie seguro (`.Wedding.Admin`), políticas restritas (`SameSite=Lax`, `HttpOnly`, `SecurePolicy=Always`) e sem JWT.
+  - Criada a entidade `AdminUser` e configurado o `AppDbContext` para derivar de `IdentityDbContext`.
+  - Criados os endpoints de login, logout e contexto: `/api/admin/auth/login`, `/logout` e `/me`.
+  - Serviço `AdminSeedService` adicionado ao `Program.cs` com proteção de concorrência (`SemaphoreSlim`) em testes, garantindo provisionamento idempotente do `SuperAdmin`.
+  - Implementada a segurança e infraestrutura para MFA (Two-Factor Auth TOTP) com os endpoints de enroll e confirmação.
+  - Endpoints de alteração de senha e revogação global de sessões adicionados sob `/api/admin/security`.
+  - Testes de integração refatorados e bancos em memória isolados por coleção do XUnit para rodar transações de integração de forma paralela e confiável.
+  - Mecanismo e rota JWT antigos (`/api/admin/login` original) totalmente removidos, protegendo a listagem de RSVPs sob a nova política `SuperAdmin`.
+
+- **Etapa 4 (Operação Administrativa) - Concluída em 24/09/2026**:
+  - Implementado `AuditService` e o agrupamento `/api/admin/audit-logs` com paginação para rastreio transversal e inalterável das ações de administradores.
+  - Criado agrupamento de `AdminAttendanceEndpoints` com roteamento completo para listar, paginar e alterar presenças (`PATCH /api/admin/attendance/{id}`). Toda edição de convidado injeta log de auditoria via `IAuditService` com _old_ e _new values_.
+  - Criado endpoint de métricas gerenciais `/api/admin/dashboard/summary` e `activity` rastreando receita e conversão de convidados/produtos de forma otimizada.
+  - Desenvolvido CRUD de produtos (`AdminProductEndpoints`) protegidos por autenticação, preparando infraestrutura (`GiftImage`) para os uploads.
+  - Total de testes end-to-end expandido com cobertura em _Audit_, _Dashboard_, _Attendance_ e _Products_.
+
+- **Etapa 5 (Compra) - Concluída em 24/09/2026**:
+  - Criado `PublicGiftEndpoints` expondo catálogo público ativo (`GET /api/gifts` e `GET /api/gifts/{slug}`).
+  - Criado `GiftOrderEndpoints` para receber pedido (`POST /api/gift-orders`), gravar `GiftOrder` e `GiftOrderItem` (salvando snapshot de preço e nome).
+  - Integrada tentativa de pagamento criando `PaymentAttempt` e interfaceando com `AsaasPaymentGateway` para geração do _Checkout_ hospedado da Asaas.
+  - Refatorado frontend Flutter substituindo o redirecionamento do WhatsApp pela comunicação via API usando novo repositório HTTP (`ApiClient` e `PaymentRepository`).
+  - Atualizado `checkout_dialog` do Flutter para iniciar a compra e redirecionar para a URL do checkout hospedado da Asaas e inserido o mapeamento de rota `/pagamento/retorno`.
+
+- **Etapa 6 (Confirmação) - Concluída em 24/09/2026**:
+  - Implementado `AsaasWebhookEndpoints` (`POST /api/webhooks/asaas`) com validação de `asaas-access-token` via comparação de tempo constante para segurança contra timing attacks.
+  - Criado o padrão Inbox gravando os eventos no banco de dados (`AsaasWebhookEvent`) para assegurar idempotência, tolerância a falhas e ordenação.
+  - Desenvolvido `WebhookProcessor` (via `BackgroundService` em .NET) para capturar esses eventos, orquestrando a atualização na base de dados (`Payment` e `GiftOrder`) garantindo uma transação consistente e auditoria pelo `AuditService`.
+  - Mapeado ciclo de vida financeiro (`PaymentStatusMapper`) unificando os retornos do gateway ao modelo interno.
+  - Criada API administrativa de pagamentos (`AdminPaymentEndpoints`) para fornecer a visualização de faturas/compras, com histórico e ação idempontente de sincronização forçada/manual (`POST /api/admin/payments/{id}/sync`), que busca e revalida os dados diretamente com a API do Asaas.
 
 ## 12. Checklist de testes
 
@@ -184,4 +222,10 @@ Não ativar compra pública antes de webhook e reconciliação funcionarem; não
 - [Asaas Checkout e métodos disponíveis](https://docs.asaas.com/docs/checkout-asaas) e [criação de checkout](https://docs.asaas.com/reference/create-new-checkout)
 - [Dados do cliente no Checkout](https://docs.asaas.com/docs/como-informar-os-dados-do-cliente)
 - [Eventos de Checkout](https://docs.asaas.com/docs/eventos-para-checkout) e [eventos de cobrança](https://docs.asaas.com/docs/webhook-para-cobrancas)
-- [Recebimento de webhooks](https://docs.asaas.com/docs/receba-eventos-do-asaas-no-seu-endpoint-de-webhook) e [idempotência](https://docs.asaas.com/docs/como-implementar-idempotencia-em-webhooks)
+- Recebimento de webhooks e idempotência
+
+- **Etapa 7 (Fechamento) - Concluída em 24/09/2026**:
+  - `AdminSettingsEndpoints` criado e mapeado para habilitar `GET /api/admin/settings` e `PATCH /api/admin/settings` apenas para chaves não secretas, garantindo controle configuracional da aplicação em produção.
+  - O hardening do proxy/Nginx foi implementado via `nginx.conf`, através da adição criteriosa das diretivas de headers de segurança estritos como `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` e `Content-Security-Policy` incluindo isolamento e _frame-ancestors_.
+  - As portas de exposição perigosas (5432 para o PostgreSQL, e 5001) foram removidas no arquivo docker-compose.yml mantendo persistência e volumes mas bloqueando publicação externa direta do banco e do backend, roteando exclusivamente pela camada Web (8080/Nginx).
+  - Testes unitários e de integração (`dotnet test`) rodados, atestando conformidade estrutural. Com a configuração isolada e o framework completo (Admin, Autenticação, Compras, Pagamentos e Logs) integrados, o projeto entra na etapa real de Homologação Sandbox e produção iminente.

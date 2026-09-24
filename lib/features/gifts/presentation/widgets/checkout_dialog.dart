@@ -3,6 +3,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../controllers/cart_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../data/repositories/payment_repository.dart';
+import '../../../../core/network/api_client.dart';
 
 class CheckoutDialog extends StatefulWidget {
   final CartController cartController;
@@ -19,6 +21,7 @@ class CheckoutDialog extends StatefulWidget {
 }
 
 class _CheckoutDialogState extends State<CheckoutDialog> {
+  final PaymentRepository _paymentRepository = PaymentRepository();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
   bool _hasError = false;
@@ -26,6 +29,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   String _formatCurrency(double value) {
     return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
   }
+
+  bool _isLoading = false;
 
   void _submit() async {
     if (_nameController.text.trim().isEmpty) {
@@ -37,41 +42,70 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
 
     setState(() {
       _hasError = false;
+      _isLoading = true;
     });
 
     final name = _nameController.text.trim();
     final message = _messageController.text.trim();
-    final total = _formatCurrency(widget.cartController.totalValue);
-    
-    final StringBuffer itemsBuffer = StringBuffer();
-    for (var item in widget.cartController.items) {
-      itemsBuffer.writeln('- ${item.quantity}x ${item.product.name} (${_formatCurrency(item.product.currentPrice * item.quantity)})');
-    }
+    final items = widget.cartController.items
+        .map((e) => {
+              'giftId': e.product.id,
+              'quantity': e.quantity,
+            })
+        .toList();
 
-    final text = 'Olá! Gostaria de presentear os noivos.\n\n'
-        '*De:* $name\n'
-        '${message.isNotEmpty ? '*Mensagem:* $message\n\n' : '\n'}'
-        '*Presentes escolhidos:*\n$itemsBuffer\n'
-        '*Total:* $total';
+    try {
+      final checkoutUrl = await _paymentRepository.createGiftOrder(
+        senderName: name,
+        message: message,
+        items: items,
+      );
 
-    // O telefone deve ser substituído pelo telefone real dos noivos (com DDI e DDD)
-    // Exemplo: 5511999999999
-    final whatsappUrl = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
-
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl);
-      if (mounted) {
-        widget.cartController.clear();
-        Navigator.of(context).pop();
+      if (checkoutUrl != null && mounted) {
+        final uri = Uri.parse(checkoutUrl);
+        if (uri.scheme == 'https' &&
+            (uri.host == 'asaas.com' || uri.host.endsWith('.asaas.com')) &&
+            await canLaunchUrl(uri)) {
+          final launched = await launchUrl(uri, webOnlyWindowName: '_self');
+          if (launched && mounted) {
+            widget.cartController.clear();
+            Navigator.of(context).pop();
+          }
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Não foi possível abrir o pagamento. Tente novamente.')),
+          );
+        }
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Redirecionando para o WhatsApp... Obrigado pelo presente!')),
+          const SnackBar(
+              content: Text('Falha ao processar o pedido. Tente novamente.')),
         );
       }
-    } else {
+    } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível abrir o WhatsApp.')),
+          SnackBar(
+              content: Text(e.statusCode == 409 || e.statusCode == 502
+                  ? 'Este pedido precisa ser conferido antes de uma nova tentativa. Entre em contato com os noivos.'
+                  : 'Não foi possível iniciar o pagamento. Tente novamente.')),
         );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                  'Não foi possível confirmar o pedido. Confira com os noivos antes de tentar novamente.')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -86,7 +120,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 700;
-    
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       insetPadding: const EdgeInsets.all(16),
@@ -155,7 +189,10 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
                   child: Text(
                     '${item.quantity > 1 ? '${item.quantity}x ' : ''}${item.product.name}',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.8),
                       fontSize: 14,
                     ),
                   ),
@@ -164,7 +201,10 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
                 Text(
                   _formatCurrency(item.product.currentPrice * item.quantity),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.8),
                     fontSize: 14,
                   ),
                 ),
@@ -173,7 +213,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
           );
         }).toList(),
         const SizedBox(height: 8),
-        Divider(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+        Divider(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,7 +273,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
           controller: _nameController,
           decoration: InputDecoration(
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(4),
               borderSide: BorderSide(
@@ -275,7 +317,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
           maxLines: 3,
           decoration: InputDecoration(
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(4),
               borderSide: const BorderSide(color: AppColors.outlineVariant),
@@ -305,8 +348,18 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Text('COMPRA', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold, height: 1)),
-                Text('SEGURA', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold, height: 1.2)),
+                Text('COMPRA',
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        height: 1)),
+                Text('SEGURA',
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2)),
               ],
             ),
           ],
@@ -316,27 +369,36 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
             OutlinedButton(
               onPressed: widget.onBack,
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 side: BorderSide(color: Colors.grey.shade400),
                 foregroundColor: Colors.grey.shade700,
               ),
-              child: const Text('Voltar para o carrinho', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text('Voltar para o carrinho',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
             ),
             const SizedBox(width: 12),
             ElevatedButton(
-              onPressed: _submit,
+              onPressed: _isLoading ? null : _submit,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 elevation: 0,
               ),
-              child: const Text(
-                'Concluir compra',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
+                  : const Text(
+                      'Concluir compra',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ],
         ),

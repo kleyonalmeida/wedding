@@ -13,20 +13,38 @@ namespace WeddingRsvp.Tests.Integration;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    public static async Task AddCsrfAsync(HttpClient client)
+    {
+        var response = await client.GetAsync("/api/admin/auth/csrf");
+        var json = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", json.GetProperty("token").GetString());
+        var cookie = response.Headers.GetValues("Set-Cookie").FirstOrDefault();
+        if (cookie != null)
+        {
+            var existing = client.DefaultRequestHeaders.GetValues("Cookie").First();
+            client.DefaultRequestHeaders.Remove("Cookie");
+            client.DefaultRequestHeaders.Add("Cookie", existing + "; " + cookie.Split(';')[0]);
+        }
+    }
     static CustomWebApplicationFactory()
     {
         Program.IsTesting = true;
     }
 
+    public string DbName { get; } = "TestDb_" + Guid.NewGuid().ToString();
+
     protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
 
-        // Configurações injetadas no Program.cs usando Program.IsTesting
-
         builder.ConfigureServices(services =>
         {
-            // O banco InMemory será inicializado pelo Program.cs
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+            services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(DbName));
         });
     }
 }
@@ -97,6 +115,14 @@ public class RsvpEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.PostAsJsonAsync("/api/rsvp", request);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task POST_RecusaComZeroPessoas_Retorna201()
+    {
+        var request = new RsvpRequest("Convidado Recusou", "recusou@teste.com", "11987654321", false, 0, 0, null);
+        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 
     [Fact]
