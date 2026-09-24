@@ -508,6 +508,21 @@ class _AdminPageState extends State<AdminPage> {
         },
       );
 
+  static const _navItems = [
+    (label: 'Dashboard', icon: Icons.dashboard_outlined, activeIcon: Icons.dashboard),
+    (label: 'Produtos', icon: Icons.inventory_2_outlined, activeIcon: Icons.inventory_2),
+    (label: 'Pagamentos', icon: Icons.payment_outlined, activeIcon: Icons.payment),
+    (label: 'Presença', icon: Icons.people_outline, activeIcon: Icons.people),
+    (label: 'Logs', icon: Icons.list_alt_outlined, activeIcon: Icons.list_alt),
+    (label: 'Configurações', icon: Icons.settings_outlined, activeIcon: Icons.settings),
+    (label: 'Segurança', icon: Icons.security_outlined, activeIcon: Icons.security),
+  ];
+
+  int get _selectedIndex {
+    final idx = _navItems.indexWhere((e) => e.label == section);
+    return idx < 0 ? 1 : idx; // fallback to Produtos
+  }
+
   @override
   Widget build(BuildContext context) {
     final ready = phase == 'ready';
@@ -526,62 +541,84 @@ class _AdminPageState extends State<AdminPage> {
                 ]
               : null),
       body: SafeArea(
-          child: SingleChildScrollView(
-              child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (error != null)
-                        Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Text(error!,
-                                style: const TextStyle(color: Colors.red))),
-                      if (!ready)
-                        _authContent()
-                      else ...[
-                        Wrap(spacing: 8, runSpacing: 8, children: [
-                          for (final label in [
-                            'Dashboard',
-                            'Produtos',
-                            'Pagamentos',
-                            'Presença',
-                            'Logs',
-                            'Configurações',
-                            'Segurança'
-                          ])
-                            ChoiceChip(
-                                label: Text(label),
-                                selected: section == label,
-                                onSelected: (_) => setState(() {
-                                      section = label;
-                                      dataPage = 1;
-                                    }))
-                        ]),
-                        const SizedBox(height: 24),
-                        Text(section,
-                            style: Theme.of(context).textTheme.headlineMedium),
-                        const SizedBox(height: 16),
-                        if (section == 'Produtos')
-                          _productList()
-                        else if (section == 'Editar produto')
-                          _productForm()
-                        else if (section == 'Segurança')
-                          Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _field(currentPassword, 'Senha atual',
-                                    secret: true),
-                                _field(newPassword, 'Nova senha', secret: true),
-                                FilledButton(
-                                    onPressed: _changePassword,
-                                    child: const Text('Trocar senha')),
-                              ])
-                        else
-                          _dataSection(),
-                      ],
+        child: ready
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Side navigation ──────────────────────────────
+                  NavigationRail(
+                    selectedIndex: _selectedIndex,
+                    labelType: NavigationRailLabelType.all,
+                    onDestinationSelected: (i) => setState(() {
+                      section = _navItems[i].label;
+                      dataPage = 1;
+                    }),
+                    destinations: [
+                      for (final item in _navItems)
+                        NavigationRailDestination(
+                          icon: Icon(item.icon),
+                          selectedIcon: Icon(item.activeIcon),
+                          label: Text(item.label),
+                        ),
                     ],
-                  )))),
+                  ),
+                  const VerticalDivider(thickness: 1, width: 1),
+                  // ── Main content ──────────────────────────────────
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (error != null)
+                            Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Text(error!,
+                                    style: const TextStyle(color: Colors.red))),
+                          Text(section,
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium),
+                          const SizedBox(height: 16),
+                          if (section == 'Produtos')
+                            _productList()
+                          else if (section == 'Editar produto')
+                            _productForm()
+                          else if (section == 'Segurança')
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _field(currentPassword, 'Senha atual',
+                                      secret: true),
+                                  _field(newPassword, 'Nova senha',
+                                      secret: true),
+                                  FilledButton(
+                                      onPressed: _changePassword,
+                                      child: const Text('Trocar senha')),
+                                ])
+                          else
+                            _dataSection(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (error != null)
+                      Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(error!,
+                              style: const TextStyle(color: Colors.red))),
+                    _authContent(),
+                  ],
+                ),
+              ),
+      ),
     );
   }
 }
+

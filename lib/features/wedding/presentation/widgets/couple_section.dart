@@ -126,7 +126,8 @@ class _CoupleSectionState extends State<CoupleSection> {
             : math.min(760.0, constraints.maxWidth * 0.72);
         final photoStart =
             (constraints.maxWidth - photoWidth) / (2 * constraints.maxWidth);
-        final edgeFadeWidth = math.min(120.0, photoWidth * 0.15);
+        const edgeTransparent = Color(0x00392A23); // _edgeColor com alpha 0
+        final edgeFadeWidth = math.min(160.0, photoWidth * 0.22);
 
         return SizedBox(
           height: sectionHeight,
@@ -202,10 +203,11 @@ class _CoupleSectionState extends State<CoupleSection> {
                           bottom: 0,
                           left: 0,
                           width: edgeFadeWidth,
-                          child: const DecoratedBox(
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [_edgeColor, Colors.transparent],
+                                colors: [_edgeColor, edgeTransparent],
+                                stops: const [0.0, 1.0],
                               ),
                             ),
                           ),
@@ -215,10 +217,11 @@ class _CoupleSectionState extends State<CoupleSection> {
                           bottom: 0,
                           right: 0,
                           width: edgeFadeWidth,
-                          child: const DecoratedBox(
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Colors.transparent, _edgeColor],
+                                colors: [edgeTransparent, _edgeColor],
+                                stops: const [0.0, 1.0],
                               ),
                             ),
                           ),
