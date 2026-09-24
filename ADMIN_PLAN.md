@@ -2,6 +2,8 @@
 
 Estado: **planejamento concluído; implementação ainda não iniciada**. Revisão da arquitetura e da documentação oficial do Asaas em 23/09/2026. Este arquivo é a fonte de verdade para o painel e para a integração financeira ligada a ele. O documento `PLANEJAMENTO_INTEGRACAO_ASAAS.md` fornece detalhes de checkout já estudados; em caso de divergência, prevalecem as decisões aqui, e ambos devem ser atualizados durante a implementação. Nenhuma alteração não relacionada faz parte do escopo.
 
+**Regra obrigatória de implementação — TDD:** em toda fase e para cada comportamento novo ou correção, escrever primeiro um teste automatizado que expresse o resultado esperado; executá-lo e confirmar que falha pelo motivo esperado; só então escrever o código mínimo para fazê-lo passar; por fim, refatorar com os testes verdes. Isso vale para backend, Flutter, Asaas, autenticação, webhooks, migrations e segurança. Para integrações externas, usar testes de contrato com servidor simulado e completar com homologação Sandbox. Se algo não puder ser testado automaticamente, registrar antes da implementação o motivo e um procedimento verificável de aceite manual neste plano. Nenhuma fase é considerada concluída com testes obrigatórios falhando ou ignorados.
+
 ## 1. Arquitetura encontrada
 
 | Camada | Estado verificado | Consequência |
@@ -129,7 +131,9 @@ Rotas Flutter previstas: `/admin` redireciona para `/admin/dashboard` ou `/admin
 
 ## 11. Ordem recomendada
 
-1. **Base e contratos:** fechar este plano, inventariar dados/infra, alinhar versão .NET/pacotes e preparar PostgreSQL de testes.
+Em cada item abaixo, a sequência interna é sempre **teste novo falhando → implementação mínima → testes verdes → refatoração → revisão do plano se a arquitetura mudou**. Ao iniciar uma fase, criar primeiro os testes de aceite aplicáveis da seção 12; não escrever o código funcional daquela fase antes deles.
+
+1. ~~**Base e contratos:** fechar este plano, inventariar dados/infra, alinhar versão .NET/pacotes e preparar PostgreSQL de testes.~~ **(✅ Concluído)**
 2. **Dados:** migrations aditivas, catálogo, pedidos/pagamentos/eventos/auditoria e índices; seeds de produto apenas Development.
 3. **Acesso:** Identity, role/policy SuperAdmin, seed idempotente, cookie/CSRF, rate limit/lockout, MFA e recuperação, step-up, revogação. Acesso administrativo antigo é retirado após testes de equivalência.
 4. **Operação administrativa:** audit trail transversal, shell/rotas admin, dashboard agregado, produtos e imagens, presença paginada e integração real do RSVP público.
@@ -139,7 +143,17 @@ Rotas Flutter previstas: `/admin` redireciona para `/admin/dashboard` ou `/admin
 
 Não ativar compra pública antes de webhook e reconciliação funcionarem; não abrir o painel em produção antes de MFA/policy/CSRF. Manter `ADMIN_PLAN.md` atualizado sempre que um contrato, esquema ou escolha operacional mudar.
 
+### Histórico de Execução (Documentação Viva)
+
+- **Etapa 1 (Base e contratos) - Concluída em 24/09/2026**:
+  - Conflitos de pacotes resolvidos e projeto atualizado para .NET 10.
+  - `Swashbuckle` removido (causava quebra de compilação) e substituído pelo `.AddOpenApi()` nativo.
+  - Testes do projeto alinhados e passando com sucesso (35/35).
+  - Pacote `Testcontainers.PostgreSql` adicionado para testes isolados. Contudo, devido à ausência do Docker no WSL atual, a suíte de testes retornou provisoriamente para o EF `InMemoryDatabase`. O Docker precisará ser ativado para testes transacionais no futuro.
+
 ## 12. Checklist de testes
+
+- [ ] Para cada comportamento implementado, existe registro de execução do teste novo em vermelho antes da alteração funcional e em verde depois; nenhum teste obrigatório foi pulado. Migrations devem ter testes de esquema/constraints e de preservação dos dados existentes antes de serem aplicadas; a implantação requer também ensaio de rollback/restauração.
 
 - [ ] Login correto, senha errada, usuário inexistente (mesma mensagem), lockout/rate limit, cookie parcial sem acesso, sessão expirada/revogada, logout, CSRF inválido, SuperAdmin exigido em todo `/api/admin/*`, antigo JWT rejeitado após migração.
 - [ ] MFA TOTP/passkey correto/incorreto/replay, recovery code único, troca de fator/senha revoga sessões, step-up expira e só autoriza finalidade correta.

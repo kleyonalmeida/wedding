@@ -122,27 +122,7 @@ builder.Services.AddRateLimiter(options =>
 // ════════════════════════════════════════════════════════════════════════════
 // SWAGGER / OPENAPI — Apenas em Development
 // ════════════════════════════════════════════════════════════════════════════
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new() { Title = "Wedding RSVP API", Version = "v1" });
-
-    // Adiciona suporte a JWT no Swagger UI
-    c.AddSecurityDefinition("Bearer", new()
-    {
-        Type        = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme      = "bearer",
-        BearerFormat = "JWT",
-        Description = "Insira o token JWT obtido via POST /api/admin/login"
-    });
-    c.AddSecurityRequirement(new()
-    {
-        {
-            new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddOpenApi();
 
 // ════════════════════════════════════════════════════════════════════════════
 // HEALTH CHECK — Usado pelo Docker Compose e Nginx
@@ -157,8 +137,7 @@ var app = builder.Build();
 // ════════════════════════════════════════════════════════════════════════════
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Wedding RSVP API v1"));
+    app.MapOpenApi();
 }
 
 app.UseCors("FlutterWebPolicy");

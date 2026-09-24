@@ -12,8 +12,7 @@ public static class RsvpEndpoints
     public static IEndpointRouteBuilder MapRsvpEndpoints(this IEndpointRouteBuilder app, string rateLimitPolicy)
     {
         var group = app.MapGroup("/api/rsvp")
-            .WithTags("RSVP")
-            .WithOpenApi();
+            .WithTags("RSVP");
 
         // ── POST /api/rsvp ────────────────────────────────────────────────────
         // Recebe confirmação de presença do convidado.
