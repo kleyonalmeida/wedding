@@ -18,6 +18,7 @@ public static class AdminSecurityEndpoints
         // MFA Enroll - Gerar chave para configurar aplicativo autenticador
         group.MapPost("/mfa/enroll", async (
             UserManager<AdminUser> userManager,
+            SignInManager<AdminUser> signInManager,
             UrlEncoder urlEncoder,
             HttpContext context) =>
         {
@@ -26,7 +27,9 @@ public static class AdminSecurityEndpoints
             if (user.TwoFactorEnabled) return Results.Conflict(new { message = "MFA já está ativo." });
 
             // Reseta a chave para garantir que uma nova seja gerada se o usuário solicitar enroll
-            await userManager.ResetAuthenticatorKeyAsync(user);
+            var resetResult = await userManager.ResetAuthenticatorKeyAsync(user);
+            if (!resetResult.Succeeded) return Results.Problem("Não foi possível gerar a chave MFA.");
+            await signInManager.RefreshSignInAsync(user);
             var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
 
             var email = await userManager.GetEmailAsync(user);
