@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -156,8 +157,7 @@ class _WeddingPageState extends State<WeddingPage> {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed('/presentes'),
+                    onPressed: () => AppNavigation.go(context, '/presentes'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 40, vertical: 16),
@@ -199,7 +199,7 @@ class _WeddingPageState extends State<WeddingPage> {
         onRecepcaoTap: () => _scrollTo(_recepcaoKey),
         onListaTap: () {
           Navigator.of(context).pop(); // close drawer
-          Navigator.of(context).pushNamed('/presentes');
+          AppNavigation.go(context, '/presentes');
         },
         onRsvpTap: () => _scrollTo(_rsvpKey),
       ),
@@ -216,7 +216,7 @@ class _WeddingPageState extends State<WeddingPage> {
             onHomeTap: () => _scrollTo(_homeKey),
             onCasalTap: () => _scrollTo(_casalKey),
             onRecepcaoTap: () => _scrollTo(_recepcaoKey),
-            onListaTap: () => Navigator.of(context).pushNamed('/presentes'),
+            onListaTap: () => AppNavigation.go(context, '/presentes'),
             onRsvpTap: () => _scrollTo(_rsvpKey),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),

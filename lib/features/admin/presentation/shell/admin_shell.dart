@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import 'admin_session_controller.dart';
 import '../theme/admin_theme.dart';
@@ -29,7 +30,7 @@ class AdminShell extends StatelessWidget {
       child: Scaffold(
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth > 960;
+            final isDesktop = constraints.maxWidth > 900;
             return Row(
               children: [
                 if (isDesktop) _buildSidebar(context),
@@ -53,7 +54,7 @@ class AdminShell extends StatelessWidget {
             );
           },
         ),
-        drawer: MediaQuery.of(context).size.width <= 960
+        drawer: MediaQuery.of(context).size.width <= 900
             ? Drawer(
                 child: Builder(
                     builder: (drawerContext) =>
@@ -66,14 +67,14 @@ class AdminShell extends StatelessWidget {
   Widget _buildSidebar(BuildContext context, {bool isDrawer = false}) {
     final theme = Theme.of(context);
     final sidebar = Container(
-      width: 288,
+      width: 248,
       color: theme.colorScheme.surfaceContainerLow,
       child: Column(
         children: [
           // Logo Area
           Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            height: 68,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             alignment: Alignment.centerLeft,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -82,14 +83,14 @@ class AdminShell extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.favorite,
-                        color: theme.colorScheme.primary, size: 22),
+                        color: theme.colorScheme.primary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                         child: Text('Kleyon & Liandra',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.headlineMedium
-                                ?.copyWith(fontSize: 18))),
+                                ?.copyWith(fontSize: 17))),
                   ],
                 ),
                 Text('CERIMONIAL PRIVÉ',
@@ -99,7 +100,7 @@ class AdminShell extends StatelessWidget {
           ),
           const Divider(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text('MENU PRINCIPAL',
@@ -110,7 +111,7 @@ class AdminShell extends StatelessWidget {
           // Nav Items
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
                 for (final item in _navItems)
                   _buildNavItem(
@@ -120,7 +121,7 @@ class AdminShell extends StatelessWidget {
           ),
           // Footer
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 InkWell(
@@ -171,12 +172,12 @@ class AdminShell extends StatelessWidget {
       child: InkWell(
         onTap: () {
           if (isDrawer) Navigator.pop(context); // Close drawer
-          if (currentPath != path) Navigator.pushNamed(context, path);
+          if (currentPath != path) AppNavigation.go(context, path);
         },
         borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
             color: isActive
                 ? theme.colorScheme.primaryContainer
@@ -190,7 +191,7 @@ class AdminShell extends StatelessWidget {
                   color: isActive
                       ? theme.colorScheme.onPrimaryContainer
                       : theme.colorScheme.onSurfaceVariant),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
               Expanded(
                   child: Text(label,
                       maxLines: 1,
@@ -222,8 +223,8 @@ class AdminShell extends StatelessWidget {
     }
 
     return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.8),
         boxShadow: [

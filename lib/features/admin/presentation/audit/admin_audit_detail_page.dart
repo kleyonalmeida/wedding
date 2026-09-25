@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/audit_log.dart';
 import '../../data/repositories/audit_repository.dart';
@@ -31,13 +32,12 @@ class _AdminAuditDetailPageState extends State<AdminAuditDetailPage> {
   Widget build(BuildContext context) => Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24),
             child: AdminPageHeader(
               title: 'Detalhe do Log',
               subtitle: 'Auditoria',
               trailing: TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/admin/logs'),
+                onPressed: () => AppNavigation.replace(context, '/admin/logs'),
                 child: const Text('Voltar aos logs'),
               ),
             ),
@@ -56,7 +56,7 @@ class _AdminAuditDetailPageState extends State<AdminAuditDetailPage> {
                 final log = snapshot.data!;
                 return SingleChildScrollView(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(24),

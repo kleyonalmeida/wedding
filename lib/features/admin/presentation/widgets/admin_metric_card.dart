@@ -51,41 +51,57 @@ class _AdminMetricCardState extends State<AdminMetricCard> {
             )
           ],
         ),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(widget.icon, size: 26, color: widget.iconColor),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.outline,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(height: 4),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.value,
-                  style: theme.textTheme.displaySmall?.copyWith(fontSize: 40),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(widget.icon, size: 20, color: widget.iconColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.value,
+                      maxLines: 1,
+                      style:
+                          theme.textTheme.displaySmall?.copyWith(fontSize: 30),
+                    ),
+                  ),
                 ),
                 if (widget.suffixText != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Text(
                     widget.suffixText!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -93,12 +109,12 @@ class _AdminMetricCardState extends State<AdminMetricCard> {
               ],
             ),
             if (widget.progress != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: widget.progress,
-                  minHeight: 6,
+                  minHeight: 4,
                   backgroundColor: theme.colorScheme.surfaceContainer,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     widget.progressColor ?? theme.colorScheme.primary,
@@ -107,16 +123,21 @@ class _AdminMetricCardState extends State<AdminMetricCard> {
               ),
               if (widget.progressLabel != null ||
                   widget.progressValue != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.progressLabel ?? '',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.outline,
+                    Flexible(
+                      child: Text(
+                        widget.progressLabel ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 6),
                     Text(
                       widget.progressValue ?? '',
                       style: theme.textTheme.labelSmall?.copyWith(

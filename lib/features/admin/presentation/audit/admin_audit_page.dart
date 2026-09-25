@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/audit_repository.dart';
 import '../../data/models/audit_log.dart';
@@ -60,7 +61,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Logs de Auditoria',
             subtitle: 'Registro de atividades administrativas',
@@ -90,7 +91,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,7 +106,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
                                 '${log.entityType} • ${log.timestampUtc.toLocal()}\n${log.userId ?? 'Sistema'}'),
                             isThreeLine: true,
                             trailing: const Icon(Icons.arrow_forward),
-                            onTap: () => Navigator.pushNamed(
+                            onTap: () => AppNavigation.go(
                                 context, '/admin/logs/${log.id}'),
                           ),
                         ))
@@ -144,7 +145,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
                           IconButton(
                             tooltip: 'Ver Detalhes',
                             icon: const Icon(Icons.receipt_long),
-                            onPressed: () => Navigator.pushNamed(
+                            onPressed: () => AppNavigation.go(
                                 context, '/admin/logs/${log.id}'),
                           ),
                         ),
@@ -165,7 +166,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
                     TextButton(
                       onPressed: _page > 1
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, '/admin/logs?page=${_page - 1}');
                             }
                           : null,
@@ -178,7 +179,7 @@ class _AdminAuditPageState extends State<AdminAuditPage> {
                     TextButton(
                       onPressed: _page < _data!.totalPages
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, '/admin/logs?page=${_page + 1}');
                             }
                           : null,

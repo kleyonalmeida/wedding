@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/rsvp.dart';
 import '../../data/repositories/attendance_repository.dart';
@@ -136,13 +137,13 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
   Widget build(BuildContext context) => Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24),
             child: AdminPageHeader(
               title: 'Detalhe da Presença',
               subtitle: 'RSVP',
               trailing: TextButton(
-                  onPressed: () => Navigator.pushReplacementNamed(
-                      context, '/admin/presenca'),
+                  onPressed: () =>
+                      AppNavigation.replace(context, '/admin/presenca'),
                   child: const Text('Voltar à lista')),
             ),
           ),
@@ -159,7 +160,7 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
                 }
                 final rsvp = snapshot.data!;
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(24),

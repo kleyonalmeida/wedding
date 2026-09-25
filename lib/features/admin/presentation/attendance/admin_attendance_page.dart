@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/repositories/attendance_repository.dart';
@@ -6,6 +7,7 @@ import '../shell/admin_session_controller.dart';
 import '../widgets/admin_page_header.dart';
 import '../widgets/admin_state_widgets.dart';
 import '../widgets/admin_metric_card.dart';
+import '../widgets/admin_metric_grid.dart';
 
 class AdminAttendancePage extends StatefulWidget {
   final int initialPage;
@@ -89,14 +91,13 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
       if (value.trim() == (_searchQuery ?? '')) return;
-      Navigator.pushReplacementNamed(
-          context, _route(page: 1, search: value.trim()));
+      AppNavigation.replace(context, _route(page: 1, search: value.trim()));
     });
   }
 
   void _onFilterChanged(bool? value) {
     _searchDebounce?.cancel();
-    Navigator.pushReplacementNamed(
+    AppNavigation.replace(
         context,
         _route(
             page: 1,
@@ -253,7 +254,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Gestão de Presenças',
             subtitle: 'RSVP',
@@ -261,14 +262,14 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildSummaryCards(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
                 _buildListSection(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -282,55 +283,45 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
       future: _summaryFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 180, child: AdminLoadingState());
+          return const SizedBox(height: 150, child: AdminLoadingState());
         }
         if (snapshot.hasError) {
           return SizedBox(
-              height: 180,
+              height: 150,
               child: AdminErrorState(message: 'Falha.', onRetry: _loadSummary));
         }
 
         final data = snapshot.data!;
 
-        return LayoutBuilder(builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth > 900;
-          return GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount:
-                isDesktop ? 4 : (constraints.maxWidth > 600 ? 2 : 1),
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
-            childAspectRatio: isDesktop ? 1.4 : 1.6,
-            children: [
-              AdminMetricCard(
-                label: 'TOTAL DE RESPOSTAS',
-                value: '${data.totalRespostas}',
-                icon: Icons.mark_email_read,
-                iconColor: Theme.of(context).colorScheme.primary,
-              ),
-              AdminMetricCard(
-                label: 'CONFIRMADOS',
-                value: '${data.confirmados}',
-                icon: Icons.check_circle,
-                iconColor: Colors.green,
-              ),
-              AdminMetricCard(
-                label: 'RECUSADOS',
-                value: '${data.naoVao}',
-                icon: Icons.cancel,
-                iconColor: Theme.of(context).colorScheme.error,
-              ),
-              AdminMetricCard(
-                label: 'TOTAL DE PESSOAS',
-                value: '${data.totalPessoas}',
-                suffixText: '${data.totalAdultos} A / ${data.totalCriancas} C',
-                icon: Icons.groups,
-                iconColor: Theme.of(context).colorScheme.secondary,
-              ),
-            ],
-          );
-        });
+        return AdminMetricGrid(
+          children: [
+            AdminMetricCard(
+              label: 'TOTAL DE RESPOSTAS',
+              value: '${data.totalRespostas}',
+              icon: Icons.mark_email_read,
+              iconColor: Theme.of(context).colorScheme.primary,
+            ),
+            AdminMetricCard(
+              label: 'CONFIRMADOS',
+              value: '${data.confirmados}',
+              icon: Icons.check_circle,
+              iconColor: Colors.green,
+            ),
+            AdminMetricCard(
+              label: 'RECUSADOS',
+              value: '${data.naoVao}',
+              icon: Icons.cancel,
+              iconColor: Theme.of(context).colorScheme.error,
+            ),
+            AdminMetricCard(
+              label: 'TOTAL DE PESSOAS',
+              value: '${data.totalPessoas}',
+              suffixText: '${data.totalAdultos} A / ${data.totalCriancas} C',
+              icon: Icons.groups,
+              iconColor: Theme.of(context).colorScheme.secondary,
+            ),
+          ],
+        );
       },
     );
   }
@@ -393,7 +384,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                                     '${rsvp.email}\n${rsvp.vaiComparecer ? 'Confirmado' : 'Recusado'} • ${rsvp.qtdAdultos} adultos / ${rsvp.qtdCriancas} crianças'),
                                 isThreeLine: true,
                                 trailing: const Icon(Icons.arrow_forward),
-                                onTap: () => Navigator.pushNamed(
+                                onTap: () => AppNavigation.go(
                                     context, '/admin/presenca/${rsvp.id}'),
                               ),
                             ))
@@ -445,7 +436,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                           IconButton(
                             tooltip: 'Ver detalhes',
                             icon: const Icon(Icons.visibility),
-                            onPressed: () => Navigator.pushNamed(
+                            onPressed: () => AppNavigation.go(
                                 context, '/admin/presenca/${rsvp.id}'),
                           ),
                           IconButton(
@@ -469,7 +460,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                     TextButton(
                       onPressed: _page > 1
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, _route(page: _page - 1));
                             }
                           : null,
@@ -482,7 +473,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                     TextButton(
                       onPressed: _page < _data!.totalPages
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, _route(page: _page + 1));
                             }
                           : null,

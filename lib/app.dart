@@ -1,12 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'dart:ui';
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:flutter/material.dart';
+import 'app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/theme_wave_transition.dart';
-import 'features/wedding/presentation/pages/wedding_page.dart';
-import 'features/gifts/presentation/pages/gifts_page.dart';
-import 'features/gifts/presentation/pages/payment_return_page.dart';
-import 'features/admin/presentation/admin_page.dart';
 
 class WeddingScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -22,60 +19,37 @@ class WeddingScrollBehavior extends MaterialScrollBehavior {
       child;
 }
 
-class WeddingApp extends StatelessWidget {
+class WeddingApp extends StatefulWidget {
   const WeddingApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ThemeProvider(
-      initTheme: AppTheme.lightTheme,
-      duration: const Duration(milliseconds: 1500),
-      builder: (context, myTheme) {
-        return MaterialApp(
+  State<WeddingApp> createState() => _WeddingAppState();
+}
+
+class _WeddingAppState extends State<WeddingApp> {
+  final AppRouterDelegate _routerDelegate = AppRouterDelegate();
+  final AppRouteInformationParser _routeParser = AppRouteInformationParser();
+
+  @override
+  Widget build(BuildContext context) => ThemeProvider(
+        initTheme: AppTheme.lightTheme,
+        duration: const Duration(milliseconds: 1500),
+        builder: (context, myTheme) => MaterialApp.router(
           title: 'Kleyon & Liandra - Casamento',
           theme: myTheme,
-          builder: (context, child) {
-            return ThemeWaveTransition(
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
+          routerDelegate: _routerDelegate,
+          routeInformationParser: _routeParser,
+          builder: (context, child) => ThemeWaveTransition(
+            child: child ?? const SizedBox.shrink(),
+          ),
           scrollBehavior: WeddingScrollBehavior(),
-          onGenerateRoute: (settings) {
-            switch (settings.name) {
-              case '/':
-                return MaterialPageRoute(builder: (_) => const WeddingPage());
-              case '/presentes':
-                return PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const GiftsPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  transitionDuration: const Duration(milliseconds: 500),
-                );
-              case '/admin':
-                return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => const AdminPage(path: '/admin/dashboard'));
-              case '/pagamento/retorno':
-                return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: Uri.base.queryParameters['id'] ?? ''));
-              default:
-                if (settings.name?.startsWith('/admin/') ?? false) {
-                  return MaterialPageRoute(
-                      settings: settings,
-                      builder: (_) => AdminPage(path: settings.name!));
-                }
-                if (settings.name?.startsWith('/pagamento/retorno') ?? false) {
-                  final uri = Uri.parse(settings.name!);
-                  return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: uri.queryParameters['id'] ?? Uri.base.queryParameters['id'] ?? ''));
-                }
-                return MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text('Página não encontrada'))));
-            }
-          },
           debugShowCheckedModeBanner: false,
-        );
-      },
-    );
+        ),
+      );
+
+  @override
+  void dispose() {
+    _routerDelegate.dispose();
+    super.dispose();
   }
 }

@@ -92,7 +92,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Configurações Globais',
             subtitle: 'Sistema',
@@ -117,7 +117,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -147,7 +147,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           else
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: _settings!.map((setting) {
@@ -224,7 +224,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                 ),
               ),
             ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
         ],
       ),
     );

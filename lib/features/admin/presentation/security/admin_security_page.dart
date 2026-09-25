@@ -92,7 +92,7 @@ class _AdminSecurityPageState extends State<AdminSecurityPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Segurança',
             subtitle: 'Controle de Acesso e Sessões',
@@ -100,7 +100,7 @@ class _AdminSecurityPageState extends State<AdminSecurityPage> {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: LayoutBuilder(builder: (context, constraints) {
               final compact = constraints.maxWidth < 800;
               final gap = compact ? 0.0 : 32.0;
@@ -117,7 +117,7 @@ class _AdminSecurityPageState extends State<AdminSecurityPage> {
                       children: [
                         Card(
                           child: Padding(
-                            padding: const EdgeInsets.all(32),
+                            padding: const EdgeInsets.all(24),
                             child: Form(
                               key: _formKey,
                               child: Column(

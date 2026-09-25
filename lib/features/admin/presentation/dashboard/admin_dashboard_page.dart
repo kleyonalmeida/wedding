@@ -1,8 +1,10 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/models/dashboard_summary.dart';
 import '../shell/admin_session_controller.dart';
 import '../widgets/admin_metric_card.dart';
+import '../widgets/admin_metric_grid.dart';
 import '../widgets/admin_state_widgets.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -38,69 +40,70 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildBanner(context),
-          const SizedBox(height: 32),
-          _buildSummaryCards(),
-          const SizedBox(height: 32),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth > 900;
-              if (isDesktop) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 65,
-                      child: Column(
+    return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+              padding: EdgeInsets.all(constraints.maxWidth < 600 ? 16 : 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildBanner(context),
+                  const SizedBox(height: 20),
+                  _buildSummaryCards(),
+                  const SizedBox(height: 20),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth > 900;
+                      if (isDesktop) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 65,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildRecentAttendance(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              flex: 35,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildRecentPayments(),
+                                  const SizedBox(height: 20),
+                                  _buildRecentActivity(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      // Mobile / Tablet layout
+                      return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildRecentAttendance(),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 32),
-                    Expanded(
-                      flex: 35,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
+                          const SizedBox(height: 20),
                           _buildRecentPayments(),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 20),
                           _buildRecentActivity(),
                         ],
-                      ),
-                    ),
-                  ],
-                );
-              }
-
-              // Mobile / Tablet layout
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildRecentAttendance(),
-                  const SizedBox(height: 32),
-                  _buildRecentPayments(),
-                  const SizedBox(height: 32),
-                  _buildRecentActivity(),
+                      );
+                    },
+                  ),
                 ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
+              ),
+            ));
   }
 
   Widget _buildBanner(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
@@ -131,26 +134,24 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 12,
             runSpacing: 12,
             children: [
               FilledButton.icon(
                 onPressed: () =>
-                    Navigator.pushNamed(context, '/admin/produtos/novo'),
+                    AppNavigation.go(context, '/admin/produtos/novo'),
                 icon: const Icon(Icons.add),
                 label: const Text('Novo Produto'),
               ),
               OutlinedButton.icon(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/admin/presenca'),
+                onPressed: () => AppNavigation.go(context, '/admin/presenca'),
                 icon: const Icon(Icons.people),
                 label: const Text('Ver Presença'),
               ),
               OutlinedButton.icon(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/admin/pagamentos'),
+                onPressed: () => AppNavigation.go(context, '/admin/pagamentos'),
                 icon: const Icon(Icons.payments),
                 label: const Text('Ver Pagamentos'),
               ),
@@ -166,11 +167,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       future: _summaryFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 180, child: AdminLoadingState());
+          return const SizedBox(height: 150, child: AdminLoadingState());
         }
         if (snapshot.hasError) {
           return SizedBox(
-              height: 180,
+              height: 150,
               child: AdminErrorState(
                   message: 'Falha ao carregar resumo.', onRetry: _loadData));
         }
@@ -181,49 +182,39 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ? 0.0
             : (data.rsvps.confirmados / data.rsvps.total);
 
-        return LayoutBuilder(builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth > 900;
-          return GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount:
-                isDesktop ? 4 : (constraints.maxWidth > 600 ? 2 : 1),
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
-            childAspectRatio: isDesktop ? 1.4 : 1.6,
-            children: [
-              AdminMetricCard(
-                label: 'PRESENÇA CONFIRMADA',
-                value: '${data.rsvps.totalPessoas}',
-                suffixText: 'pessoas',
-                icon: Icons.how_to_reg,
-                progress: rsvpProg,
-                progressLabel: 'Respostas recebidas',
-                progressValue: '${(rsvpProg * 100).toStringAsFixed(1)}%',
-              ),
-              AdminMetricCard(
-                label: 'ARRECADAÇÃO',
-                value:
-                    'R\$ ${(data.payments.totalReceivedCents / 100).toStringAsFixed(2)}',
-                icon: Icons.savings,
-                iconColor: Theme.of(context).colorScheme.secondary,
-              ),
-              AdminMetricCard(
-                label: 'PRODUTOS ATIVOS',
-                value: '${data.products.ativos}',
-                suffixText: 'ativos',
-                icon: Icons.inventory_2,
-              ),
-              AdminMetricCard(
-                label: 'PAGAMENTOS',
-                value: '${data.payments.pending}',
-                suffixText: 'pendentes',
-                icon: Icons.payment,
-                iconColor: Theme.of(context).colorScheme.secondary,
-              ),
-            ],
-          );
-        });
+        return AdminMetricGrid(
+          children: [
+            AdminMetricCard(
+              label: 'PRESENÇA CONFIRMADA',
+              value: '${data.rsvps.totalPessoas}',
+              suffixText: 'pessoas',
+              icon: Icons.how_to_reg,
+              progress: rsvpProg,
+              progressLabel: 'Respostas recebidas',
+              progressValue: '${(rsvpProg * 100).toStringAsFixed(1)}%',
+            ),
+            AdminMetricCard(
+              label: 'ARRECADAÇÃO',
+              value:
+                  'R\$ ${(data.payments.totalReceivedCents / 100).toStringAsFixed(2)}',
+              icon: Icons.savings,
+              iconColor: Theme.of(context).colorScheme.secondary,
+            ),
+            AdminMetricCard(
+              label: 'PRODUTOS ATIVOS',
+              value: '${data.products.ativos}',
+              suffixText: 'ativos',
+              icon: Icons.inventory_2,
+            ),
+            AdminMetricCard(
+              label: 'PAGAMENTOS',
+              value: '${data.payments.pending}',
+              suffixText: 'pendentes',
+              icon: Icons.payment,
+              iconColor: Theme.of(context).colorScheme.secondary,
+            ),
+          ],
+        );
       },
     );
   }
@@ -252,8 +243,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   ],
                 ),
                 TextButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/admin/presenca'),
+                  onPressed: () => AppNavigation.go(context, '/admin/presenca'),
                   child: const Text('Ver Todos'),
                 ),
               ],
@@ -288,7 +278,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         subtitle: Text(
                             '${rsvp['vaiComparecer'] == true ? 'Confirmado' : 'Recusado'} • ${rsvp['qtdAdultos']} adultos / ${rsvp['qtdCriancas']} crianças'),
                         trailing: const Icon(Icons.arrow_forward),
-                        onTap: () => Navigator.pushNamed(
+                        onTap: () => AppNavigation.go(
                             context, '/admin/presenca/${rsvp['id']}'),
                       );
                     }).toList());
@@ -337,7 +327,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             DataCell(
                               IconButton(
                                 icon: const Icon(Icons.visibility),
-                                onPressed: () => Navigator.pushNamed(
+                                onPressed: () => AppNavigation.go(
                                     context, '/admin/presenca/${rsvp['id']}'),
                               ),
                             ),

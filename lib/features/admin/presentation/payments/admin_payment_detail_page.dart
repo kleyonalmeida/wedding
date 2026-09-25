@@ -126,7 +126,7 @@ class _AdminPaymentDetailPageState extends State<AdminPaymentDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Detalhes do Pagamento',
             subtitle:
@@ -145,7 +145,7 @@ class _AdminPaymentDetailPageState extends State<AdminPaymentDetailPage> {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: LayoutBuilder(builder: (context, constraints) {
               final compact = constraints.maxWidth < 800;
               final gap = compact ? 0.0 : 24.0;

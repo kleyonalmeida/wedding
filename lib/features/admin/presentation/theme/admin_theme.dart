@@ -42,32 +42,32 @@ class AdminTheme {
       textTheme: TextTheme(
         // headline-lg
         displaySmall: GoogleFonts.playfairDisplay(
-          fontSize: 48,
+          fontSize: 34,
           fontWeight: FontWeight.w700,
-          height: 56 / 48,
-          letterSpacing: -0.96,
+          height: 1.15,
+          letterSpacing: -0.5,
           color: colorScheme.onSurface,
         ),
         // section-title
         headlineMedium: GoogleFonts.bodoniModa(
-          fontSize: 36,
+          fontSize: 27,
           fontWeight: FontWeight.w400,
-          height: 44 / 36,
+          height: 1.2,
           color: colorScheme.onSurface,
         ),
         // body-md
         bodyMedium: GoogleFonts.workSans(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.w400,
-          height: 28 / 16,
+          height: 1.45,
           color: colorScheme.onSurface,
         ),
         // label-caps
         labelSmall: GoogleFonts.plusJakartaSans(
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
-          height: 16 / 12,
-          letterSpacing: 1.8,
+          height: 1.3,
+          letterSpacing: 1.3,
           color: colorScheme.onSurfaceVariant,
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
@@ -56,15 +57,15 @@ class _GiftsPageState extends State<GiftsPage> {
   }
 
   void _navigateHome(BuildContext context) {
-    Navigator.of(context).pushNamed('/');
+    AppNavigation.go(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isDesktopWeb = kIsWeb && !isMobile;
-    final useSmoothWebScroll = isDesktopWeb &&
-        resolveWebScrollMode() == WebScrollMode.smooth;
+    final useSmoothWebScroll =
+        isDesktopWeb && resolveWebScrollMode() == WebScrollMode.smooth;
 
     final innerScrollView = CustomScrollView(
       controller: _scrollController,
@@ -86,7 +87,8 @@ class _GiftsPageState extends State<GiftsPage> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 : 32.0, vertical: 32.0),
+            padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16.0 : 32.0, vertical: 32.0),
             child: ListenableBuilder(
               listenable: _catalogController,
               builder: (context, _) {
@@ -111,20 +113,27 @@ class _GiftsPageState extends State<GiftsPage> {
                               Expanded(
                                 child: GiftSortSelector(
                                   totalResults: _catalogController.totalResults,
-                                  currentSort: _catalogController.currentFilter.sortOrder,
-                                  onSortChanged: _catalogController.setSortOrder,
+                                  currentSort: _catalogController
+                                      .currentFilter.sortOrder,
+                                  onSortChanged:
+                                      _catalogController.setSortOrder,
                                 ),
                               ),
                               if (isMobile)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 16.0),
                                   child: OutlinedButton.icon(
-                                    onPressed: () => GiftFilterSheet.show(context, _catalogController),
-                                    icon: const Icon(Icons.filter_list, size: 20),
+                                    onPressed: () => GiftFilterSheet.show(
+                                        context, _catalogController),
+                                    icon:
+                                        const Icon(Icons.filter_list, size: 20),
                                     label: const Text('Filtros'),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: Theme.of(context).colorScheme.onSurface,
-                                      side: const BorderSide(color: AppColors.outlineVariant),
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      side: const BorderSide(
+                                          color: AppColors.outlineVariant),
                                     ),
                                   ),
                                 ),
@@ -137,7 +146,8 @@ class _GiftsPageState extends State<GiftsPage> {
                             hasMore: _catalogController.hasMore,
                             onLoadMore: () => _catalogController.loadProducts(),
                             error: _catalogController.error,
-                            onRetry: () => _catalogController.loadProducts(refresh: true),
+                            onRetry: () =>
+                                _catalogController.loadProducts(refresh: true),
                             cartController: _cartController,
                           ),
                         ],
@@ -207,7 +217,8 @@ class _GiftsPageState extends State<GiftsPage> {
             icon: const Icon(Icons.shopping_cart, color: Colors.white),
             label: Text(
               '${_cartController.itemCount} itens',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
             ),
           );
         },

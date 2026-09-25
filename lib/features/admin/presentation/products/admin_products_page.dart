@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/models/product.dart';
@@ -111,14 +112,13 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Catálogo de Produtos',
             subtitle: 'Produtos',
             trailing: FilledButton.icon(
               onPressed: () =>
-                  Navigator.pushNamed(context, '/admin/produtos/novo')
-                      .then((_) => _loadProducts()),
+                  AppNavigation.go(context, '/admin/produtos/novo'),
               icon: const Icon(Icons.add),
               label: const Text('Novo Produto'),
             ),
@@ -148,7 +148,7 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -183,10 +183,9 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                                             ? 'Remover destaque'
                                             : 'Destacar')),
                                     TextButton(
-                                        onPressed: () => Navigator.pushNamed(
-                                                context,
-                                                '/admin/produtos/${product.id}')
-                                            .then((_) => _loadProducts()),
+                                        onPressed: () => AppNavigation.go(
+                                            context,
+                                            '/admin/produtos/${product.id}'),
                                         child: const Text('Editar')),
                                     TextButton(
                                         onPressed: () =>
@@ -269,9 +268,8 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                             IconButton(
                               tooltip: 'Editar',
                               icon: const Icon(Icons.edit, size: 20),
-                              onPressed: () => Navigator.pushNamed(
-                                      context, '/admin/produtos/${product.id}')
-                                  .then((_) => _loadProducts()),
+                              onPressed: () => AppNavigation.go(
+                                  context, '/admin/produtos/${product.id}'),
                             ),
                             IconButton(
                               tooltip: 'Remover',
@@ -298,7 +296,7 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                     TextButton(
                       onPressed: _page > 1
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, '/admin/produtos?page=${_page - 1}');
                             }
                           : null,
@@ -311,7 +309,7 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                     TextButton(
                       onPressed: _page < _data!.totalPages
                           ? () {
-                              Navigator.pushNamed(
+                              AppNavigation.go(
                                   context, '/admin/produtos?page=${_page + 1}');
                             }
                           : null,

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:wedding_app/app_navigation.dart';
 import '../../../../core/network/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -157,7 +158,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Produto salvo com sucesso.')),
         );
-        Navigator.pop(context);
+        AppNavigation.replace(context, '/admin/produtos');
       }
     } catch (_) {
       if (mounted) {
@@ -182,7 +183,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
           child: AdminPageHeader(
             title: widget.productId == null ? 'Novo Produto' : 'Editar Produto',
             subtitle: 'Catálogo',
@@ -200,7 +201,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compact = constraints.maxWidth < 750;
@@ -215,7 +216,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                           : (constraints.maxWidth - gap) * 0.7,
                       child: Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(24),
                           child: Form(
                             key: _formKey,
                             child: Column(

@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/payment_repository.dart';
 import '../../data/models/payment.dart';
@@ -60,7 +61,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Gestão Financeira',
             subtitle: 'Pagamentos',
@@ -90,7 +91,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
     final totalPages = (_data!.total / _data!.pageSize).ceil();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,7 +107,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
                             isThreeLine: true,
                             trailing: Text(
                                 'R\$ ${(payment.amountCents / 100).toStringAsFixed(2)}'),
-                            onTap: () => Navigator.pushNamed(
+                            onTap: () => AppNavigation.go(
                                 context, '/admin/pagamentos/${payment.id}'),
                           ),
                         ))
@@ -160,7 +161,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
                           IconButton(
                             tooltip: 'Ver Detalhes',
                             icon: const Icon(Icons.arrow_forward),
-                            onPressed: () => Navigator.pushNamed(
+                            onPressed: () => AppNavigation.go(
                                 context, '/admin/pagamentos/${payment.id}'),
                           ),
                         ),
@@ -181,7 +182,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
                     TextButton(
                       onPressed: _page > 1
                           ? () {
-                              Navigator.pushNamed(context,
+                              AppNavigation.go(context,
                                   '/admin/pagamentos?page=${_page - 1}');
                             }
                           : null,
@@ -194,7 +195,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
                     TextButton(
                       onPressed: _page < totalPages
                           ? () {
-                              Navigator.pushNamed(context,
+                              AppNavigation.go(context,
                                   '/admin/pagamentos?page=${_page + 1}');
                             }
                           : null,

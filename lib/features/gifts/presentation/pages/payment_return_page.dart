@@ -1,3 +1,4 @@
+import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -93,8 +94,7 @@ class _PaymentReturnPageState extends State<PaymentReturnPage> {
               const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil('/', (route) => false);
+                  AppNavigation.replace(context, '/');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
