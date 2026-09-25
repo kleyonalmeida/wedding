@@ -55,10 +55,17 @@ class WeddingApp extends StatelessWidget {
                   transitionDuration: const Duration(milliseconds: 500),
                 );
               case '/admin':
-                return MaterialPageRoute(builder: (_) => const AdminPage());
+                return MaterialPageRoute(
+                    settings: settings,
+                    builder: (_) => const AdminPage(path: '/admin/dashboard'));
               case '/pagamento/retorno':
                 return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: Uri.base.queryParameters['id'] ?? ''));
               default:
+                if (settings.name?.startsWith('/admin/') ?? false) {
+                  return MaterialPageRoute(
+                      settings: settings,
+                      builder: (_) => AdminPage(path: settings.name!));
+                }
                 if (settings.name?.startsWith('/pagamento/retorno') ?? false) {
                   final uri = Uri.parse(settings.name!);
                   return MaterialPageRoute(builder: (_) => PaymentReturnPage(orderId: uri.queryParameters['id'] ?? Uri.base.queryParameters['id'] ?? ''));

@@ -16,8 +16,11 @@ class ApiClient {
   // In development flutter web, we can use the same host via relative URL, or point to localhost:5001
   static const String baseUrl = kReleaseMode ? '' : 'http://localhost:5001';
 
-  final http.Client _client = platform.createHttpClient();
+  final http.Client _client;
   String? _csrfToken;
+
+  ApiClient({http.Client? client})
+      : _client = client ?? platform.createHttpClient();
 
   Uri _uri(String endpoint) => Uri.parse('$baseUrl$endpoint');
 
@@ -48,7 +51,12 @@ class ApiClient {
     request.headers['Content-Type'] = 'application/json';
     if (_csrfToken != null) request.headers['X-CSRF-TOKEN'] = _csrfToken!;
     request.body = jsonEncode(body);
-    return _decode(await http.Response.fromStream(await _client.send(request)));
+    return _decode(
+      await http.Response.fromStream(await _client.send(request)),
+      notifyUnauthorized: endpoint != '/api/admin/auth/login' &&
+          endpoint != '/api/admin/auth/mfa/verify' &&
+          endpoint != '/api/admin/auth/mfa/recovery',
+    );
   }
 
   Future<dynamic> upload(
@@ -60,7 +68,15 @@ class ApiClient {
     return _decode(await http.Response.fromStream(await _client.send(request)));
   }
 
-  dynamic _decode(http.Response response) {
+  void Function()? onUnauthorized;
+  void Function()? onForbidden;
+
+  dynamic _decode(http.Response response, {bool notifyUnauthorized = true}) {
+    if (response.statusCode == 401 && notifyUnauthorized) {
+      onUnauthorized?.call();
+    }
+    if (response.statusCode == 403) onForbidden?.call();
+
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiException(response.statusCode);
     }
