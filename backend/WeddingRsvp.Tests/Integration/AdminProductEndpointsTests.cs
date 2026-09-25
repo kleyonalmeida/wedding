@@ -72,6 +72,26 @@ public class AdminProductEndpointsTests : IClassFixture<CustomWebApplicationFact
     }
 
     [Fact]
+    public async Task POST_Product_WithoutUrl_GeneratesSlugAndKeepsStockOffPublicApi()
+    {
+        var client = await GetAuthenticatedClientAsync();
+        var response = await client.PostAsJsonAsync("/api/admin/products", new
+        {
+            name = "Café especial", category = "Casa", priceCents = 2599,
+            stockRemaining = 2, externalUrl = "https://example.com/cafe"
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var adminGift = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        var slug = adminGift.GetProperty("slug").GetString();
+        Assert.StartsWith("cafe-especial-", slug);
+        Assert.Equal(2, adminGift.GetProperty("stockRemaining").GetInt32());
+        var publicGift = await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/gifts/{slug}");
+        Assert.Equal(2599, publicGift.GetProperty("priceCents").GetInt64());
+        Assert.False(publicGift.TryGetProperty("stockRemaining", out _));
+        Assert.False(publicGift.TryGetProperty("externalUrl", out _));
+    }
+
+    [Fact]
     public async Task POST_Image_PublishesImageForGift()
     {
         var client = await GetAuthenticatedClientAsync();

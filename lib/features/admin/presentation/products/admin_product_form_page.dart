@@ -25,6 +25,8 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
   final _slug = TextEditingController();
   final _category = TextEditingController();
   final _price = TextEditingController();
+  final _stock = TextEditingController(text: '1');
+  final _externalUrl = TextEditingController();
   final _displayOrder = TextEditingController(text: '0');
   final _shortDesc = TextEditingController();
   final _desc = TextEditingController();
@@ -63,6 +65,8 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
       _slug.text = product.slug;
       _category.text = product.category;
       _price.text = (product.priceCents / 100).toStringAsFixed(2);
+      _stock.text = product.stockRemaining?.toString() ?? '';
+      _externalUrl.text = product.externalUrl ?? '';
       _displayOrder.text = product.displayOrder.toString();
       _shortDesc.text = product.shortDescription ?? '';
       _desc.text = product.description ?? '';
@@ -115,6 +119,10 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
         'slug': _slug.text,
         'category': _category.text,
         'priceCents': priceCents,
+        'stockRemaining':
+            _stock.text.trim().isEmpty ? null : int.parse(_stock.text.trim()),
+        'externalUrl':
+            _externalUrl.text.trim().isEmpty ? null : _externalUrl.text.trim(),
         'displayOrder': int.tryParse(_displayOrder.text) ?? 0,
         'shortDescription': _shortDesc.text,
         'description': _desc.text,
@@ -265,7 +273,8 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                               child: TextFormField(
                                                 controller: _price,
                                                 decoration: const InputDecoration(
-                                                    labelText: 'Preço (R\$)',
+                                                    labelText:
+                                                        'Valor interno (R\$)',
                                                     border:
                                                         OutlineInputBorder()),
                                                 validator: (v) {
@@ -308,9 +317,10 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                                     labelText: 'Categoria',
                                                     border:
                                                         OutlineInputBorder()),
-                                                validator: (v) => v!.isEmpty
-                                                    ? 'Obrigatório'
-                                                    : null,
+                                                validator: (v) =>
+                                                    (v ?? '').trim().isEmpty
+                                                        ? 'Obrigatório'
+                                                        : null,
                                               ),
                                             ),
                                             SizedBox(
@@ -323,16 +333,82 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                                 controller: _slug,
                                                 decoration: const InputDecoration(
                                                     labelText:
-                                                        'Slug (URL amigável)',
+                                                        'Identificador da URL (opcional)',
                                                     border:
                                                         OutlineInputBorder()),
-                                                validator: (v) => v!.isEmpty
-                                                    ? 'Obrigatório'
+                                                validator: (v) => (v
+                                                                ?.trim()
+                                                                .length ??
+                                                            0) >
+                                                        150
+                                                    ? 'Máximo de 150 caracteres'
                                                     : null,
                                               ),
                                             ),
                                           ],
                                         )),
+                                const SizedBox(height: 16),
+                                LayoutBuilder(
+                                  builder: (context, fieldConstraints) => Wrap(
+                                    spacing: 16,
+                                    runSpacing: 16,
+                                    children: [
+                                      SizedBox(
+                                        width: compact
+                                            ? fieldConstraints.maxWidth
+                                            : (fieldConstraints.maxWidth - 16) /
+                                                2,
+                                        child: TextFormField(
+                                          controller: _stock,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Estoque disponível',
+                                            helperText:
+                                                'Vazio = sem limite; 0 = Presenteado',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          validator: (value) {
+                                            final text = value?.trim() ?? '';
+                                            if (text.isEmpty) return null;
+                                            final amount = int.tryParse(text);
+                                            return amount != null &&
+                                                    amount >= 0 &&
+                                                    amount <= 1000000
+                                                ? null
+                                                : 'Informe de 0 a 1.000.000';
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: compact
+                                            ? fieldConstraints.maxWidth
+                                            : (fieldConstraints.maxWidth - 16) /
+                                                2,
+                                        child: TextFormField(
+                                          controller: _externalUrl,
+                                          keyboardType: TextInputType.url,
+                                          decoration: const InputDecoration(
+                                            labelText:
+                                                'Link de referência (opcional)',
+                                            helperText:
+                                                'O pagamento continua pelo Asaas',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          validator: (value) {
+                                            final text = value?.trim() ?? '';
+                                            if (text.isEmpty) return null;
+                                            final uri = Uri.tryParse(text);
+                                            return text.length <= 2048 &&
+                                                    uri?.scheme == 'https' &&
+                                                    uri?.host.isNotEmpty == true
+                                                ? null
+                                                : 'Informe uma URL HTTPS válida';
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _displayOrder,
@@ -460,6 +536,8 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
     _slug.dispose();
     _category.dispose();
     _price.dispose();
+    _stock.dispose();
+    _externalUrl.dispose();
     _displayOrder.dispose();
     _shortDesc.dispose();
     _desc.dispose();

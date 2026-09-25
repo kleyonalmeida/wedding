@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
+import 'gift_price.dart';
 
 class GiftProductCard extends StatefulWidget {
   final GiftProduct product;
@@ -19,15 +20,15 @@ class GiftProductCard extends StatefulWidget {
 class _GiftProductCardState extends State<GiftProductCard> {
   bool _isHovered = false;
 
-  String _formatCurrency(double value) {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+    final card = MouseRegion(
+      onEnter: (_) {
+        if (widget.product.available) setState(() => _isHovered = true);
+      },
+      onExit: (_) {
+        if (_isHovered) setState(() => _isHovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         transform: Matrix4.translationValues(0, _isHovered ? -4 : 0, 0),
@@ -35,16 +36,17 @@ class _GiftProductCardState extends State<GiftProductCard> {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-              color: AppColors.outlineVariant.withOpacity(0.6), width: 1.2),
+              color: AppColors.outlineVariant.withValues(alpha: 0.6),
+              width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
             if (_isHovered)
               BoxShadow(
-                color: AppColors.primaryContainer.withOpacity(0.15),
+                color: AppColors.primaryContainer.withValues(alpha: 0.15),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               )
@@ -64,7 +66,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildTitle(context),
-                      _buildPriceSection(context),
+                      _buildActionSection(context),
                     ],
                   ),
                 ),
@@ -73,6 +75,32 @@ class _GiftProductCardState extends State<GiftProductCard> {
           ),
         ),
       ),
+    );
+    if (widget.product.available) return card;
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix([
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      child: Opacity(opacity: 0.72, child: card),
     );
   }
 
@@ -121,8 +149,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
                 end: Alignment.topCenter,
                 colors: [
                   isDark
-                      ? Colors.grey[900]!.withOpacity(0.5)
-                      : AppColors.surfaceContainerLow.withOpacity(0.5),
+                      ? Colors.grey[900]!.withValues(alpha: 0.5)
+                      : AppColors.surfaceContainerLow.withValues(alpha: 0.5),
                   Colors.transparent,
                 ],
               ),
@@ -155,44 +183,38 @@ class _GiftProductCardState extends State<GiftProductCard> {
     );
   }
 
-  Widget _buildPriceSection(BuildContext context) {
+  Widget _buildActionSection(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              _formatCurrency(widget.product.currentPrice),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
+        Text(
+          formatGiftPrice(widget.product.priceCents),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
+          ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: widget.onGiftPressed,
+            onPressed: widget.product.available ? widget.onGiftPressed : null,
             style: ButtonStyle(
-              padding: MaterialStateProperty.all(
+              padding: WidgetStateProperty.all(
                   const EdgeInsets.symmetric(vertical: 16)),
-              elevation: MaterialStateProperty.all(0),
-              backgroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.hovered)) {
+              elevation: WidgetStateProperty.all(0),
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) return Colors.grey;
+                if (states.contains(WidgetState.hovered)) {
                   // Mix primary with 20% black to make a darker brown
                   return Color.lerp(AppColors.primary, Colors.black, 0.2);
                 }
                 return AppColors.primary;
               }),
             ),
-            child: const Text(
-              'PRESENTEAR',
-              style: TextStyle(
+            child: Text(
+              widget.product.available ? 'PRESENTEAR' : 'PRESENTEADO',
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 2.0,

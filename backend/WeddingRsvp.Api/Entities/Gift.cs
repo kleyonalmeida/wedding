@@ -9,6 +9,8 @@ public class Gift
     public string? ShortDescription { get; set; }
     public string? Description { get; set; }
     public long PriceCents { get; set; }
+    public int? StockRemaining { get; set; }
+    public string? ExternalUrl { get; set; }
     public string Category { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public int DisplayOrder { get; set; }

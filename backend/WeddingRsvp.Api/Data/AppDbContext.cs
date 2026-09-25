@@ -71,10 +71,12 @@ public class AppDbContext : IdentityDbContext<AdminUser, IdentityRole<Guid>, Gui
 
         modelBuilder.Entity<Gift>(entity =>
         {
-            if (Database.IsRelational()) entity.ToTable("gifts");
+            if (Database.IsRelational()) entity.ToTable("gifts", t =>
+                t.HasCheckConstraint("CK_gifts_stock_nonnegative", "\"StockRemaining\" IS NULL OR \"StockRemaining\" >= 0"));
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Slug).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.ExternalUrl).HasMaxLength(2048);
             entity.HasIndex(e => e.Slug).IsUnique();
             entity.HasIndex(e => new { e.Active, e.Category, e.DisplayOrder });
             entity.Property(e => e.Version).IsConcurrencyToken();

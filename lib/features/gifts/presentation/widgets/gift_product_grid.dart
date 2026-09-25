@@ -27,6 +27,7 @@ class GiftProductGrid extends StatelessWidget {
   });
 
   void _handleGiftPressed(BuildContext context, GiftProduct product) {
+    if (!product.available) return;
     cartController.addItem(product);
     showDialog(
       context: context,
@@ -38,6 +39,7 @@ class GiftProductGrid extends StatelessWidget {
             context: context,
             builder: (ctx2) => CheckoutDialog(
               cartController: cartController,
+              onCatalogChanged: onRetry,
               onBack: () {
                 Navigator.of(ctx2).pop();
               },
@@ -81,21 +83,27 @@ class GiftProductGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 280,
-            childAspectRatio: 0.62,
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return GiftProductCard(
-              product: product,
-              onGiftPressed: () => _handleGiftPressed(context, product),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final columns =
+                ((constraints.maxWidth + 24) / 304).floor().clamp(1, 4).toInt();
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisExtent: 370,
+                crossAxisSpacing: 24,
+                mainAxisSpacing: 24,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return GiftProductCard(
+                  product: product,
+                  onGiftPressed: () => _handleGiftPressed(context, product),
+                );
+              },
             );
           },
         ),
@@ -115,12 +123,15 @@ class GiftProductGrid extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.secondary,
                   side: const BorderSide(color: AppColors.secondary),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
                 ),
                 child: const Text(
                   'CARREGAR MAIS',
-                  style: TextStyle(letterSpacing: 2.0, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      letterSpacing: 2.0, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

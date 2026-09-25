@@ -166,6 +166,8 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                                       style: theme.textTheme.titleMedium),
                                   Text(
                                       '${product.category} • R\$ ${(product.priceCents / 100).toStringAsFixed(2)}'),
+                                  Text(
+                                      'Estoque: ${product.stockRemaining?.toString() ?? 'Sem limite'}'),
                                   Text(product.active ? 'Ativo' : 'Inativo'),
                                   if (product.featured)
                                     const Text('Em destaque'),
@@ -202,6 +204,7 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                     DataColumn(label: Text('Nome do Produto')),
                     DataColumn(label: Text('Categoria')),
                     DataColumn(label: Text('Preço')),
+                    DataColumn(label: Text('Estoque')),
                     DataColumn(label: Text('Status')),
                     DataColumn(label: Text('Ações')),
                   ],
@@ -214,6 +217,8 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                         DataCell(Text(product.category)),
                         DataCell(Text(
                             'R\$ ${(product.priceCents / 100).toStringAsFixed(2)}')),
+                        DataCell(Text(product.stockRemaining?.toString() ??
+                            'Sem limite')),
                         DataCell(Wrap(
                           spacing: 8,
                           children: [

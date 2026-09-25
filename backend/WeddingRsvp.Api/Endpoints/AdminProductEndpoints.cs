@@ -3,6 +3,9 @@ using WeddingRsvp.Api.Data;
 using WeddingRsvp.Api.Entities;
 using WeddingRsvp.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WeddingRsvp.Api.Endpoints;
 
@@ -39,7 +42,7 @@ public static class AdminProductEndpoints
             if (gift == null) return Results.NotFound();
             return Results.Ok(new
             {
-                gift.Id, gift.Name, gift.Slug, gift.PriceCents, gift.Category,
+                gift.Id, gift.Name, gift.Slug, gift.PriceCents, gift.StockRemaining, gift.ExternalUrl, gift.Category,
                 gift.ShortDescription, gift.Description, gift.DisplayOrder, gift.Active,
                 gift.Featured, gift.Version,
                 images = gift.Images.Select(i => new { i.Id, imageUrl = $"/api/images/{i.StorageKey}", i.Width, i.Height, i.IsPrimary })
@@ -51,22 +54,23 @@ public static class AdminProductEndpoints
             AppDbContext db,
             IAuditService auditService) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 150 ||
-                string.IsNullOrWhiteSpace(request.Slug) || request.Slug.Length > 150 ||
-                string.IsNullOrWhiteSpace(request.Category) || request.PriceCents <= 0 || request.PriceCents > 10_000_000)
+            if (!ValidProduct(request.Name, request.Slug, request.Category, request.PriceCents, request.StockRemaining, request.ExternalUrl))
                 return Results.BadRequest(new { message = "Dados do produto inválidos." });
-            // Validar unique slug
-            if (await db.Gifts.AnyAsync(g => g.Slug == request.Slug))
+            var id = Guid.NewGuid();
+            var slug = string.IsNullOrWhiteSpace(request.Slug) ? GenerateSlug(request.Name, id) : request.Slug.Trim();
+            if (await db.Gifts.AnyAsync(g => g.Slug == slug))
             {
                 return Results.Conflict(new { message = "Slug already exists." });
             }
 
             var gift = new Gift
             {
-                Id = Guid.NewGuid(),
+                Id = id,
                 Name = request.Name,
-                Slug = request.Slug,
+                Slug = slug,
                 PriceCents = request.PriceCents,
+                StockRemaining = request.StockRemaining,
+                ExternalUrl = NormalizeUrl(request.ExternalUrl),
                 Category = request.Category,
                 ShortDescription = request.ShortDescription,
                 Description = request.Description,
@@ -90,26 +94,27 @@ public static class AdminProductEndpoints
             AppDbContext db,
             IAuditService auditService) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 150 ||
-                string.IsNullOrWhiteSpace(request.Slug) || request.Slug.Length > 150 ||
-                string.IsNullOrWhiteSpace(request.Category) || request.PriceCents <= 0 || request.PriceCents > 10_000_000)
+            if (!ValidProduct(request.Name, request.Slug, request.Category, request.PriceCents, request.StockRemaining, request.ExternalUrl))
                 return Results.BadRequest(new { message = "Dados do produto inválidos." });
             var gift = await db.Gifts.FirstOrDefaultAsync(g => g.Id == id && g.DeletedAtUtc == null);
             if (gift == null) return Results.NotFound();
+            var slug = string.IsNullOrWhiteSpace(request.Slug) ? gift.Slug : request.Slug.Trim();
 
-            if (request.Slug != gift.Slug && await db.Gifts.AnyAsync(g => g.Slug == request.Slug && g.Id != id))
+            if (slug != gift.Slug && await db.Gifts.AnyAsync(g => g.Slug == slug && g.Id != id))
             {
                 return Results.Conflict(new { message = "Slug already exists." });
             }
 
             var oldValues = new
             {
-                gift.Name, gift.Slug, gift.PriceCents, gift.Category, gift.ShortDescription, gift.Description, gift.DisplayOrder
+                gift.Name, gift.Slug, gift.PriceCents, gift.StockRemaining, gift.ExternalUrl, gift.Category, gift.ShortDescription, gift.Description, gift.DisplayOrder
             };
 
             gift.Name = request.Name;
-            gift.Slug = request.Slug;
+            gift.Slug = slug;
             gift.PriceCents = request.PriceCents;
+            gift.StockRemaining = request.StockRemaining;
+            gift.ExternalUrl = NormalizeUrl(request.ExternalUrl);
             gift.Category = request.Category;
             gift.ShortDescription = request.ShortDescription;
             gift.Description = request.Description;
@@ -202,26 +207,50 @@ public static class AdminProductEndpoints
         }).DisableAntiforgery().WithMetadata(new RequestSizeLimitAttribute(6 * 1024 * 1024));
         
     }
+
+    private static bool ValidProduct(string name, string? slug, string category, long priceCents, int? stockRemaining, string? externalUrl) =>
+        !string.IsNullOrWhiteSpace(name) && name.Length <= 150 &&
+        (string.IsNullOrWhiteSpace(slug) || slug.Trim().Length <= 150) &&
+        !string.IsNullOrWhiteSpace(category) && priceCents > 0 && priceCents <= 10_000_000 &&
+        (stockRemaining == null || stockRemaining is >= 0 and <= 1_000_000) &&
+        (string.IsNullOrWhiteSpace(externalUrl) ||
+         (externalUrl.Length <= 2048 && Uri.TryCreate(externalUrl.Trim(), UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps));
+
+    private static string? NormalizeUrl(string? url) => string.IsNullOrWhiteSpace(url) ? null : url.Trim();
+
+    private static string GenerateSlug(string name, Guid id)
+    {
+        var normalized = name.Normalize(NormalizationForm.FormD);
+        var ascii = new string(normalized.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray());
+        var baseSlug = Regex.Replace(ascii.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+        if (baseSlug.Length > 130) baseSlug = baseSlug[..130].TrimEnd('-');
+        if (baseSlug.Length == 0) baseSlug = "presente";
+        return $"{baseSlug}-{id.ToString("N")[..8]}";
+    }
 }
 
 public record ProductCreateRequest(
     string Name,
-    string Slug,
+    string? Slug,
     long PriceCents,
     string Category,
     string? ShortDescription,
     string? Description,
-    int DisplayOrder = 0
+    int DisplayOrder = 0,
+    int? StockRemaining = null,
+    string? ExternalUrl = null
 );
 
 public record ProductUpdateRequest(
     string Name,
-    string Slug,
+    string? Slug,
     long PriceCents,
     string Category,
     string? ShortDescription,
     string? Description,
-    int DisplayOrder = 0
+    int DisplayOrder = 0,
+    int? StockRemaining = null,
+    string? ExternalUrl = null
 );
 public record ProductStatusRequest(bool Active, bool Featured);
 public record ProductOrderRequest(int DisplayOrder);

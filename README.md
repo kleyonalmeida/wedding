@@ -12,6 +12,16 @@ Flutter Web, API ASP.NET Core e PostgreSQL. A lista pública de presentes lê o 
 
 Para executar a API fora do Compose, forneça `ConnectionStrings__DefaultConnection`, `AllowedOrigin`, `SUPERADMIN_EMAIL`, `SUPERADMIN_INITIAL_PASSWORD` no primeiro início, `Asaas__ApiKey`, `Asaas__WebhookAuthToken` e `PublicBaseUrl` por variáveis de ambiente ou secret manager. Os arquivos `appsettings*.json` não contêm credenciais.
 
+## Presentes e pagamentos
+
+Em `/admin/produtos/novo`, informe o valor usado para gerar o checkout Asaas e o estoque disponível. O valor aparece na lista pública, no carrinho e no resumo; a quantidade continua restrita ao admin. O catálogo público recebe apenas `soldOut`. Quando o estoque chega a zero, o cartão público fica cinza e mostra **Presenteado**. O campo de estoque vazio significa sem limite; produtos cadastrados antes da migration começam sem limite até serem editados. O identificador da URL é gerado automaticamente se ficar vazio. O link de referência é opcional, fica no admin e não substitui o checkout Asaas.
+
+Ao confirmar o carrinho, a API recalcula os valores a partir do banco, reserva o estoque e cria um checkout Asaas de 60 minutos para Pix ou cartão. O convidado vê o valor novamente na página segura do Asaas antes de pagar. O retorno ao site consulta o status do pedido, mas a confirmação financeira vem dos webhooks. Os eventos `CHECKOUT_CANCELED` e `CHECKOUT_EXPIRED` liberam a reserva. O webhook precisa estar ativo e acessível para que o estoque volte automaticamente após cancelamento ou expiração. Uma falha incerta ao criar o checkout mantém a reserva e requer conferência administrativa para evitar uma segunda cobrança.
+
+No admin, a seção Pagamentos mostra as cobranças recebidas pelos eventos de pagamento e permite consultar o status atual no Asaas. Cadastre no Asaas os eventos de checkout `CHECKOUT_PAID`, `CHECKOUT_CANCELED`, `CHECKOUT_EXPIRED` e os eventos de pagamento usados para confirmação e conciliação.
+
+Não é preciso cadastrar os presentes, criar links de pagamento ou gerar cobranças manualmente no Asaas: o site envia nome, quantidade e valor de cada item quando o convidado inicia o pagamento. Na conta Asaas, crie uma chave de API para o ambiente usado e configure um webhook ativo com URL `https://seu-dominio/api/webhooks/asaas`, token próprio de 32 a 255 caracteres (diferente da chave de API), versão 3 e eventos de checkout e pagamento. No `.env`, informe `ASAAS_API_KEY`, `ASAAS_WEBHOOK_AUTH_TOKEN`, `ASAAS_ENVIRONMENT` e `PUBLIC_BASE_URL`; o token deve ser igual ao cadastrado no webhook. Teste primeiro no Sandbox.
+
 ## Verificação
 
 ```sh

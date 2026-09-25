@@ -86,6 +86,8 @@ public class WebhookProcessor : BackgroundService
                 {
                     attempt.Order.Status = status!;
                     attempt.Order.UpdatedAtUtc = DateTimeOffset.UtcNow;
+                    if (status is "Cancelled" or "Overdue")
+                        await GiftInventory.ReleaseAsync(db, attempt.Order, cancellationToken);
                 }
                 evt.Status = "Processed";
                 evt.ProcessedAtUtc = DateTimeOffset.UtcNow;

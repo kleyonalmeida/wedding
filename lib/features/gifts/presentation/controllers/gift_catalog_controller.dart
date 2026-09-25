@@ -5,17 +5,17 @@ import '../../data/repositories/gift_repository.dart';
 
 class GiftCatalogController extends ChangeNotifier {
   final GiftRepository _repository = GiftRepository();
-  
+
   List<GiftProduct> products = [];
   List<String> categories = [];
   bool isLoading = false;
   String? error;
-  
+
   GiftFilter currentFilter = GiftFilter();
   int currentPage = 1;
   final int limit = 10;
   bool hasMore = true;
-  
+
   int totalResults = 0;
 
   GiftCatalogController() {
@@ -27,12 +27,12 @@ class GiftCatalogController extends ChangeNotifier {
     try {
       categories = await _repository.getCategories();
       notifyListeners();
-    } catch (_) { /* Catalog error is shown by loadProducts. */ }
+    } catch (_) {/* Catalog error is shown by loadProducts. */}
   }
 
   Future<void> loadProducts({bool refresh = false}) async {
     if (isLoading) return;
-    
+
     if (refresh) {
       currentPage = 1;
       products = [];
@@ -51,13 +51,13 @@ class GiftCatalogController extends ChangeNotifier {
         page: currentPage,
         limit: limit,
       );
-      
+
       totalResults = await _repository.getTotalCount(filter: currentFilter);
 
       if (newProducts.length < limit) {
         hasMore = false;
       }
-      
+
       products.addAll(newProducts);
       currentPage++;
     } catch (e) {
@@ -73,13 +73,8 @@ class GiftCatalogController extends ChangeNotifier {
     loadProducts(refresh: true);
   }
 
-  void setSortOrder(GiftSortOrder order) {
-    if (currentFilter.sortOrder == order) return;
-    updateFilter(currentFilter.copyWith(sortOrder: order));
-  }
-  
   void clearFilters() {
-    updateFilter(GiftFilter(sortOrder: currentFilter.sortOrder));
+    updateFilter(GiftFilter());
   }
 
   void toggleOccasion(String occasion) {
@@ -91,7 +86,7 @@ class GiftCatalogController extends ChangeNotifier {
     }
     updateFilter(currentFilter.copyWith(occasions: list));
   }
-  
+
   void toggleCategory(String category) {
     final list = List<String>.from(currentFilter.categories);
     if (list.contains(category)) {

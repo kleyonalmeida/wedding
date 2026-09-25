@@ -12,7 +12,6 @@ import '../controllers/gift_catalog_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../widgets/gift_filter_panel.dart';
 import '../widgets/gift_filter_sheet.dart';
-import '../widgets/gift_sort_selector.dart';
 import '../widgets/gift_product_grid.dart';
 import '../widgets/cart_dialog.dart';
 import '../widgets/checkout_dialog.dart';
@@ -111,12 +110,9 @@ class _GiftsPageState extends State<GiftsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: GiftSortSelector(
-                                  totalResults: _catalogController.totalResults,
-                                  currentSort: _catalogController
-                                      .currentFilter.sortOrder,
-                                  onSortChanged:
-                                      _catalogController.setSortOrder,
+                                child: Text(
+                                  '${_catalogController.totalResults} presentes especiais para você',
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
                               if (isMobile)
@@ -203,6 +199,8 @@ class _GiftsPageState extends State<GiftsPage> {
                       context: context,
                       builder: (ctx2) => CheckoutDialog(
                         cartController: _cartController,
+                        onCatalogChanged: () =>
+                            _catalogController.loadProducts(refresh: true),
                         onBack: () {
                           Navigator.of(ctx2).pop();
                           // To truly go back to cart, we'd open the cart dialog again, but standard is just closing it for now or triggering the FAB.

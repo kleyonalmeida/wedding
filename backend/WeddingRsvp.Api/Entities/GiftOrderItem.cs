@@ -15,4 +15,5 @@ public class GiftOrderItem
     public string GiftNameSnapshot { get; set; } = string.Empty;
     public long PriceCentsSnapshot { get; set; }
     public int Quantity { get; set; }
+    public int ReservedQuantity { get; set; }
 }

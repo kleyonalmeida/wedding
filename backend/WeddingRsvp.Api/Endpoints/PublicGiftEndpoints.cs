@@ -42,6 +42,7 @@ public static class PublicGiftEndpoints
                     g.PriceCents,
                     g.Category,
                     g.Featured,
+                    SoldOut = g.StockRemaining == 0,
                     ImageUrl = g.Images.Where(img => img.IsPrimary)
                         .Select(img => $"/api/images/{img.StorageKey}").FirstOrDefault()
                 })
@@ -68,6 +69,7 @@ public static class PublicGiftEndpoints
                 gift.PriceCents,
                 gift.Category,
                 gift.Featured,
+                SoldOut = gift.StockRemaining == 0,
                 ImageUrl = gift.Images.Where(img => img.IsPrimary)
                     .Select(img => $"/api/images/{img.StorageKey}").FirstOrDefault()
             });

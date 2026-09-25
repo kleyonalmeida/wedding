@@ -18,10 +18,13 @@ class CartController extends ChangeNotifier {
 
   int get itemCount => _items.fold(0, (total, item) => total + item.quantity);
 
-  double get totalValue => _items.fold(0, (total, item) => total + (item.product.currentPrice * item.quantity));
+  int get totalCents => _items.fold(
+      0, (total, item) => total + item.product.priceCents * item.quantity);
 
   void addItem(GiftProduct product) {
-    final existingIndex = _items.indexWhere((item) => item.product.id == product.id);
+    if (!product.available) return;
+    final existingIndex =
+        _items.indexWhere((item) => item.product.id == product.id);
     if (existingIndex >= 0) {
       _items[existingIndex].quantity += 1;
     } else {
@@ -40,7 +43,8 @@ class CartController extends ChangeNotifier {
       removeItem(productId);
       return;
     }
-    final existingIndex = _items.indexWhere((item) => item.product.id == productId);
+    final existingIndex =
+        _items.indexWhere((item) => item.product.id == productId);
     if (existingIndex >= 0) {
       _items[existingIndex].quantity = quantity;
       notifyListeners();

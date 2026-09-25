@@ -5,15 +5,18 @@ import '../controllers/cart_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/repositories/payment_repository.dart';
 import '../../../../core/network/api_client.dart';
+import 'gift_price.dart';
 
 class CheckoutDialog extends StatefulWidget {
   final CartController cartController;
   final VoidCallback onBack;
+  final VoidCallback? onCatalogChanged;
 
   const CheckoutDialog({
     super.key,
     required this.cartController,
     required this.onBack,
+    this.onCatalogChanged,
   });
 
   @override
@@ -25,10 +28,6 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
   bool _hasError = false;
-
-  String _formatCurrency(double value) {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
-  }
 
   bool _isLoading = false;
 
@@ -86,11 +85,14 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       }
     } on ApiException catch (e) {
       if (mounted) {
+        if (e.statusCode == 409) widget.onCatalogChanged?.call();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(e.statusCode == 409 || e.statusCode == 502
-                  ? 'Este pedido precisa ser conferido antes de uma nova tentativa. Entre em contato com os noivos.'
-                  : 'Não foi possível iniciar o pagamento. Tente novamente.')),
+              content: Text(e.statusCode == 409
+                  ? 'Presente esgotado ou pedido em análise. A lista foi atualizada.'
+                  : e.statusCode == 502
+                      ? 'Este pedido precisa ser conferido antes de uma nova tentativa. Entre em contato com os noivos.'
+                      : 'Não foi possível iniciar o pagamento. Tente novamente.')),
         );
       }
     } catch (_) {
@@ -126,50 +128,56 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       insetPadding: const EdgeInsets.all(16),
       child: Container(
         width: isMobile ? double.infinity : 700,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Resumo da sua compra',
-                  style: AppTextStyles.serif.copyWith(
-                    fontSize: 24,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            if (isMobile) ...[
-              _buildSummarySection(context),
-              const SizedBox(height: 32),
-              _buildFormSection(context),
-            ] else
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height - 32,
+        ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 20 : 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    flex: 4,
-                    child: _buildSummarySection(context),
-                  ),
-                  const SizedBox(width: 48),
-                  Expanded(
-                    flex: 6,
-                    child: _buildFormSection(context),
+                      child: Text(
+                    'Resumo da sua compra',
+                    style: AppTextStyles.serif.copyWith(
+                      fontSize: 24,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  )),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-            const SizedBox(height: 48),
-            _buildFooter(context, isMobile),
-          ],
+              const SizedBox(height: 32),
+              if (isMobile) ...[
+                _buildSummarySection(context),
+                const SizedBox(height: 32),
+                _buildFormSection(context),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: _buildSummarySection(context),
+                    ),
+                    const SizedBox(width: 48),
+                    Expanded(
+                      flex: 6,
+                      child: _buildFormSection(context),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 48),
+              _buildFooter(context, isMobile),
+            ],
+          ),
         ),
       ),
     );
@@ -192,47 +200,37 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(0.8),
+                          .withValues(alpha: 0.8),
                       fontSize: 14,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Text(
-                  _formatCurrency(item.product.currentPrice * item.quantity),
+                  formatGiftPrice(item.product.priceCents * item.quantity),
                   style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.8),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                 ),
               ],
             ),
           );
-        }).toList(),
+        }),
         const SizedBox(height: 8),
         Divider(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Total',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+            const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
-              _formatCurrency(widget.cartController.totalValue),
+              formatGiftPrice(widget.cartController.totalCents),
               style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
               ),
             ),
           ],
@@ -265,7 +263,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
           '(Este será o nome assinado no cartão)',
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 8),
@@ -338,69 +337,80 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   }
 
   Widget _buildFooter(BuildContext context, bool isMobile) {
+    final secureLabel = Row(
+      children: [
+        const Icon(Icons.lock_outline, color: Colors.grey, size: 28),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text('COMPRA',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    height: 1)),
+            Text('SEGURA',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2)),
+          ],
+        ),
+      ],
+    );
+    final backButton = OutlinedButton(
+      onPressed: widget.onBack,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        side: BorderSide(color: Colors.grey.shade400),
+        foregroundColor: Colors.grey.shade700,
+      ),
+      child: const Text('Voltar para o carrinho',
+          style: TextStyle(fontWeight: FontWeight.w600)),
+    );
+    final finishButton = ElevatedButton(
+      onPressed: _isLoading ? null : _submit,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        elevation: 0,
+      ),
+      child: _isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                  color: Colors.white, strokeWidth: 2))
+          : const Text(
+              'Concluir compra',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+    );
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          secureLabel,
+          const SizedBox(height: 20),
+          finishButton,
+          const SizedBox(height: 8),
+          backButton,
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        secureLabel,
         Row(
-          children: [
-            const Icon(Icons.lock_outline, color: Colors.grey, size: 28),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('COMPRA',
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        height: 1)),
-                Text('SEGURA',
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2)),
-              ],
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            OutlinedButton(
-              onPressed: widget.onBack,
-              style: OutlinedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                side: BorderSide(color: Colors.grey.shade400),
-                foregroundColor: Colors.grey.shade700,
-              ),
-              child: const Text('Voltar para o carrinho',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                elevation: 0,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : const Text(
-                      'Concluir compra',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
-          ],
+          children: [backButton, const SizedBox(width: 12), finishButton],
         ),
       ],
     );

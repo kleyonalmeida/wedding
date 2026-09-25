@@ -3,6 +3,8 @@ class Product {
   final String name;
   final String slug;
   final int priceCents;
+  final int? stockRemaining;
+  final String? externalUrl;
   final String category;
   final String? description;
   final String? shortDescription;
@@ -16,6 +18,8 @@ class Product {
     required this.name,
     required this.slug,
     required this.priceCents,
+    this.stockRemaining,
+    this.externalUrl,
     required this.category,
     this.description,
     this.shortDescription,
@@ -38,6 +42,8 @@ class Product {
       name: json['name'] as String? ?? '',
       slug: json['slug'] as String? ?? '',
       priceCents: json['priceCents'] as int? ?? 0,
+      stockRemaining: json['stockRemaining'] as int?,
+      externalUrl: json['externalUrl'] as String?,
       category: json['category'] as String? ?? '',
       description: json['description'] as String?,
       shortDescription: json['shortDescription'] as String?,
@@ -54,6 +60,8 @@ class Product {
       'name': name,
       'slug': slug,
       'priceCents': priceCents,
+      'stockRemaining': stockRemaining,
+      'externalUrl': externalUrl,
       'category': category,
       'description': description,
       'shortDescription': shortDescription,

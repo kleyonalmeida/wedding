@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../controllers/cart_controller.dart';
+import 'gift_price.dart';
 
 class CartDialog extends StatelessWidget {
   final CartController cartController;
@@ -12,10 +13,6 @@ class CartDialog extends StatelessWidget {
     required this.cartController,
     required this.onCheckout,
   });
-
-  String _formatCurrency(double value) {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +30,13 @@ class CartDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Meu carrinho',
-                  style: AppTextStyles.serif.copyWith(
-                    fontSize: 24,
-                    color: Theme.of(context).colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Meu carrinho',
+                    style: AppTextStyles.serif.copyWith(
+                      fontSize: 24,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -50,15 +49,17 @@ class CartDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Descrição do presente',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Descrição do presente',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 Text(
-                  'Valor',
+                  'Subtotal',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -66,7 +67,13 @@ class CartDialog extends StatelessWidget {
                 ),
               ],
             ),
-            Divider(height: 24, thickness: 1, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+            Divider(
+                height: 24,
+                thickness: 1,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.1)),
             Flexible(
               child: ListenableBuilder(
                 listenable: cartController,
@@ -79,7 +86,10 @@ class CartDialog extends StatelessWidget {
                           'Seu carrinho está vazio.',
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
                           ),
                         ),
                       ),
@@ -88,7 +98,13 @@ class CartDialog extends StatelessWidget {
                   return ListView.separated(
                     shrinkWrap: true,
                     itemCount: cartController.items.length,
-                    separatorBuilder: (context, index) => Divider(height: 24, thickness: 1, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+                    separatorBuilder: (context, index) => Divider(
+                        height: 24,
+                        thickness: 1,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.1)),
                     itemBuilder: (context, index) {
                       final item = cartController.items[index];
                       return Row(
@@ -99,14 +115,17 @@ class CartDialog extends StatelessWidget {
                             height: 80,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.outlineVariant),
+                              border:
+                                  Border.all(color: AppColors.outlineVariant),
                               color: AppColors.surfaceContainerLow,
                             ),
                             padding: const EdgeInsets.all(8),
                             child: Image.network(
                               item.product.imageUrl,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, size: 24),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image_not_supported,
+                                      size: 24),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -118,12 +137,19 @@ class CartDialog extends StatelessWidget {
                                   item.product.name,
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                   ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${item.quantity} × ${formatGiftPrice(item.product.priceCents)}',
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                                 const SizedBox(height: 8),
                                 InkWell(
-                                  onTap: () => cartController.removeItem(item.product.id),
+                                  onTap: () => cartController
+                                      .removeItem(item.product.id),
                                   child: const Text(
                                     'Remover',
                                     style: TextStyle(
@@ -138,7 +164,8 @@ class CartDialog extends StatelessWidget {
                           ),
                           const SizedBox(width: 16),
                           Text(
-                            _formatCurrency(item.product.currentPrice * item.quantity),
+                            formatGiftPrice(
+                                item.product.priceCents * item.quantity),
                             style: TextStyle(
                               fontSize: 16,
                               color: Theme.of(context).colorScheme.onSurface,
@@ -151,32 +178,29 @@ class CartDialog extends StatelessWidget {
                 },
               ),
             ),
-            Divider(height: 24, thickness: 1, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
+            Divider(
+                height: 24,
+                thickness: 1,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.1)),
             ListenableBuilder(
               listenable: cartController,
-              builder: (context, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Total ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+              builder: (context, _) => Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Text('Total: ',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    formatGiftPrice(cartController.totalCents),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
                     ),
-                    Text(
-                      _formatCurrency(cartController.totalValue),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
             Row(

@@ -65,6 +65,18 @@ public static class GiftOrderEndpoints
             {
                 return Results.BadRequest("One or more gifts are invalid, inactive, or not found.");
             }
+            await using var stockTransaction = db.Database.IsRelational()
+                ? await db.Database.BeginTransactionAsync() : null;
+
+            foreach (var itemReq in request.Items)
+            {
+                var gift = gifts.First(g => g.Id == itemReq.GiftId);
+                if (!await GiftInventory.ReserveAsync(db, gift, itemReq.Quantity))
+                {
+                    if (stockTransaction != null) await stockTransaction.RollbackAsync();
+                    return Results.Conflict("Um dos presentes foi esgotado. Atualize a lista e tente novamente.");
+                }
+            }
 
             var order = new GiftOrder
             {
@@ -89,6 +101,7 @@ public static class GiftOrderEndpoints
                     OrderId = order.Id,
                     GiftId = gift.Id,
                     Quantity = itemReq.Quantity,
+                    ReservedQuantity = gift.StockRemaining == null ? 0 : itemReq.Quantity,
                     PriceCentsSnapshot = gift.PriceCents,
                     GiftNameSnapshot = gift.Name
                 };
@@ -113,6 +126,7 @@ public static class GiftOrderEndpoints
             db.Add(order);
             db.Add(attempt);
             await db.SaveChangesAsync(); // Save first to have IDs in DB
+            if (stockTransaction != null) await stockTransaction.CommitAsync();
 
             try
             {
@@ -142,7 +156,6 @@ public static class GiftOrderEndpoints
                 {
                     o.Id,
                     o.Status,
-                    o.TotalCents,
                     CheckoutUrl = db.Set<PaymentAttempt>()
                         .Where(a => a.OrderId == o.Id)
                         .OrderByDescending(a => a.CreatedAtUtc)

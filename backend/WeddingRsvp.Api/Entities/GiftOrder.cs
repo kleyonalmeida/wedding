@@ -11,6 +11,7 @@ public class GiftOrder
     public string Currency { get; set; } = "BRL";
     public long TotalCents { get; set; }
     public string Status { get; set; } = "Pending";
+    public bool StockReleased { get; set; }
     public string? PublicTokenHash { get; set; }
     
     public DateTimeOffset CreatedAtUtc { get; set; }
