@@ -274,7 +274,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                                 controller: _price,
                                                 decoration: const InputDecoration(
                                                     labelText:
-                                                        'Valor interno (R\$)',
+                                                        'Valor do presente (R\$)',
                                                     border:
                                                         OutlineInputBorder()),
                                                 validator: (v) {
@@ -330,19 +330,29 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                                           16) /
                                                       2,
                                               child: TextFormField(
-                                                controller: _slug,
-                                                decoration: const InputDecoration(
-                                                    labelText:
-                                                        'Identificador da URL (opcional)',
-                                                    border:
-                                                        OutlineInputBorder()),
-                                                validator: (v) => (v
-                                                                ?.trim()
-                                                                .length ??
-                                                            0) >
-                                                        150
-                                                    ? 'Máximo de 150 caracteres'
-                                                    : null,
+                                                controller: _stock,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                decoration:
+                                                    const InputDecoration(
+                                                  labelText:
+                                                      'Estoque disponível',
+                                                  helperText:
+                                                      'Vazio = sem limite; 0 = Presenteado',
+                                                  border: OutlineInputBorder(),
+                                                ),
+                                                validator: (value) {
+                                                  final text =
+                                                      value?.trim() ?? '';
+                                                  if (text.isEmpty) return null;
+                                                  final amount =
+                                                      int.tryParse(text);
+                                                  return amount != null &&
+                                                          amount >= 0 &&
+                                                          amount <= 1000000
+                                                      ? null
+                                                      : 'Informe de 0 a 1.000.000';
+                                                },
                                               ),
                                             ),
                                           ],
@@ -359,24 +369,16 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                             : (fieldConstraints.maxWidth - 16) /
                                                 2,
                                         child: TextFormField(
-                                          controller: _stock,
-                                          keyboardType: TextInputType.number,
+                                          controller: _slug,
                                           decoration: const InputDecoration(
-                                            labelText: 'Estoque disponível',
-                                            helperText:
-                                                'Vazio = sem limite; 0 = Presenteado',
+                                            labelText:
+                                                'Identificador da URL (opcional)',
                                             border: OutlineInputBorder(),
                                           ),
-                                          validator: (value) {
-                                            final text = value?.trim() ?? '';
-                                            if (text.isEmpty) return null;
-                                            final amount = int.tryParse(text);
-                                            return amount != null &&
-                                                    amount >= 0 &&
-                                                    amount <= 1000000
-                                                ? null
-                                                : 'Informe de 0 a 1.000.000';
-                                          },
+                                          validator: (v) =>
+                                              (v?.trim().length ?? 0) > 150
+                                                  ? 'Máximo de 150 caracteres'
+                                                  : null,
                                         ),
                                       ),
                                       SizedBox(

@@ -28,9 +28,15 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(body: AdminProductFormPage()),
+      home: AdminShell(
+        currentPath: '/admin/produtos/novo',
+        child: AdminProductFormPage(),
+      ),
     ));
     expect(find.text('Nome do Produto'), findsOneWidget);
+    final stockField = find.widgetWithText(TextFormField, 'Estoque disponível');
+    expect(stockField, findsOneWidget);
+    expect(tester.getRect(stockField).top, lessThan(800));
     expect(tester.takeException(), isNull);
   });
 
