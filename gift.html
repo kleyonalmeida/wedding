@@ -131,67 +131,67 @@
 </nav>
 <main class="flex-grow pt-24 pb-section-padding px-4 md:px-8 max-w-container-max mx-auto w-full flex flex-col lg:flex-row gap-8">
 <!-- SideNavBar / Filters -->
-<aside class="w-full lg:w-64 flex-shrink-0">
-<div class="bg-surface-container-low text-primary font-body-md text-body-md h-full w-full lg:w-64 lg:block border-r border-outline-variant/20 flex flex-col gap-4 p-6 duration-200 ease-linear rounded-lg">
+<aside class="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-28 lg:h-fit z-10">
+<div class="bg-surface-container text-primary font-body-md text-body-md w-full lg:w-64 lg:block border border-outline-variant/30 flex flex-col gap-4 p-6 duration-200 ease-linear rounded-lg">
 <div class="mb-6">
-<h2 class="font-label-caps text-label-caps text-secondary mb-1 uppercase tracking-widest">Onde será a entrega?</h2>
+<h2 class="font-label-caps text-label-caps text-on-primary-container mb-1 uppercase tracking-widest font-bold">Onde será a entrega?</h2>
 <div class="relative mt-2">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">location_on</span>
-<input class="w-full bg-surface-container-lowest border-b border-outline-variant/50 focus:border-primary focus:ring-0 pl-10 pr-4 py-2 text-sm bg-transparent outline-none transition-colors placeholder:text-outline-variant" placeholder="Digite seu CEP" type="text"/>
-<button class="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary-container">location_on</span>
+<input class="w-full bg-surface-container-lowest border-b border-outline-variant/50 focus:border-primary focus:ring-0 pl-10 pr-4 py-2 text-sm bg-transparent outline-none transition-colors placeholder:text-outline-variant text-on-primary-fixed" placeholder="Digite seu CEP" type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-primary-container hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-sm">search</span>
 </button>
 </div>
 </div>
 <div class="flex justify-between items-center mb-4">
-<h3 class="font-label-caps text-label-caps text-on-background uppercase">Filtros ativos:</h3>
-<button class="text-xs text-secondary underline hover:text-primary transition-colors">Limpar todos os filtros</button>
+<h3 class="font-label-caps text-label-caps text-on-primary-container uppercase font-bold">Filtros ativos:</h3>
+<button class="text-xs text-secondary underline hover:text-primary transition-colors font-medium">Limpar todos os filtros</button>
 </div>
 <!-- Accordion 1 -->
 <div class="border-t border-outline-variant/30 py-4">
-<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<button class="flex justify-between items-center w-full text-left font-section-title text-xl text-on-primary-fixed hover:text-primary transition-colors mb-2 font-bold">
 <span>Ocasiões</span>
 <span class="material-symbols-outlined text-sm">remove</span>
 </button>
 <div class="space-y-2 mt-3 pl-2">
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Agradecimento (12)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Agradecimento (12)</span>
 </label>
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Amizade (16)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Amizade (16)</span>
 </label>
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Aniversário (8)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Aniversário (8)</span>
 </label>
 </div>
 </div>
 <!-- Accordion 2 -->
 <div class="border-t border-outline-variant/30 py-4">
-<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<button class="flex justify-between items-center w-full text-left font-section-title text-xl text-on-primary-fixed hover:text-primary transition-colors mb-2 font-bold">
 <span>Presentes</span>
 <span class="material-symbols-outlined text-sm">remove</span>
 </button>
 <div class="space-y-2 mt-3 pl-2">
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Balões (3)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Balões (3)</span>
 </label>
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Bebidas (9)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Bebidas (9)</span>
 </label>
 <label class="flex items-center space-x-3 cursor-pointer group">
 <input class="form-checkbox h-4 w-4 text-primary border-outline-variant rounded focus:ring-primary focus:ring-offset-background bg-transparent" type="checkbox"/>
-<span class="text-sm text-on-surface-variant group-hover:text-primary transition-colors">Chocolates (18)</span>
+<span class="text-sm text-on-primary-fixed group-hover:text-primary transition-colors font-medium">Chocolates (18)</span>
 </label>
 </div>
 </div>
 <!-- Accordion 3 -->
 <div class="border-t border-outline-variant/30 py-4">
-<button class="flex justify-between items-center w-full text-left font-semibold text-on-background hover:text-primary transition-colors mb-2">
+<button class="flex justify-between items-center w-full text-left font-section-title text-xl text-on-primary-fixed hover:text-primary transition-colors mb-2 font-bold">
 <span>Tipo de flor</span>
 <span class="material-symbols-outlined text-sm">add</span>
 </button>
