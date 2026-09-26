@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using WeddingRsvp.Api.Data;
+using WeddingRsvp.Api.Services;
 using WeddingRsvp.Api.Entities;
 
 namespace WeddingRsvp.Api.Endpoints;
@@ -21,21 +22,12 @@ public static class AdminPaymentEndpoints
 
         group.MapGet("/", async (AppDbContext db, int page = 1, int pageSize = 20) =>
         {
-            var query = db.Set<Payment>()
-                .Include(p => p.Order)
-                .OrderByDescending(p => p.CreatedAtUtc);
-
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            var query = AdminFinancialRecords.Query(db);
             var total = await query.CountAsync();
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.GatewayPaymentId,
-                    p.Status,
-                    p.AmountCents,
-                    p.CreatedAtUtc,
-                    SenderName = p.Order != null ? p.Order.SenderName : null
-                })
+            var items = await query.OrderByDescending(p => p.CreatedAtUtc)
+                .ThenBy(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize)
                 .ToListAsync();
 
             return Results.Ok(new { items, total, page, pageSize });
@@ -47,15 +39,36 @@ public static class AdminPaymentEndpoints
                 .Include(p => p.Order)
                 .ThenInclude(o => o!.Items)
                 .ThenInclude(i => i.Gift)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .OrderByDescending(p => p.CreatedAtUtc)
+                .FirstOrDefaultAsync(p => p.Id == id || p.OrderId == id);
 
-            if (payment == null) return Results.NotFound();
+            if (payment == null)
+            {
+                var order = await db.GiftOrders.AsNoTracking().Include(o => o.Items)
+                    .FirstOrDefaultAsync(o => o.Id == id);
+                if (order == null) return Results.NotFound();
+                var record = await AdminFinancialRecords.Query(db).FirstOrDefaultAsync(r => r.Id == id);
+                if (record == null) return Results.NotFound();
+                return Results.Ok(new
+                {
+                    order.Id, GatewayPaymentId = (string?)null, record.Status,
+                    AmountCents = order.TotalCents, NetCents = (long?)null,
+                    BillingType = (string?)null, order.CreatedAtUtc,
+                    ConfirmedAtUtc = (DateTimeOffset?)null, ReceivedAtUtc = (DateTimeOffset?)null,
+                    Source = "Order", CanSync = false,
+                    Order = new { order.Id, order.SenderName, order.Message,
+                        Items = order.Items.Select(i => new { i.Quantity,
+                            Name = i.GiftNameSnapshot, PriceCents = i.PriceCentsSnapshot }) }
+                });
+            }
 
             return Results.Ok(new
             {
                 payment.Id,
+                Source = "Payment",
+                CanSync = true,
                 payment.GatewayPaymentId,
-                payment.Status,
+                Status = (await AdminFinancialRecords.Query(db).FirstAsync(r => r.Id == payment.Id)).Status,
                 payment.AmountCents,
                 payment.NetCents,
                 payment.BillingType,
@@ -80,10 +93,16 @@ public static class AdminPaymentEndpoints
         group.MapGet("/{id:guid}/events", async (Guid id, AppDbContext db) =>
         {
             var payment = await db.Set<Payment>().FindAsync(id);
-            if (payment == null) return Results.NotFound();
-
+            var orderId = payment?.OrderId ?? id;
+            if (payment == null && !await db.GiftOrders.AnyAsync(o => o.Id == id))
+                return Results.NotFound();
+            var checkoutIds = db.PaymentAttempts.Where(a => a.OrderId == orderId)
+                .Select(a => a.GatewayCheckoutId);
+            var gatewayPaymentIds = db.Payments.Where(p => p.OrderId == orderId)
+                .Select(p => p.GatewayPaymentId);
             var events = await db.Set<AsaasWebhookEvent>()
-                .Where(e => e.GatewayPaymentId == payment.GatewayPaymentId)
+                .Where(e => (e.GatewayPaymentId != null && gatewayPaymentIds.Contains(e.GatewayPaymentId)) ||
+                    (e.GatewayCheckoutId != null && checkoutIds.Contains(e.GatewayCheckoutId)))
                 .OrderByDescending(e => e.ReceivedAtUtc)
                 .Select(e => new
                 {
@@ -104,7 +123,9 @@ public static class AdminPaymentEndpoints
             using var transaction = await db.Database.BeginTransactionAsync();
             try
             {
-                var payment = await db.Set<Payment>().Include(p => p.Order).FirstOrDefaultAsync(p => p.Id == id);
+                var payment = await db.Set<Payment>().Include(p => p.Order)
+                    .OrderByDescending(p => p.CreatedAtUtc)
+                    .FirstOrDefaultAsync(p => p.Id == id || p.OrderId == id);
                 if (payment == null) return Results.NotFound();
 
                 var statusResponse = await gateway.GetPaymentStatusAsync(payment.GatewayPaymentId);

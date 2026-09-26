@@ -5,6 +5,7 @@ import '../../data/models/payment.dart';
 import '../shell/admin_session_controller.dart';
 import '../widgets/admin_page_header.dart';
 import '../widgets/admin_state_widgets.dart';
+import '../widgets/admin_live_refresh.dart';
 import '../widgets/admin_responsive_records.dart';
 
 class AdminPaymentsPage extends StatefulWidget {
@@ -15,7 +16,8 @@ class AdminPaymentsPage extends StatefulWidget {
   State<AdminPaymentsPage> createState() => _AdminPaymentsPageState();
 }
 
-class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
+class _AdminPaymentsPageState extends State<AdminPaymentsPage>
+    with AdminLiveRefresh<AdminPaymentsPage> {
   late PaymentRepository _repository;
 
   PaginatedPayments? _data;
@@ -29,10 +31,12 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
     super.initState();
     _page = widget.initialPage;
     _repository = PaymentRepository(AdminSessionController.instance.api);
-    _loadData();
+    refreshData();
   }
 
-  Future<void> _loadData() async {
+  @override
+  Future<void> refreshData() async {
+    if (_isLoading) return;
     try {
       setState(() {
         _isLoading = true;
@@ -60,11 +64,16 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(24),
+        Padding(
+          padding: const EdgeInsets.all(24),
           child: AdminPageHeader(
             title: 'Gestão Financeira',
-            subtitle: 'Pagamentos',
+            subtitle: 'Pagamentos e pedidos',
+            trailing: OutlinedButton.icon(
+              onPressed: _isLoading ? null : refreshData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Atualizar'),
+            ),
           ),
         ),
         Expanded(
@@ -80,7 +89,7 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage> {
     }
 
     if (_error != null) {
-      return AdminErrorState(message: _error!, onRetry: _loadData);
+      return AdminErrorState(message: _error!, onRetry: refreshData);
     }
 
     if (_data == null || _data!.items.isEmpty) {

@@ -41,7 +41,8 @@ class PaymentDetail {
   final String? gatewayPaymentId;
   final String status;
   final int amountCents;
-  final int netCents;
+  final int? netCents;
+  final bool canSync;
   final String billingType;
   final DateTime createdAtUtc;
   final DateTime? confirmedAtUtc;
@@ -54,6 +55,7 @@ class PaymentDetail {
     required this.status,
     required this.amountCents,
     required this.netCents,
+    this.canSync = true,
     required this.billingType,
     required this.createdAtUtc,
     this.confirmedAtUtc,
@@ -67,8 +69,9 @@ class PaymentDetail {
       gatewayPaymentId: json['gatewayPaymentId']?.toString(),
       status: json['status']?.toString() ?? 'Unknown',
       amountCents: json['amountCents'] as int? ?? 0,
-      netCents: json['netCents'] as int? ?? 0,
-      billingType: json['billingType']?.toString() ?? '',
+      netCents: json['netCents'] as int?,
+      canSync: json['canSync'] as bool? ?? true,
+      billingType: json['billingType']?.toString() ?? 'Ainda não informado',
       createdAtUtc: DateTime.parse(json['createdAtUtc'] as String),
       confirmedAtUtc: json['confirmedAtUtc'] != null
           ? DateTime.parse(json['confirmedAtUtc'] as String)

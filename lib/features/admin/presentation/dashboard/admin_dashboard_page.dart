@@ -6,6 +6,7 @@ import '../shell/admin_session_controller.dart';
 import '../widgets/admin_metric_card.dart';
 import '../widgets/admin_metric_grid.dart';
 import '../widgets/admin_state_widgets.dart';
+import '../widgets/admin_live_refresh.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -14,9 +15,11 @@ class AdminDashboardPage extends StatefulWidget {
   State<AdminDashboardPage> createState() => _AdminDashboardPageState();
 }
 
-class _AdminDashboardPageState extends State<AdminDashboardPage> {
+class _AdminDashboardPageState extends State<AdminDashboardPage>
+    with AdminLiveRefresh<AdminDashboardPage> {
   late DashboardRepository _repository;
 
+  bool _isRefreshing = false;
   Future<DashboardSummary>? _summaryFuture;
   Future<List<dynamic>>? _attendanceFuture;
   Future<List<dynamic>>? _paymentsFuture;
@@ -26,16 +29,31 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   void initState() {
     super.initState();
     _repository = DashboardRepository(AdminSessionController.instance.api);
-    _loadData();
+    refreshData();
   }
 
-  void _loadData() {
+  @override
+  Future<void> refreshData() async {
+    if (_isRefreshing) return;
+    _isRefreshing = true;
     setState(() {
       _summaryFuture = _repository.getSummary();
       _attendanceFuture = _repository.getRecentAttendance();
       _paymentsFuture = _repository.getRecentPayments();
       _activityFuture = _repository.getActivity(limit: 10);
     });
+    try {
+      await Future.wait([
+        _summaryFuture!,
+        _attendanceFuture!,
+        _paymentsFuture!,
+        _activityFuture!,
+      ]);
+    } catch (_) {
+      // Each FutureBuilder displays the error for its own request.
+    } finally {
+      _isRefreshing = false;
+    }
   }
 
   @override
@@ -151,6 +169,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 label: const Text('Ver Presença'),
               ),
               OutlinedButton.icon(
+                onPressed: refreshData,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Atualizar painel'),
+              ),
+              OutlinedButton.icon(
                 onPressed: () => AppNavigation.go(context, '/admin/pagamentos'),
                 icon: const Icon(Icons.payments),
                 label: const Text('Ver Pagamentos'),
@@ -173,7 +196,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           return SizedBox(
               height: 150,
               child: AdminErrorState(
-                  message: 'Falha ao carregar resumo.', onRetry: _loadData));
+                  message: 'Falha ao carregar resumo.', onRetry: refreshData));
         }
 
         final data = snapshot.data!;
@@ -194,11 +217,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               progressValue: '${(rsvpProg * 100).toStringAsFixed(1)}%',
             ),
             AdminMetricCard(
-              label: 'ARRECADAÇÃO',
+              label: 'ARRECADAÇÃO CONFIRMADA',
               value:
-                  'R\$ ${(data.payments.totalReceivedCents / 100).toStringAsFixed(2)}',
+                  'R\$ ${(data.payments.totalRaisedCents / 100).toStringAsFixed(2)}',
               icon: Icons.savings,
               iconColor: Theme.of(context).colorScheme.secondary,
+            ),
+            AdminMetricCard(
+              label: 'VALORES RECEBIDOS',
+              value:
+                  'R\$ ${(data.payments.totalReceivedCents / 100).toStringAsFixed(2)}',
+              icon: Icons.account_balance,
             ),
             AdminMetricCard(
               label: 'PRODUTOS ATIVOS',
@@ -258,7 +287,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 if (snapshot.hasError) {
                   return AdminErrorState(
                       message: 'Falha ao carregar presença.',
-                      onRetry: _loadData);
+                      onRetry: refreshData);
                 }
 
                 final items = snapshot.data!;
@@ -367,7 +396,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   return const AdminLoadingState();
                 }
                 if (snapshot.hasError) {
-                  return AdminErrorState(message: 'Falha.', onRetry: _loadData);
+                  return AdminErrorState(
+                      message: 'Falha.', onRetry: refreshData);
                 }
 
                 final items = snapshot.data!;
@@ -426,7 +456,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   return const AdminLoadingState();
                 }
                 if (snapshot.hasError) {
-                  return AdminErrorState(message: 'Falha.', onRetry: _loadData);
+                  return AdminErrorState(
+                      message: 'Falha.', onRetry: refreshData);
                 }
 
                 final items = snapshot.data!;

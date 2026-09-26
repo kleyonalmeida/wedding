@@ -132,7 +132,7 @@ class _AdminPaymentDetailPageState extends State<AdminPaymentDetailPage> {
             subtitle:
                 'Referência: ${_payment!.gatewayPaymentId ?? _payment!.id}',
             trailing: FilledButton.icon(
-              onPressed: _isSyncing ? null : _syncPayment,
+              onPressed: _isSyncing || !_payment!.canSync ? null : _syncPayment,
               icon: _isSyncing
                   ? const SizedBox(
                       width: 16,
@@ -219,7 +219,9 @@ class _AdminPaymentDetailPageState extends State<AdminPaymentDetailPage> {
                                             context,
                                             'Valor Líquido',
                                             Text(
-                                                'R\$ ${(_payment!.netCents / 100).toStringAsFixed(2)}',
+                                                _payment!.netCents == null
+                                                    ? 'Ainda não informado'
+                                                    : 'R\$ ${(_payment!.netCents! / 100).toStringAsFixed(2)}',
                                                 style: theme
                                                     .textTheme.titleMedium
                                                     ?.copyWith(
@@ -229,7 +231,9 @@ class _AdminPaymentDetailPageState extends State<AdminPaymentDetailPage> {
                                             context,
                                             'Taxa',
                                             Text(
-                                                'R\$ ${((_payment!.amountCents - _payment!.netCents) / 100).toStringAsFixed(2)}',
+                                                _payment!.netCents == null
+                                                    ? 'Ainda não informada'
+                                                    : 'R\$ ${((_payment!.amountCents - _payment!.netCents!) / 100).toStringAsFixed(2)}',
                                                 style: theme
                                                     .textTheme.bodyMedium
                                                     ?.copyWith(

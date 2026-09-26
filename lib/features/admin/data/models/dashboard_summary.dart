@@ -81,12 +81,16 @@ class DashboardPayments {
   final int confirmed;
   final int cancelled;
   final int totalReceivedCents;
+  final int totalConfirmedCents;
+  final int totalRaisedCents;
 
   DashboardPayments({
     required this.pending,
     required this.confirmed,
     required this.cancelled,
     required this.totalReceivedCents,
+    this.totalConfirmedCents = 0,
+    this.totalRaisedCents = 0,
   });
 
   factory DashboardPayments.fromJson(Map<String, dynamic> json) {
@@ -95,6 +99,10 @@ class DashboardPayments {
       confirmed: json['confirmed'] as int? ?? 0,
       cancelled: json['cancelled'] as int? ?? 0,
       totalReceivedCents: json['totalReceivedCents'] as int? ?? 0,
+      totalConfirmedCents: json['totalConfirmedCents'] as int? ?? 0,
+      totalRaisedCents: json['totalRaisedCents'] as int? ??
+          json['totalReceivedCents'] as int? ??
+          0,
     );
   }
 }

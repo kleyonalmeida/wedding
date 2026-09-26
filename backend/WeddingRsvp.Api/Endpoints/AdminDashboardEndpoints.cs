@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingRsvp.Api.Data;
+using WeddingRsvp.Api.Services;
 
 namespace WeddingRsvp.Api.Endpoints;
 
@@ -27,14 +28,15 @@ public static class AdminDashboardEndpoints
             // Pedidos confirmados por webhook de checkout ou cobrança.
             var paidOrders = await db.GiftOrders.AsNoTracking().CountAsync(o => o.Status == "Confirmed" || o.Status == "Received");
             
-            var payments = await db.Payments.AsNoTracking().ToListAsync();
-            var pendingPayments = payments.Count(p => p.Status == "Pending");
-            var confirmedPayments = payments.Count(p => p.Status == "Confirmed");
-            var cancelledPayments = payments.Count(p => p.Status == "Cancelled" || p.Status == "Overdue");
-            
-            // Receita apenas de pagamentos Received
-            var receivedPayments = payments.Where(p => p.Status == "Received").ToList();
-            var totalReceivedCents = receivedPayments.Sum(p => p.AmountCents - p.RefundedCents);
+            var records = AdminFinancialRecords.Query(db);
+            var pendingPayments = await records.CountAsync(p => p.Status == "Pending");
+            var confirmedPayments = await records.CountAsync(p => p.Status == "Confirmed");
+            var cancelledPayments = await records.CountAsync(p => p.Status == "Cancelled" || p.Status == "Overdue");
+            var totalConfirmedCents = await records.Where(p => p.Status == "Confirmed")
+                .SumAsync(p => (long?)(p.AmountCents - p.RefundedCents)) ?? 0;
+            var totalReceivedCents = await records.Where(p => p.Status == "Received")
+                .SumAsync(p => (long?)(p.AmountCents - p.RefundedCents)) ?? 0;
+            var totalRaisedCents = totalConfirmedCents + totalReceivedCents;
 
             return Results.Ok(new
             {
@@ -60,6 +62,8 @@ public static class AdminDashboardEndpoints
                     pending = pendingPayments,
                     confirmed = confirmedPayments,
                     cancelled = cancelledPayments,
+                    totalConfirmedCents,
+                    totalRaisedCents,
                     totalReceivedCents
                 }
             });
