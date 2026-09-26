@@ -35,6 +35,7 @@ class GiftRepository {
           priceCents: json['priceCents'] as int,
           isBestSeller: json['featured'] ?? false,
           available: json['soldOut'] != true,
+          description: json['description'] as String? ?? json['shortDescription'] as String?,
         );
       }).toList();
 

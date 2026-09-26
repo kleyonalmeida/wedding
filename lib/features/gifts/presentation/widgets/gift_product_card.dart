@@ -61,11 +61,12 @@ class _GiftProductCardState extends State<GiftProductCard> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 16.0),
+                      horizontal: 24.0, vertical: 24.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle(context),
+                      _buildTitleAndDescription(context),
+                      const Spacer(),
                       _buildActionSection(context),
                     ],
                   ),
@@ -109,50 +110,53 @@ class _GiftProductCardState extends State<GiftProductCard> {
     return Stack(
       children: [
         Container(
-          height: 170,
+          height: 256,
           width: double.infinity,
           color: isDark ? Colors.grey[900] : AppColors.surfaceContainerLow,
-          padding: const EdgeInsets.all(16),
-          child: AnimatedScale(
-            scale: _isHovered ? 1.05 : 1.0,
-            duration: const Duration(milliseconds: 500),
-            child: Image.network(
-              widget.product.imageUrl,
-              fit: BoxFit.contain,
-              cacheWidth: (280 * MediaQuery.devicePixelRatioOf(context))
-                  .round()
-                  .clamp(280, 840)
-                  .toInt(),
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.image_not_supported,
-                color: AppColors.outlineVariant,
-                size: 48,
+          child: ClipRect(
+            child: AnimatedScale(
+              scale: _isHovered ? 1.05 : 1.0,
+              duration: const Duration(milliseconds: 500),
+              child: Image.network(
+                widget.product.imageUrl,
+                fit: BoxFit.cover,
+                cacheWidth: (280 * MediaQuery.devicePixelRatioOf(context))
+                    .round()
+                    .clamp(280, 840)
+                    .toInt(),
+                filterQuality: FilterQuality.medium,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported,
+                  color: AppColors.outlineVariant,
+                  size: 48,
+                ),
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2));
+                },
               ),
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2));
-              },
             ),
           ),
         ),
         Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 16,
+          left: 16,
           child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [
-                  isDark
-                      ? Colors.grey[900]!.withValues(alpha: 0.5)
-                      : AppColors.surfaceContainerLow.withValues(alpha: 0.5),
-                  Colors.transparent,
-                ],
+              color: isDark
+                  ? Colors.grey[900]!.withValues(alpha: 0.9)
+                  : AppColors.surfaceContainerLowest.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              widget.product.category.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+                color: AppColors.secondary,
               ),
             ),
           ),
@@ -161,66 +165,127 @@ class _GiftProductCardState extends State<GiftProductCard> {
     );
   }
 
-  Widget _buildTitle(BuildContext context) {
-    return SizedBox(
-      height:
-          48, // Fix height to exactly 2 lines (18 * 1.2 * 2 ≈ 43.2, rounded up to 48 for safety)
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Text(
+  Widget _buildTitleAndDescription(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
           widget.product.name,
-          textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontFamily: 'Bodoni Moda',
-            fontSize: 18,
+            fontSize: 24,
             height: 1.2,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-      ),
+        const SizedBox(height: 10),
+        if (widget.product.description != null &&
+            widget.product.description!.isNotEmpty)
+          Text(
+            widget.product.description!,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+      ],
     );
   }
 
   Widget _buildActionSection(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          formatGiftPrice(widget.product.priceCents),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            const Expanded(
+              child: Text(
+                'PRESENTE SUGERIDO',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.0,
+                  color: Colors.grey,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              formatGiftPrice(widget.product.priceCents),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: widget.product.available ? widget.onGiftPressed : null,
+          style: ButtonStyle(
+            padding: WidgetStateProperty.all(
+                const EdgeInsets.symmetric(vertical: 16)),
+            elevation: WidgetStateProperty.all(0),
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.disabled)) return Colors.grey;
+              if (states.contains(WidgetState.hovered)) {
+                return Color.lerp(AppColors.primary, Colors.black, 0.2);
+              }
+              return AppColors.primary;
+            }),
+            shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (widget.product.available) ...[
+                  const Icon(Icons.redeem, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  widget.product.available
+                      ? 'Presentear os Noivos'
+                      : 'PRESENTEADO',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 2.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: widget.product.available ? widget.onGiftPressed : null,
-            style: ButtonStyle(
-              padding: WidgetStateProperty.all(
-                  const EdgeInsets.symmetric(vertical: 16)),
-              elevation: WidgetStateProperty.all(0),
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.disabled)) return Colors.grey;
-                if (states.contains(WidgetState.hovered)) {
-                  // Mix primary with 20% black to make a darker brown
-                  return Color.lerp(AppColors.primary, Colors.black, 0.2);
-                }
-                return AppColors.primary;
-              }),
-            ),
-            child: Text(
-              widget.product.available ? 'PRESENTEAR' : 'PRESENTEADO',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 2.0,
-                color: Colors.white,
+        const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.chat_bubble_outline,
+                  size: 14, color: AppColors.secondary),
+              SizedBox(width: 6),
+              Text(
+                'Inclui cartão de felicitações',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ],

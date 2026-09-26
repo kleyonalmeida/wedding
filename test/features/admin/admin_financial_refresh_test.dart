@@ -22,7 +22,8 @@ class _RefreshProbeState extends State<RefreshProbe>
 }
 
 void main() {
-  test('arrecadação confirmada inclui confirmação sem confundir recebimento', () {
+  test('arrecadação confirmada inclui confirmação sem confundir recebimento',
+      () {
     final summary = DashboardSummary.fromJson({
       'payments': {
         'pending': 1,
@@ -60,9 +61,11 @@ void main() {
     ));
     await tester.pump(const Duration(seconds: 30));
     expect(calls, 1);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     await tester.pump(const Duration(seconds: 60));
     expect(calls, 1);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(calls, 2);

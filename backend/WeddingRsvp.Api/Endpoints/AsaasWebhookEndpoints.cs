@@ -66,6 +66,10 @@ public static class AsaasWebhookEndpoints
                     ? paymentId.GetString() : null;
                 var gatewayCheckoutId = root.TryGetProperty("checkout", out var checkoutElem) && checkoutElem.TryGetProperty("id", out var checkoutId)
                     ? checkoutId.GetString() : null;
+                if (gatewayCheckoutId == null && gatewayPaymentId != null &&
+                    paymentElem.TryGetProperty("checkoutSession", out var session) &&
+                    session.ValueKind == JsonValueKind.String)
+                    gatewayCheckoutId = session.GetString();
                 if (gatewayPaymentId == null && gatewayCheckoutId == null) return Results.BadRequest("Missing payment or checkout.");
 
                 var webhookEvent = new AsaasWebhookEvent

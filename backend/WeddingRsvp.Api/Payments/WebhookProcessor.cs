@@ -65,7 +65,7 @@ public class WebhookProcessor : BackgroundService
         using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var document = JsonDocument.Parse(evt.Payload);
+            using var document = JsonDocument.Parse(evt.Payload);
             if (evt.GatewayCheckoutId != null && evt.GatewayPaymentId == null)
             {
                 var checkout = document.RootElement.GetProperty("checkout");
@@ -101,8 +101,8 @@ public class WebhookProcessor : BackgroundService
             var statusStr = paymentNode.GetProperty("status").GetString();
             var newStatus = PaymentStatusMapper.MapAsaasStatus(statusStr!);
             
-            var extRefNode = paymentNode.GetProperty("externalReference");
-            string? extRef = extRefNode.ValueKind == JsonValueKind.String ? extRefNode.GetString() : null;
+            var extRef = paymentNode.TryGetProperty("externalReference", out var extRefNode) &&
+                extRefNode.ValueKind == JsonValueKind.String ? extRefNode.GetString() : null;
             
             var netValue = paymentNode.GetProperty("netValue").GetDecimal();
             var netCents = (long)(netValue * 100);
@@ -115,16 +115,41 @@ public class WebhookProcessor : BackgroundService
 
             if (payment == null)
             {
-                if (string.IsNullOrEmpty(extRef) || !Guid.TryParse(extRef, out var attemptId))
+                PaymentAttempt? attempt = null;
+
+                if (!string.IsNullOrEmpty(extRef))
                 {
-                    throw new Exception("Payment not found and no valid external reference.");
+                    if (!Guid.TryParse(extRef, out var attemptId))
+                        throw new InvalidOperationException("Invalid payment external reference.");
+
+                    attempt = await db.Set<PaymentAttempt>()
+                        .Include(a => a.Order)
+                        .FirstOrDefaultAsync(a => a.Id == attemptId, cancellationToken);
+                }
+                else
+                {
+                    var checkoutId =
+                        paymentNode.TryGetProperty("checkoutSession", out var checkoutNode) &&
+                        checkoutNode.ValueKind == JsonValueKind.String
+                            ? checkoutNode.GetString()
+                            : null;
+
+                    if (string.IsNullOrEmpty(checkoutId))
+                        throw new InvalidOperationException(
+                            "Payment has no external reference or checkout session.");
+
+                    attempt = await db.Set<PaymentAttempt>()
+                        .Include(a => a.Order)
+                        .FirstOrDefaultAsync(
+                            a => a.GatewayCheckoutId == checkoutId,
+                            cancellationToken);
                 }
 
-                var attempt = await db.Set<PaymentAttempt>().Include(a => a.Order).FirstOrDefaultAsync(a => a.Id == attemptId, cancellationToken);
                 if (attempt == null || attempt.Order == null)
                 {
                     throw new Exception("Attempt or Order not found.");
                 }
+
                 if (gatewayValueCents != attempt.Order.TotalCents)
                     throw new InvalidOperationException("Payment value does not match order.");
 

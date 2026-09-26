@@ -92,7 +92,7 @@ class GiftProductGrid extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
-                mainAxisExtent: 370,
+                mainAxisExtent: 720,
                 crossAxisSpacing: 24,
                 mainAxisSpacing: 24,
               ),

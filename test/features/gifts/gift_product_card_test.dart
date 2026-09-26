@@ -18,6 +18,7 @@ void main() {
         priceCents: 4321,
         isBestSeller: false,
         available: available,
+        description: 'Um belo presente para os noivos',
       );
 
   test('carrinho soma centavos e formata reais', () {
@@ -34,8 +35,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SizedBox(
-          width: 260,
-          height: 450,
+          width: 350,
+          height: 600,
           child: GiftProductCard(
             product: gift(available: false),
             onGiftPressed: () => presses++,
@@ -46,6 +47,8 @@ void main() {
     expect(find.text('PRESENTEADO'), findsOneWidget);
     expect(find.byType(ColorFiltered), findsWidgets);
     expect(find.text('R\$ 43,21'), findsOneWidget);
+    expect(find.text('CASA'), findsOneWidget);
+    expect(find.text('Um belo presente para os noivos'), findsOneWidget);
     await tester.tap(find.text('PRESENTEADO'));
     expect(presses, 0);
   });
@@ -56,8 +59,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SizedBox(
-          width: 260,
-          height: 450,
+          width: 350,
+          height: 600,
           child: GiftProductCard(
             product: gift(available: true),
             onGiftPressed: () => presses++,
@@ -66,7 +69,9 @@ void main() {
       ),
     ));
     expect(find.text('R\$ 43,21'), findsOneWidget);
-    await tester.tap(find.text('PRESENTEAR'));
+    expect(find.text('Presentear os Noivos'), findsOneWidget);
+    expect(find.text('Inclui cartão de felicitações'), findsOneWidget);
+    await tester.tap(find.text('Presentear os Noivos'));
     expect(presses, 1);
   });
 
@@ -90,7 +95,7 @@ void main() {
     ));
     expect(tester.getSize(find.byType(GiftProductCard).first).width,
         greaterThan(300));
-    expect(find.text('PRESENTEAR'), findsOneWidget);
+    expect(find.text('Presentear os Noivos'), findsOneWidget);
     expect(find.text('PRESENTEADO'), findsOneWidget);
   });
 
