@@ -15,8 +15,9 @@ class GiftFilterPanel extends StatelessWidget {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppColors.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -28,9 +29,9 @@ class GiftFilterPanel extends StatelessWidget {
               Text(
                 'FILTROS ATIVOS:',
                 style: TextStyle(
-                  color: onSurface,
+                  color: AppColors.onPrimaryContainer,
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
                 ),
               ),
@@ -47,6 +48,7 @@ class GiftFilterPanel extends StatelessWidget {
                     style: TextStyle(
                       color: AppColors.secondary,
                       fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -81,13 +83,14 @@ class GiftFilterPanel extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(
-            color: onSurface,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
+            color: AppColors.onPrimaryFixed,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            fontFamily: 'Bodoni Moda',
           ),
         ),
-        iconColor: onSurface,
-        collapsedIconColor: onSurface,
+        iconColor: AppColors.onPrimaryFixed,
+        collapsedIconColor: AppColors.onPrimaryFixed,
         initiallyExpanded: true,
         children: items.map((item) {
           final isSelected = selectedItems.contains(item);
@@ -112,7 +115,8 @@ class GiftFilterPanel extends StatelessWidget {
                     item,
                     style: TextStyle(
                       fontSize: 14,
-                      color: isSelected ? AppColors.primary : onSurface.withOpacity(0.7),
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? AppColors.primary : AppColors.onPrimaryFixed,
                     ),
                   ),
                 ],

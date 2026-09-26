@@ -18,4 +18,5 @@ class AppColors {
   static const Color primaryContainer = Color(0xFFb8a291);
   static const Color onPrimaryContainer = Color(0xFF48392c);
   static const Color outline = Color(0xFF80756e);
+  static const Color onPrimaryFixed = Color(0xFF26190e);
 }

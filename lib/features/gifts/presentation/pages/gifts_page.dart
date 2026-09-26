@@ -95,9 +95,27 @@ class _GiftsPageState extends State<GiftsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (!isMobile) ...[
-                      SizedBox(
-                        width: 256,
-                        child: GiftFilterPanel(controller: _catalogController),
+                      AnimatedBuilder(
+                        animation: _scrollController,
+                        builder: (context, child) {
+                          double offsetY = 0;
+                          if (_scrollController.hasClients) {
+                            // O Row começa em y = 120 (padding) + 32 = 152.
+                            // Vamos deixar sticky logo abaixo do header, traduzindo o Y.
+                            final offset = _scrollController.offset;
+                            if (offset > 120) {
+                              offsetY = offset - 120;
+                            }
+                          }
+                          return Transform.translate(
+                            offset: Offset(0, offsetY),
+                            child: child,
+                          );
+                        },
+                        child: SizedBox(
+                          width: 256,
+                          child: GiftFilterPanel(controller: _catalogController),
+                        ),
                       ),
                       const SizedBox(width: 32),
                     ],
