@@ -150,6 +150,16 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
               productId, _selectedImageBytes!, _selectedImage!.name);
           _selectedImage = null;
           _selectedImageBytes = null;
+        } on ApiException catch (e) {
+          if (mounted) {
+            setState(() {
+              _error = e.message == null
+                  ? 'O produto foi salvo, mas o upload da imagem falhou (HTTP ${e.statusCode}). Tente novamente.'
+                  : 'O produto foi salvo, mas o upload da imagem falhou: ${e.message}';
+              _isLoading = false;
+            });
+          }
+          return;
         } catch (_) {
           if (mounted) {
             setState(() {

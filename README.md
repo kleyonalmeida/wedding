@@ -22,6 +22,8 @@ No admin, a seção Pagamentos mostra as cobranças recebidas pelos eventos de p
 
 Não é preciso cadastrar os presentes, criar links de pagamento ou gerar cobranças manualmente no Asaas: o site envia nome, quantidade e valor de cada item quando o convidado inicia o pagamento. Na conta Asaas, crie uma chave de API para o ambiente usado e configure um webhook ativo com URL `https://seu-dominio/api/webhooks/asaas`, token próprio de 32 a 255 caracteres (diferente da chave de API), versão 3 e eventos de checkout e pagamento. No `.env`, informe `ASAAS_API_KEY`, `ASAAS_WEBHOOK_AUTH_TOKEN`, `ASAAS_ENVIRONMENT` e `PUBLIC_BASE_URL`; o token deve ser igual ao cadastrado no webhook. Teste primeiro no Sandbox.
 
+Chaves recentes do Asaas começam com `$aact_hmlg_` (Sandbox) ou `$aact_prod_` (produção). No `.env` usado pelo Docker Compose, coloque o valor completo entre aspas simples, por exemplo `ASAAS_API_KEY='$aact_hmlg_...'`, para preservar o `$` literal. Não duplique o `$` no `.env`. O `__` aparece apenas nos nomes `Asaas__ApiKey` e `Asaas__WebhookAuthToken` do `docker-compose.yml`, que mapeiam para a configuração .NET. Após alterar o `.env`, recrie o serviço da API para aplicar os novos valores. Se a criação do checkout retornar HTTP 502, consulte os logs da API pelo identificador da tentativa antes de repetir o pedido; o checkout anterior pode ter sido criado mesmo sem resposta recebida.
+
 ## Verificação
 
 ```sh

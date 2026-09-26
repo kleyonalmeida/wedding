@@ -204,7 +204,7 @@ public static class AdminProductEndpoints
                 File.Delete(store.PathFor(saved.Key));
                 throw;
             }
-        }).DisableAntiforgery().WithMetadata(new RequestSizeLimitAttribute(6 * 1024 * 1024));
+        }).DisableAntiforgery().WithMetadata(new RequestSizeLimitAttribute(10 * 1024 * 1024));
         
     }
 

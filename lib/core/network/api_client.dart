@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart'
     as platform;
 
 class ApiException implements Exception {
   final int statusCode;
-  const ApiException(this.statusCode);
+  final String? message;
+  const ApiException(this.statusCode, [this.message]);
 
   @override
-  String toString() => 'HTTP $statusCode';
+  String toString() => message == null ? 'HTTP $statusCode' : 'HTTP $statusCode: $message';
 }
 
 class ApiClient {
@@ -63,8 +65,16 @@ class ApiClient {
       String endpoint, Uint8List bytes, String filename) async {
     final request = http.MultipartRequest('POST', _uri(endpoint));
     if (_csrfToken != null) request.headers['X-CSRF-TOKEN'] = _csrfToken!;
-    request.files
-        .add(http.MultipartFile.fromBytes('image', bytes, filename: filename));
+    final extension = filename.split('.').last.toLowerCase();
+    final mimeType = switch (extension) {
+      'jpg' || 'jpeg' => 'jpeg',
+      'png' => 'png',
+      'webp' => 'webp',
+      _ => null,
+    };
+    request.files.add(http.MultipartFile.fromBytes('image', bytes,
+        filename: filename,
+        contentType: mimeType == null ? null : MediaType('image', mimeType)));
     return _decode(await http.Response.fromStream(await _client.send(request)));
   }
 
@@ -78,7 +88,14 @@ class ApiClient {
     if (response.statusCode == 403) onForbidden?.call();
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(response.statusCode);
+      String? message;
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map<String, dynamic> && body['message'] is String) {
+          message = body['message'] as String;
+        }
+      } catch (_) {}
+      throw ApiException(response.statusCode, message);
     }
     if (response.body.isEmpty) return null;
     return jsonDecode(response.body);

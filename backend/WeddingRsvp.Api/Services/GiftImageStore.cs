@@ -13,9 +13,9 @@ public sealed class GiftImageStore
 
     public async Task<(string Key, string MimeType, long Length, int Width, int Height)> SaveAsync(IFormFile image, CancellationToken cancellationToken)
     {
-        if (image.Length == 0 || image.Length > 5 * 1024 * 1024)
-            throw new ArgumentException("A imagem deve ter até 5 MiB.");
-        if (image.ContentType is not ("image/jpeg" or "image/png" or "image/webp"))
+        if (image.Length == 0 || image.Length > 10 * 1024 * 1024)
+            throw new ArgumentException("A imagem deve ter até 10 MiB.");
+        if (image.ContentType is not ("image/jpeg" or "image/png" or "image/webp" or "application/octet-stream"))
             throw new ArgumentException("Envie uma imagem JPEG, PNG ou WebP válida.");
         await using var input = image.OpenReadStream();
         using var buffer = new MemoryStream();

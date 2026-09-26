@@ -22,7 +22,8 @@ public static class GiftOrderEndpoints
             GiftOrderRequest request,
             AppDbContext db,
             IPaymentGateway paymentGateway,
-            IConfiguration configuration) =>
+            IConfiguration configuration,
+            ILoggerFactory loggerFactory) =>
         {
             if (string.IsNullOrWhiteSpace(request.SenderName) || request.SenderName.Length > 100 || request.Message?.Length > 500 || request.Items == null || !request.Items.Any() || request.Items.Count > 50 || request.Items.Any(i => i.Quantity < 1 || i.Quantity > 100) || request.Items.Select(i => i.GiftId).Distinct().Count() != request.Items.Count ||
                 request.IdempotencyKey?.Length != 64 || !request.IdempotencyKey.All(Uri.IsHexDigit))
@@ -138,8 +139,10 @@ public static class GiftOrderEndpoints
 
                 return Results.Ok(new GiftOrderResponse(order.Id, attempt.CheckoutUrl!, accessToken));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                loggerFactory.CreateLogger(nameof(GiftOrderEndpoints))
+                    .LogError(ex, "Checkout creation failed for attempt {AttemptId} and order {OrderId}", attempt.Id, order.Id);
                 attempt.Status = "UnknownNeedsReview";
                 attempt.UpdatedAtUtc = DateTimeOffset.UtcNow;
                 await db.SaveChangesAsync();
