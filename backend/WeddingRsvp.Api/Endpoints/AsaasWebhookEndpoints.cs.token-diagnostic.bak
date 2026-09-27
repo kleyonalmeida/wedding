@@ -45,7 +45,7 @@ public static class AsaasWebhookEndpoints
                     System.Text.Encoding.UTF8.GetBytes(tokenHeader),
                     System.Text.Encoding.UTF8.GetBytes(configuredToken)))
             {
-                logger.LogWarning("Invalid webhook token. HeaderCount={HeaderCount}, ReceivedLength={ReceivedLength}, ConfiguredLength={ConfiguredLength}, MatchesAfterTrim={MatchesAfterTrim}", request.Headers["asaas-access-token"].Count, tokenHeader.Length, configuredToken.Length, string.Equals(tokenHeader.Trim(), configuredToken.Trim(), StringComparison.Ordinal));
+                logger.LogWarning("Invalid webhook token.");
                 return Results.Unauthorized();
             }
 
@@ -66,10 +66,6 @@ public static class AsaasWebhookEndpoints
                     ? paymentId.GetString() : null;
                 var gatewayCheckoutId = root.TryGetProperty("checkout", out var checkoutElem) && checkoutElem.TryGetProperty("id", out var checkoutId)
                     ? checkoutId.GetString() : null;
-                if (gatewayCheckoutId == null && gatewayPaymentId != null &&
-                    paymentElem.TryGetProperty("checkoutSession", out var session) &&
-                    session.ValueKind == JsonValueKind.String)
-                    gatewayCheckoutId = session.GetString();
                 if (gatewayPaymentId == null && gatewayCheckoutId == null) return Results.BadRequest("Missing payment or checkout.");
 
                 var webhookEvent = new AsaasWebhookEvent
