@@ -65,6 +65,20 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay.ttf
+    - family: Bodoni Moda
+      fonts:
+        - asset: assets/fonts/BodoniModa.ttf
+    - family: Work Sans
+      fonts:
+        - asset: assets/fonts/WorkSans.ttf
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans.ttf
+
   assets:
     - assets/images/
     - assets/images/carousel/

@@ -11,6 +11,7 @@ class AppColors {
 
   // New colors from gift.html (Tailwind theme)
   static const Color outlineVariant = Color(0xFFd1c4bb);
+  static const Color surfaceContainerHigh = Color(0xFFe4e2e1);
   static const Color surfaceContainer = Color(0xFFf0eded);
   static const Color surfaceContainerLow = Color(0xFFf6f3f2);
   static const Color surfaceContainerLowest = Color(0xFFffffff);

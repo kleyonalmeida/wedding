@@ -4,7 +4,8 @@ import 'package:wedding_app/features/gifts/presentation/widgets/gifts_closing_se
 
 void main() {
   group('GiftsClosingSection', () {
-    testWidgets('should render icon, title, and body text', (WidgetTester tester) async {
+    testWidgets('should render icon, title, and body text',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -27,7 +28,8 @@ void main() {
       );
     });
 
-    testWidgets('should have max width constraint and correct padding', (WidgetTester tester) async {
+    testWidgets('should have max width constraint and correct padding',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -38,12 +40,13 @@ void main() {
 
       final paddingFinder = find.byKey(const Key('closing_section_padding'));
       final paddingWidget = tester.widget<Padding>(paddingFinder);
-      
+
       // Expected padding vertical 24px (py-6)
       expect(paddingWidget.padding.resolve(TextDirection.ltr).top, 24.0);
       expect(paddingWidget.padding.resolve(TextDirection.ltr).bottom, 24.0);
 
-      final containerFinder = find.byKey(const Key('closing_section_constraints'));
+      final containerFinder =
+          find.byKey(const Key('closing_section_constraints'));
       final containerWidget = tester.widget<ConstrainedBox>(containerFinder);
 
       expect(containerWidget.constraints.maxWidth, 672.0);

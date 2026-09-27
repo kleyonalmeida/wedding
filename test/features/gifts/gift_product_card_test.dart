@@ -47,7 +47,7 @@ void main() {
     expect(find.text('PRESENTEADO'), findsOneWidget);
     expect(find.byType(ColorFiltered), findsWidgets);
     expect(find.text('R\$ 43,21'), findsOneWidget);
-    expect(find.text('CASA'), findsOneWidget);
+    expect(find.text('NOSSO NOVO LAR'), findsOneWidget);
     expect(find.text('Um belo presente para os noivos'), findsOneWidget);
     await tester.tap(find.text('PRESENTEADO'));
     expect(presses, 0);
@@ -76,27 +76,28 @@ void main() {
   });
 
   testWidgets('grade móvel mantém botão inteiro em uma coluna', (tester) async {
+    tester.view.physicalSize = const Size(390, 1500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final cart = CartController();
+    addTearDown(cart.dispose);
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: SizedBox(
-            width: 390,
-            child: GiftProductGrid(
-              products: [gift(available: true), gift(available: false)],
-              isLoading: false,
-              hasMore: false,
-              onLoadMore: () {},
-              onRetry: () {},
-              cartController: CartController(),
-            ),
-          ),
-        ),
-      ),
-    ));
+        home: Scaffold(
+            body: CustomScrollView(slivers: [
+      GiftProductGrid(
+          products: [gift(available: true), gift(available: false)],
+          isLoading: false,
+          hasMore: false,
+          onLoadMore: () {},
+          onRetry: () {},
+          cartController: cart),
+    ]))));
     expect(tester.getSize(find.byType(GiftProductCard).first).width,
         greaterThan(300));
     expect(find.text('Presentear os Noivos'), findsOneWidget);
     expect(find.text('PRESENTEADO'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('carrinho e resumo exibem total no celular', (tester) async {

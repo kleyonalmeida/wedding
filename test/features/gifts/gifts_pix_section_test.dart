@@ -4,6 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:wedding_app/features/gifts/presentation/widgets/gifts_pix_section.dart';
 
 void main() {
+  testWidgets('PIX sem configuração fica oculto', (tester) async {
+    await tester
+        .pumpWidget(const MaterialApp(home: Scaffold(body: GiftsPixSection())));
+    expect(find.byIcon(Icons.copy), findsNothing);
+    expect(find.text('Enviar Recado com Presente'), findsNothing);
+  });
   Widget buildTestableWidget(Widget child) {
     return MaterialApp(
       home: Scaffold(
@@ -18,9 +24,13 @@ void main() {
     );
   }
 
-  testWidgets('GiftsPixSection exibe textos principais e chave PIX', (tester) async {
+  testWidgets('GiftsPixSection exibe textos principais e chave PIX',
+      (tester) async {
     await tester.pumpWidget(buildTestableWidget(
-      GiftsPixSection(onAddMessage: () {}),
+      GiftsPixSection(
+          pixKey: 'pix-teste@example.com',
+          beneficiary: 'Beneficiário teste',
+          onAddMessage: () {}),
     ));
 
     expect(find.text('Contribuição Afetiva Personalizada'), findsOneWidget);
@@ -32,28 +42,37 @@ void main() {
     expect(find.byIcon(Icons.copy), findsOneWidget);
   });
 
-  testWidgets('GiftsPixSection aciona callback de mensagem ao clicar no botão', (tester) async {
+  testWidgets('GiftsPixSection aciona callback de mensagem ao clicar no botão',
+      (tester) async {
     bool messageClicked = false;
 
     await tester.pumpWidget(buildTestableWidget(
-      GiftsPixSection(onAddMessage: () {
-        messageClicked = true;
-      }),
+      GiftsPixSection(
+          pixKey: 'pix-teste@example.com',
+          beneficiary: 'Beneficiário teste',
+          onAddMessage: () {
+            messageClicked = true;
+          }),
     ));
 
     await tester.tap(find.text('Enviar Recado com Presente'));
     expect(messageClicked, isTrue);
   });
 
-  testWidgets('GiftsPixSection copia chave PIX ao clicar no botão de copiar', (tester) async {
+  testWidgets('GiftsPixSection copia chave PIX ao clicar no botão de copiar',
+      (tester) async {
     final List<MethodCall> log = [];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
 
     await tester.pumpWidget(buildTestableWidget(
-      GiftsPixSection(onAddMessage: () {}),
+      GiftsPixSection(
+          pixKey: 'pix-teste@example.com',
+          beneficiary: 'Beneficiário teste',
+          onAddMessage: () {}),
     ));
 
     await tester.tap(find.byIcon(Icons.copy));
@@ -61,6 +80,6 @@ void main() {
 
     expect(log, isNotEmpty);
     expect(log.last.method, 'Clipboard.setData');
-    expect(log.last.arguments, containsPair('text', 'amor@kleyoneliandra.com.br'));
+    expect(log.last.arguments, containsPair('text', 'pix-teste@example.com'));
   });
 }

@@ -43,8 +43,51 @@ public class GiftOrderEndpointsTests
         var repeatedBody = await repeated.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
         Assert.Equal(id, repeatedBody.GetProperty("id").GetString());
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync($"/api/gift-orders/{id}")).StatusCode);
+        
+        var notFound = await client.GetAsync($"/api/gift-orders/{id}?token=invalid_token");
+        Assert.Equal(HttpStatusCode.NotFound, notFound.StatusCode);
+        
         var status = await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/gift-orders/{id}?token={key}");
-        Assert.False(status.TryGetProperty("totalCents", out _));
+        Assert.True(status.TryGetProperty("totalCents", out _));
+        Assert.Equal(2500, status.GetProperty("totalCents").GetInt64());
+        Assert.Equal("BRL", status.GetProperty("currency").GetString());
+        Assert.Equal("Convidado", status.GetProperty("senderName").GetString());
+        Assert.Equal("Felicidades", status.GetProperty("message").GetString());
+        Assert.True(status.TryGetProperty("items", out var items));
+        Assert.Equal(1, items.GetArrayLength());
+        Assert.Equal(2, items[0].GetProperty("quantity").GetInt32());
+    }
+
+    [Fact]
+    public async Task DetailsUseCompletedPaymentInsteadOfNewerPendingAttempt()
+    {
+        using var factory = new Factory();
+        using var client = factory.CreateClient();
+        var orderId = Guid.NewGuid();
+        var attemptId = Guid.NewGuid();
+        var token = new string('E', 64);
+        var receivedAt = DateTimeOffset.UtcNow.AddMinutes(-10);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.GiftOrders.Add(new GiftOrder {
+                Id = orderId, SenderName = "Convidado", TotalCents = 2500, Status = "Received",
+                CreatedAtUtc = receivedAt.AddMinutes(-20),
+                PublicTokenHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)))
+            });
+            db.PaymentAttempts.Add(new PaymentAttempt { Id = attemptId, OrderId = orderId, Gateway = "Asaas", Environment = "Sandbox", IdempotencyKey = token, CreatedAtUtc = receivedAt.AddMinutes(-20) });
+            db.Payments.AddRange(
+                new Payment { Id = Guid.NewGuid(), OrderId = orderId, AttemptId = attemptId, Gateway = "Asaas", Environment = "Sandbox", GatewayPaymentId = "completed", Status = "Received", BillingType = "PIX", AmountCents = 2500, CreatedAtUtc = receivedAt.AddMinutes(-5), ReceivedAtUtc = receivedAt },
+                new Payment { Id = Guid.NewGuid(), OrderId = orderId, AttemptId = attemptId, Gateway = "Asaas", Environment = "Sandbox", GatewayPaymentId = "pending", Status = "Pending", BillingType = "CREDIT_CARD", AmountCents = 2500, CreatedAtUtc = receivedAt.AddMinutes(5) }
+            );
+            await db.SaveChangesAsync();
+        }
+        var details = await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/gift-orders/{orderId}?token={token}");
+        Assert.Equal("PIX", details.GetProperty("paymentMethod").GetString());
+        Assert.Equal(receivedAt, details.GetProperty("receivedAtUtc").GetDateTimeOffset());
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, details.GetProperty("confirmedAtUtc").ValueKind);
+        Assert.False(details.TryGetProperty("gatewayPaymentId", out _));
+        Assert.False(details.TryGetProperty("publicTokenHash", out _));
     }
 
     [Fact]

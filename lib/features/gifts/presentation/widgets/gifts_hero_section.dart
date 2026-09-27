@@ -17,7 +17,7 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
@@ -34,7 +34,17 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
       curve: Curves.easeOut,
     ));
 
-    _controller.forward();
+    // Start after reading the platform movement preference.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.value = 1;
+    } else if (_controller.status == AnimationStatus.dismissed) {
+      _controller.forward();
+    }
   }
 
   @override
@@ -50,7 +60,7 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 20 : 0),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 896),
           child: FadeTransition(
@@ -60,14 +70,14 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
               child: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: isSmallScreen ? 32 : 56,
-                  vertical: 32,
+                  vertical: isSmallScreen ? 32 : 56,
                 ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface, // 'fundo claro'
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -77,22 +87,22 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
                   children: [
                     // Floral decorations via CustomPainter
                     Positioned(
-                      top: 0,
-                      left: 0,
+                      top: -24,
+                      right: -24,
                       child: CustomPaint(
-                        size: const Size(64, 64),
+                        size: const Size(160, 160),
                         painter: _FloralPainter(),
                       ),
                     ),
                     Positioned(
-                      bottom: 0,
-                      right: 0,
+                      bottom: -20,
+                      left: -20,
                       child: CustomPaint(
-                        size: const Size(64, 64),
+                        size: const Size(160, 160),
                         painter: _FloralPainter(flip: true),
                       ),
                     ),
-                    
+
                     // Main content
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -111,15 +121,20 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
                           'Lista de Presentes & Memórias',
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontFamily: 'Playfair Display',
+                            fontSize: isSmallScreen ? 32 : 48,
+                            height: isSmallScreen ? 40 / 32 : 56 / 48,
+                            color: theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Agradecemos de coração por fazerem parte desta nova etapa das nossas vidas. '
-                          'Aqui, vocês podem escolher como nos presentear e deixar um recado especial para nós!',
+                          'A sua presença na celebração da nossa união é o maior presente que poderíamos receber. Caso deseje nos homenagear de forma especial, preparamos com carinho esta lista de experiências e mimos que transformarão o início da nossa jornada em memórias inesquecíveis.',
                           style: theme.textTheme.bodyLarge?.copyWith(
+                            fontFamily: 'Work Sans',
+                            fontSize: 16,
+                            height: 28 / 16,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
@@ -130,9 +145,18 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
                           runSpacing: 16,
                           alignment: WrapAlignment.center,
                           children: const [
-                            _InfoBadge(text: 'Experiências Reais', icon: Icons.flight_takeoff),
-                            _InfoBadge(text: 'Contribuição Afetiva', icon: Icons.favorite_border),
-                            _InfoBadge(text: 'Recado aos Noivos', icon: Icons.mail_outline),
+                            _InfoBadge(
+                                text: 'Experiências Reais',
+                                subtitle: 'Momentos da lua de mel e afeto',
+                                icon: Icons.favorite),
+                            _InfoBadge(
+                                text: 'Contribuição Afetiva',
+                                subtitle: 'Seguro, simples e com dedicatória',
+                                icon: Icons.volunteer_activism),
+                            _InfoBadge(
+                                text: 'Recado aos Noivos',
+                                subtitle: 'Uma mensagem de carinho',
+                                icon: Icons.mail_outline),
                           ],
                         ),
                       ],
@@ -150,55 +174,56 @@ class _GiftsHeroSectionState extends State<GiftsHeroSection>
 
 class _InfoBadge extends StatelessWidget {
   final String text;
+  final String subtitle;
   final IconData icon;
-
-  const _InfoBadge({
-    required this.text,
-    required this.icon,
-  });
-
+  const _InfoBadge(
+      {required this.text, required this.subtitle, required this.icon});
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: theme.colorScheme.primary),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
+    final colors = Theme.of(context).colorScheme;
+    return ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 280),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(4)),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 24, color: colors.secondary),
+            const SizedBox(width: 12),
+            Flexible(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                  Text(text,
+                      style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 11,
+                          color: colors.secondary)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(fontSize: 14)),
+                ])),
+          ]),
+        ));
   }
 }
 
 // Simple floral painter for subtle decoration
 class _FloralPainter extends CustomPainter {
   final bool flip;
-  
+
   _FloralPainter({this.flip = false});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.2)
+      ..color = Colors.grey.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
     final path = Path();
-    
+
     if (flip) {
       canvas.translate(size.width, size.height);
       canvas.scale(-1, -1);
@@ -206,13 +231,17 @@ class _FloralPainter extends CustomPainter {
 
     path.moveTo(0, size.height * 0.5);
     path.quadraticBezierTo(
-      size.width * 0.5, size.height * 0.5,
-      size.width * 0.8, 0,
+      size.width * 0.5,
+      size.height * 0.5,
+      size.width * 0.8,
+      0,
     );
     path.moveTo(0, size.height * 0.7);
     path.quadraticBezierTo(
-      size.width * 0.4, size.height * 0.7,
-      size.width, size.height * 0.2,
+      size.width * 0.4,
+      size.height * 0.7,
+      size.width,
+      size.height * 0.2,
     );
 
     canvas.drawPath(path, paint);

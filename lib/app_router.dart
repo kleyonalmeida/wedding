@@ -17,7 +17,11 @@ class AppRouteInformationParser extends RouteInformationParser<String> {
       RouteInformation(uri: Uri.parse(configuration));
 
   static String _location(Uri uri) =>
-      uri.path + (uri.hasQuery ? '?${uri.query}' : '');
+      uri.path +
+      (uri.hasQuery ? '?${uri.query}' : '') +
+      (uri.path == '/pagamento/retorno' && uri.hasFragment
+          ? '#${uri.fragment}'
+          : '');
 }
 
 class AppRouterDelegate extends RouterDelegate<String>
@@ -82,8 +86,10 @@ class AppRouterDelegate extends RouterDelegate<String>
     if (routePath == '/pagamento/retorno') {
       return MaterialPage<void>(
         key: ValueKey(path),
-        name: path,
-        child: PaymentReturnPage(orderId: uri.queryParameters['id'] ?? ''),
+        name: uri.replace(fragment: '').toString(),
+        child: PaymentReturnPage(
+            orderId: uri.queryParameters['id'] ?? '',
+            tokenFragment: uri.fragment),
       );
     }
     return MaterialPage<void>(

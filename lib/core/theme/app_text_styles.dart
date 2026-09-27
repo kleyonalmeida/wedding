@@ -15,4 +15,12 @@ class AppTextStyles {
   static TextStyle get sans => GoogleFonts.plusJakartaSans(
         fontWeight: FontWeight.w500,
       );
+      
+  static TextStyle get bodoni => GoogleFonts.bodoniModa(
+        fontWeight: FontWeight.w400,
+      );
+      
+  static TextStyle get workSans => GoogleFonts.workSans(
+        fontWeight: FontWeight.w400,
+      );
 }

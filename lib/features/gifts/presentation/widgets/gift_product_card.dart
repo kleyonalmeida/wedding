@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
 import 'gift_price.dart';
+import '../../data/models/gift_category.dart';
 
 class GiftProductCard extends StatefulWidget {
   final GiftProduct product;
@@ -117,49 +118,63 @@ class _GiftProductCardState extends State<GiftProductCard> {
             child: AnimatedScale(
               scale: _isHovered ? 1.05 : 1.0,
               duration: const Duration(milliseconds: 500),
-              child: Image.network(
-                widget.product.imageUrl,
-                fit: BoxFit.cover,
-                cacheWidth: (280 * MediaQuery.devicePixelRatioOf(context))
-                    .round()
-                    .clamp(280, 840)
-                    .toInt(),
-                filterQuality: FilterQuality.medium,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.image_not_supported,
-                  color: AppColors.outlineVariant,
-                  size: 48,
-                ),
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2));
-                },
-              ),
+              child: LayoutBuilder(
+                  builder: (context, constraints) => widget
+                          .product.imageUrl.isEmpty
+                      ? const Center(
+                          child: Icon(Icons.image_not_supported_outlined,
+                              size: 48))
+                      : Image.network(
+                          widget.product.imageUrl,
+                          fit: BoxFit.cover,
+                          cacheWidth: (constraints.maxWidth *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round()
+                              .clamp(256, 1200)
+                              .toInt(),
+                          filterQuality: FilterQuality.medium,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                            Icons.image_not_supported,
+                            color: AppColors.outlineVariant,
+                            size: 48,
+                          ),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                                child: Icon(Icons.image_outlined, size: 48));
+                          },
+                        )),
             ),
           ),
         ),
         Positioned(
           top: 16,
           left: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.grey[900]!.withValues(alpha: 0.9)
-                  : AppColors.surfaceContainerLowest.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              widget.product.category.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-                color: AppColors.secondary,
-              ),
-            ),
-          ),
+          right: 16,
+          child: Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.grey[900]!.withValues(alpha: 0.9)
+                      : AppColors.surfaceContainerLowest.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  giftCategoryLabel(widget.product.category).toUpperCase(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+              )),
         ),
       ],
     );
@@ -174,7 +189,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontFamily: 'Bodoni Moda',
+            fontFamily: 'Playfair Display',
             fontSize: 24,
             height: 1.2,
             color: Theme.of(context).colorScheme.onSurface,
@@ -198,97 +213,61 @@ class _GiftProductCardState extends State<GiftProductCard> {
   }
 
   Widget _buildActionSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+    final colors = Theme.of(context).colorScheme;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
           children: [
-            const Expanded(
-              child: Text(
-                'PRESENTE SUGERIDO',
+            Text('PRESENTE SUGERIDO',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.0,
-                  color: Colors.grey,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Text(
-              formatGiftPrice(widget.product.priceCents),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: widget.product.available ? widget.onGiftPressed : null,
-          style: ButtonStyle(
-            padding: WidgetStateProperty.all(
-                const EdgeInsets.symmetric(vertical: 16)),
-            elevation: WidgetStateProperty.all(0),
-            backgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.disabled)) return Colors.grey;
-              if (states.contains(WidgetState.hovered)) {
-                return Color.lerp(AppColors.primary, Colors.black, 0.2);
-              }
-              return AppColors.primary;
-            }),
-            shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-          ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (widget.product.available) ...[
-                  const Icon(Icons.redeem, size: 18, color: Colors.white),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  widget.product.available
-                      ? 'Presentear os Noivos'
-                      : 'PRESENTEADO',
-                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 2.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        const FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.chat_bubble_outline,
-                  size: 14, color: AppColors.secondary),
-              SizedBox(width: 6),
-              Text(
-                'Inclui cartão de felicitações',
+                    color: colors.onSurfaceVariant)),
+            Text(formatGiftPrice(widget.product.priceCents),
                 style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+                    fontFamily: 'Playfair Display',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary)),
+          ]),
+      const SizedBox(height: 16),
+      ElevatedButton(
+          onPressed: widget.product.available ? widget.onGiftPressed : null,
+          style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 14)),
+          child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                if (widget.product.available)
+                  const Icon(Icons.redeem, size: 18),
+                Text(
+                    widget.product.available
+                        ? 'Presentear os Noivos'
+                        : 'PRESENTEADO',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans', fontSize: 12)),
+              ])),
+      const SizedBox(height: 12),
+      Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 14, color: colors.secondary),
+            Text('Inclui cartão de felicitações',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant)),
+          ]),
+    ]);
   }
 }

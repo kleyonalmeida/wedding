@@ -212,9 +212,21 @@ Construção lazy, rebuilds locais e redução de efeitos/medidas custosos segue
 - [ ] Sprint 3: shell compartilhado e novo corpo editorial.
 - [ ] Sprint 4: ajuda real, duas ações e acessibilidade.
 - [ ] Sprint 5: screenshots, fluxo integrado, testes e desempenho validados.
-- [ ] `K&L`, menus/header e footer preservados.
-- [ ] Sem overline de homenagem, download de comprovante ou galeria afetiva.
-- [ ] Sem valores, forma de pagamento, datas, notificações ou contato fictícios.
+- [x] `K&L`, menus/header e footer preservados.
+- [x] Sem overline de homenagem, download de comprovante ou galeria afetiva.
+- [x] Sem valores, forma de pagamento, datas, notificações ou contato fictícios.
+
+## Registro das complementações — 27/09/2026
+
+- API protegida ampliada e testada; dados históricos vêm dos snapshots. Método e datas são obtidos de um pagamento compatível com o status do pedido, priorizando correspondência exata, e não de uma tentativa pendente mais recente.
+- Controller bloqueia consultas duplicadas, identifica cada geração de consulta (inclusive troca de token do mesmo pedido), ignora respostas anteriores e após dispose, fecha o cliente e diferencia link inválido, 401/404 e falha transitória. Refresh com erro mantém dados e mostra aviso visível; autorização negada remove detalhes.
+- Fragmento preservado pelo parser apenas no retorno e passado explicitamente à página; o nome público da página omite o token. Alterações de pedido/token reconfiguram o controller sem reutilizar detalhes antigos.
+- Corpo usa tema local de gifts e fontes registradas, com header/footer originais fora do tema. Título responsivo, badge com quebra, total em bloco, metadados de uma/duas/quatro colunas conforme espaço e texto, descrições por estado, método traduzido, data real com fuso, status separado da data e dedicatória integral.
+- Pedidos extensos usam paginação local de dez itens, com quantidade/preço unitário/subtotal. É uma adaptação da proposta de slivers lazy: mantém a construção limitada sem scroll interno e sem reconstruir todos os itens do pedido.
+- Animação de entrada única, reduzida quando solicitado, e rebuild de consulta localizado no cartão. Navegação permanece disponível durante carregamento/falha.
+- WhatsApp configurável no build por `--dart-define=GROOM_WHATSAPP_NUMBER=<DDI+DDD+número, somente dígitos>`. Número inválido/ausente oculta o botão; mensagem usa somente ID do pedido, e falhas ao abrir têm feedback. Nenhum contato fictício foi configurado.
+- Validação automatizada: 64 testes Flutter de gifts passaram; cinco testes .NET de pedidos e sete de gateway/webhook passaram. O build web release foi concluído; a análise estática não apontou erros ou avisos novos (14 apontamentos preexistentes permanecem). Regressões cobrem estados, credenciais, concorrência, atualização com falha e layout nas larguras 320/390/768/1024/1440 com escala de texto 1 e 2, incluindo modo escuro e pedidos extensos.
+- Pendências de aceite externas à implementação: número real de contato, comparação de screenshots com o HTML adaptado, medições release no navegador e sequência real Sandbox → callback → webhook → atualização. Os testes de parser/página validam preservação e troca da credencial, mas não substituem reload/deep link e histórico em navegador real.
 
 ## HTML original de referência
 

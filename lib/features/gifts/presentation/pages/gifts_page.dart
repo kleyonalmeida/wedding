@@ -10,14 +10,17 @@ import '../../../wedding/presentation/widgets/wedding_footer.dart';
 import '../../../wedding/presentation/widgets/textured_background.dart';
 import '../controllers/gift_catalog_controller.dart';
 import '../controllers/cart_controller.dart';
-import '../widgets/gift_filter_panel.dart';
-import '../widgets/gift_filter_sheet.dart';
+import '../../data/repositories/gift_repository.dart';
 import '../widgets/gift_product_grid.dart';
-import '../widgets/cart_dialog.dart';
-import '../widgets/checkout_dialog.dart';
+import '../widgets/gift_checkout_flow.dart';
+import '../widgets/gifts_theme.dart';
+import '../widgets/gifts_hero_section.dart';
+import '../widgets/gifts_category_chips.dart';
+import '../widgets/gifts_closing_section.dart';
 
 class GiftsPage extends StatefulWidget {
-  const GiftsPage({super.key});
+  final GiftRepository? repository;
+  const GiftsPage({super.key, this.repository});
 
   @override
   State<GiftsPage> createState() => _GiftsPageState();
@@ -26,25 +29,14 @@ class GiftsPage extends StatefulWidget {
 class _GiftsPageState extends State<GiftsPage> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GiftCatalogController _catalogController = GiftCatalogController();
+  late final GiftCatalogController _catalogController;
   final CartController _cartController = CartController();
-  bool _isScrolled = false;
+  String _selectedCategory = 'todas';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.hasClients) {
-      final currentScroll = _scrollController.offset;
-      if (currentScroll > 100 && !_isScrolled) {
-        setState(() => _isScrolled = true);
-      } else if (currentScroll <= 100 && _isScrolled) {
-        setState(() => _isScrolled = false);
-      }
-    }
+    _catalogController = GiftCatalogController(repository: widget.repository);
   }
 
   @override
@@ -66,6 +58,7 @@ class _GiftsPageState extends State<GiftsPage> {
     final useSmoothWebScroll =
         isDesktopWeb && resolveWebScrollMode() == WebScrollMode.smooth;
 
+    final catalogTheme = giftsTheme(context);
     final innerScrollView = CustomScrollView(
       controller: _scrollController,
       physics: useSmoothWebScroll
@@ -85,97 +78,55 @@ class _GiftsPageState extends State<GiftsPage> {
           ),
         ),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16.0 : 32.0, vertical: 32.0),
-            child: ListenableBuilder(
-              listenable: _catalogController,
-              builder: (context, _) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!isMobile) ...[
-                      AnimatedBuilder(
-                        animation: _scrollController,
-                        builder: (context, child) {
-                          double offsetY = 0;
-                          if (_scrollController.hasClients) {
-                            // O Row começa em y = 120 (padding) + 32 = 152.
-                            // Vamos deixar sticky logo abaixo do header, traduzindo o Y.
-                            final offset = _scrollController.offset;
-                            if (offset > 120) {
-                              offsetY = offset - 120;
-                            }
-                          }
-                          return Transform.translate(
-                            offset: Offset(0, offsetY),
-                            child: child,
-                          );
-                        },
-                        child: SizedBox(
-                          width: 256,
-                          child: GiftFilterPanel(controller: _catalogController),
-                        ),
-                      ),
-                      const SizedBox(width: 32),
-                    ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '${_catalogController.totalResults} presentes especiais para você',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                              if (isMobile)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16.0),
-                                  child: OutlinedButton.icon(
-                                    onPressed: () => GiftFilterSheet.show(
-                                        context, _catalogController),
-                                    icon:
-                                        const Icon(Icons.filter_list, size: 20),
-                                    label: const Text('Filtros'),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                      side: const BorderSide(
-                                          color: AppColors.outlineVariant),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          GiftProductGrid(
-                            products: _catalogController.products,
-                            isLoading: _catalogController.isLoading,
-                            hasMore: _catalogController.hasMore,
-                            onLoadMore: () => _catalogController.loadProducts(),
-                            error: _catalogController.error,
-                            onRetry: () =>
-                                _catalogController.loadProducts(refresh: true),
-                            cartController: _cartController,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 896),
+              child: Theme(data: catalogTheme, child: const GiftsHeroSection()),
             ),
           ),
         ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 120), // Extra spacing to push the footer down
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 20.0 : 32.0, vertical: 40.0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Theme(
+                    data: catalogTheme,
+                    child: GiftsCategoryChips(
+                      selectedCategory: _selectedCategory,
+                      onCategoryChanged: (category) {
+                        setState(() => _selectedCategory = category);
+                        _catalogController.selectCategory(category);
+                      },
+                      onSearchChanged: _catalogController.updateSearch,
+                    )),
+              ),
+            ),
+          ),
         ),
+        ListenableBuilder(
+          listenable: _catalogController,
+          builder: (context, _) => Theme(
+              data: catalogTheme,
+              child: GiftProductGrid(
+                products: _catalogController.products,
+                isLoading: _catalogController.isLoading,
+                hasMore: _catalogController.hasMore,
+                onLoadMore: () => _catalogController.loadProducts(),
+                error: _catalogController.error,
+                onRetry: () => _catalogController.loadProducts(refresh: true),
+                cartController: _cartController,
+              )),
+        ),
+        SliverToBoxAdapter(
+            child: Theme(
+                data: catalogTheme,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 64),
+                  child: GiftsClosingSection(),
+                ))),
         const SliverToBoxAdapter(
           child: WeddingFooter(),
         ),
@@ -206,29 +157,8 @@ class _GiftsPageState extends State<GiftsPage> {
         builder: (context, _) {
           if (_cartController.items.isEmpty) return const SizedBox.shrink();
           return FloatingActionButton.extended(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => CartDialog(
-                  cartController: _cartController,
-                  onCheckout: () {
-                    Navigator.of(ctx).pop();
-                    showDialog(
-                      context: context,
-                      builder: (ctx2) => CheckoutDialog(
-                        cartController: _cartController,
-                        onCatalogChanged: () =>
-                            _catalogController.loadProducts(refresh: true),
-                        onBack: () {
-                          Navigator.of(ctx2).pop();
-                          // To truly go back to cart, we'd open the cart dialog again, but standard is just closing it for now or triggering the FAB.
-                        },
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+            onPressed: () => showGiftCart(context, _cartController,
+                () => _catalogController.loadProducts(refresh: true)),
             backgroundColor: AppColors.primary,
             icon: const Icon(Icons.shopping_cart, color: Colors.white),
             label: Text(

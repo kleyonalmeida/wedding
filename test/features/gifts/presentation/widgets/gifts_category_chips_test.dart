@@ -4,9 +4,9 @@ import 'package:wedding_app/features/gifts/presentation/widgets/gifts_category_c
 
 void main() {
   group('GiftsCategoryChips', () {
-    testWidgets('should render all chips and a search field', (WidgetTester tester) async {
+    testWidgets('should render all chips and a search field',
+        (WidgetTester tester) async {
       String selected = 'todas';
-      String search = '';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -14,7 +14,7 @@ void main() {
             body: GiftsCategoryChips(
               selectedCategory: selected,
               onCategoryChanged: (v) => selected = v,
-              onSearchChanged: (v) => search = v,
+              onSearchChanged: (_) {},
             ),
           ),
         ),
@@ -29,10 +29,12 @@ void main() {
 
       // Verify Search Field
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Buscar presentes...'), findsOneWidget); // Hint text
+      expect(find.text('Buscar lembrança ou cota...'),
+          findsOneWidget); // Hint text
     });
 
-    testWidgets('should call callbacks on interaction', (WidgetTester tester) async {
+    testWidgets('should call callbacks on interaction',
+        (WidgetTester tester) async {
       String selected = 'todas';
       String search = '';
 

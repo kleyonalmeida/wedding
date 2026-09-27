@@ -4,7 +4,8 @@ import 'package:wedding_app/features/gifts/presentation/widgets/gift_dedication_
 
 void main() {
   group('GiftDedicationModal', () {
-    testWidgets('should render modal with expected elements for fixed price', (WidgetTester tester) async {
+    testWidgets('should render modal with expected elements for fixed price',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -27,7 +28,8 @@ void main() {
       // Form fields
       expect(find.text('Seu Nome / Família'), findsOneWidget);
       expect(find.text('Sua Mensagem aos Noivos'), findsOneWidget);
-      expect(find.text('Valor da Contribuição (R\$)'), findsNothing); // Should be hidden for fixed price
+      expect(find.text('Valor da Contribuição (R\$)'),
+          findsNothing); // Should be hidden for fixed price
 
       // Info box
       expect(find.text('Ambiente seguro e afetivo'), findsOneWidget);
@@ -38,7 +40,8 @@ void main() {
       expect(find.text('Confirmar Presente'), findsOneWidget);
     });
 
-    testWidgets('should render custom amount field when isCustomAmount is true', (WidgetTester tester) async {
+    testWidgets('should render custom amount field when isCustomAmount is true',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -57,7 +60,8 @@ void main() {
       expect(find.text('Presente Personalizado'), findsOneWidget);
     });
 
-    testWidgets('should trigger callbacks correctly', (WidgetTester tester) async {
+    testWidgets('should trigger callbacks correctly',
+        (WidgetTester tester) async {
       bool closeCalled = false;
       String? submittedName;
       String? submittedMessage;
@@ -87,7 +91,8 @@ void main() {
         'João Silva',
       );
       await tester.enterText(
-        find.widgetWithText(TextField, 'Escreva algumas palavras doces para aquecer nossos corações...'),
+        find.widgetWithText(TextField,
+            'Escreva algumas palavras doces para aquecer nossos corações...'),
         'Felicidades!',
       );
 

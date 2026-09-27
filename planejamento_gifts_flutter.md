@@ -193,6 +193,14 @@ As escolhas de construção lazy, rebuilds locais e redução de camadas/medidas
 - [ ] Sprint 6: evidências visuais, testes e medições aprovados.
 - [ ] `K&L`, menus/header e footer preservados conforme o pedido.
 
+## Registro da implementação — 26/09/2026
+
+- Catálogo compartilhado em memória, busca com debounce combinada com categorias, paginação local e proteção contra respostas antigas/dispose implementados. Categorias da API, como `Casa`, são associadas aos chips.
+- Corpo com tema e fontes locais, hero responsivo e grid lazy de uma, duas ou três colunas implementados. Cards preservam a descrição completa na dedicatória, limitam a resolução das imagens e se adaptam à ampliação de texto.
+- Modal de dedicatória conectado ao checkout real de preço fixo. A seleção direta usa apenas o presente escolhido; adicionar ao carrinho continua disponível. Validação, bloqueio durante envio e tratamento de erros mantidos.
+- Header, menus, iniciais e footer compartilhados preservados. Nenhuma configuração fictícia de PIX é exibida. Valor livre e PIX na página continuam pendentes do contrato e da configuração reais da sprint 5.
+- Validação executada: 40 testes da área de presentes passaram e `flutter build web --release --no-pub` compilou com sucesso. Os testes cobrem catálogo, filtros, estado, seleção isolada, modal e grid nas larguras 320, 390, 768, 1024 e 1440 com escala de texto 1 e 2. A comparação visual por screenshots e as medições de desempenho da sprint 6 continuam pendentes; os testes de layout não substituem esses critérios.
+
 ## HTML original de referência
 
 Preservado abaixo para consulta e extração na sprint 0. Suas identidades, header/footer, chave PIX, dados fictícios e handlers de demonstração não sobrepõem as regras e contratos deste planejamento.

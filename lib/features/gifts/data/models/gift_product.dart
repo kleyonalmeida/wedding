@@ -9,6 +9,7 @@ class GiftProduct {
   final bool isBestSeller;
   final bool available;
   final String? description;
+  final String? fullDescription;
 
   GiftProduct({
     required this.id,
@@ -21,5 +22,6 @@ class GiftProduct {
     required this.isBestSeller,
     required this.available,
     this.description,
+    this.fullDescription,
   });
 }

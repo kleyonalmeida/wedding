@@ -153,22 +153,49 @@ public static class GiftOrderEndpoints
         group.MapGet("/{id:guid}", async (Guid id, string? token, AppDbContext db) =>
         {
             if (string.IsNullOrWhiteSpace(token)) return Results.Unauthorized();
+            var tokenHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)));
             var order = await db.Set<GiftOrder>()
-                .Where(o => o.Id == id && o.PublicTokenHash == Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token))))
-                .Select(o => new
-                {
+                .AsNoTracking()
+                .Where(o => o.Id == id && o.PublicTokenHash == tokenHash)
+                .Select(o => new GiftOrderDetailsResponse(
                     o.Id,
                     o.Status,
-                    CheckoutUrl = db.Set<PaymentAttempt>()
-                        .Where(a => a.OrderId == o.Id)
-                        .OrderByDescending(a => a.CreatedAtUtc)
-                        .Select(a => a.CheckoutUrl)
-                        .FirstOrDefault()
-                })
+                    o.TotalCents,
+                    o.Currency,
+                    o.Items.Select(i => new GiftOrderItemDetailsResponse(
+                        i.GiftId,
+                        i.GiftNameSnapshot,
+                        i.PriceCentsSnapshot,
+                        i.Quantity
+                    )).ToList(),
+                    o.SenderName,
+                    o.Message,
+                    o.CreatedAtUtc,
+                    null,
+                    null,
+                    null,
+                    db.Set<PaymentAttempt>().Where(a => a.OrderId == o.Id).OrderByDescending(a => a.CreatedAtUtc).Select(a => a.CheckoutUrl).FirstOrDefault()
+                ))
                 .FirstOrDefaultAsync();
 
             if (order == null) return Results.NotFound();
-            return Results.Ok(order);
+            // Only expose metadata from a payment consistent with the order's state.
+            // A newer pending attempt must not replace a completed payment's details.
+            var payment = await db.Set<Payment>().AsNoTracking()
+                .Where(p => p.OrderId == id &&
+                    (p.Status == order.Status ||
+                     (order.Status == "Confirmed" && p.Status == "Received") ||
+                     (order.Status == "Received" && p.Status == "Confirmed")))
+                .OrderByDescending(p => p.Status == order.Status)
+                .ThenByDescending(p => p.ReceivedAtUtc ?? p.ConfirmedAtUtc ?? p.UpdatedAtUtc ?? p.CreatedAtUtc)
+                .ThenByDescending(p => p.Id)
+                .Select(p => new { p.BillingType, p.ConfirmedAtUtc, p.ReceivedAtUtc })
+                .FirstOrDefaultAsync();
+            return Results.Ok(order with {
+                PaymentMethod = payment?.BillingType,
+                ConfirmedAtUtc = payment?.ConfirmedAtUtc,
+                ReceivedAtUtc = payment?.ReceivedAtUtc
+            });
         });
     }
 }

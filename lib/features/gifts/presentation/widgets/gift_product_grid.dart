@@ -1,11 +1,11 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
 import '../controllers/cart_controller.dart';
 import 'gift_product_card.dart';
-import 'cart_dialog.dart';
-import 'checkout_dialog.dart';
+import 'gift_checkout_flow.dart';
 
+/// A sliver: place directly in CustomScrollView.slivers.
 class GiftProductGrid extends StatelessWidget {
   final List<GiftProduct> products;
   final bool isLoading;
@@ -15,128 +15,79 @@ class GiftProductGrid extends StatelessWidget {
   final VoidCallback onRetry;
   final CartController cartController;
 
-  const GiftProductGrid({
-    super.key,
-    required this.products,
-    required this.isLoading,
-    required this.hasMore,
-    required this.onLoadMore,
-    this.error,
-    required this.onRetry,
-    required this.cartController,
-  });
-
-  void _handleGiftPressed(BuildContext context, GiftProduct product) {
-    if (!product.available) return;
-    cartController.addItem(product);
-    showDialog(
-      context: context,
-      builder: (ctx) => CartDialog(
-        cartController: cartController,
-        onCheckout: () {
-          Navigator.of(ctx).pop();
-          showDialog(
-            context: context,
-            builder: (ctx2) => CheckoutDialog(
-              cartController: cartController,
-              onCatalogChanged: onRetry,
-              onBack: () {
-                Navigator.of(ctx2).pop();
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
+  const GiftProductGrid(
+      {super.key,
+      required this.products,
+      required this.isLoading,
+      required this.hasMore,
+      required this.onLoadMore,
+      this.error,
+      required this.onRetry,
+      required this.cartController});
 
   @override
-  Widget build(BuildContext context) {
-    if (products.isEmpty && !isLoading) {
-      if (error != null) {
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(error!, style: const TextStyle(color: AppColors.dark)),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: onRetry,
-                child: const Text('Tentar Novamente'),
-              ),
-            ],
-          ),
-        );
-      }
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Text(
-            'Nenhum produto encontrado com os filtros selecionados.',
-            style: TextStyle(color: AppColors.onSurfaceVariant),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final columns =
-                ((constraints.maxWidth + 24) / 304).floor().clamp(1, 4).toInt();
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisExtent: 720,
-                crossAxisSpacing: 24,
-                mainAxisSpacing: 24,
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return GiftProductCard(
-                  product: product,
-                  onGiftPressed: () => _handleGiftPressed(context, product),
-                );
-              },
-            );
-          },
-        ),
-        if (isLoading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.secondary),
-            ),
-          )
-        else if (hasMore)
-          Padding(
-            padding: const EdgeInsets.only(top: 48.0, bottom: 24.0),
-            child: Center(
-              child: OutlinedButton(
-                onPressed: onLoadMore,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.secondary,
-                  side: const BorderSide(color: AppColors.secondary),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                ),
-                child: const Text(
-                  'CARREGAR MAIS',
-                  style: TextStyle(
-                      letterSpacing: 2.0, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) =>
+      SliverLayoutBuilder(builder: (context, constraints) {
+        final viewport = MediaQuery.sizeOf(context).width;
+        final margin = viewport < 768 ? 20.0 : 32.0;
+        final horizontal =
+            math.max(margin, (constraints.crossAxisExtent - 1200) / 2);
+        final width = constraints.crossAxisExtent - horizontal * 2;
+        final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+        final desired = viewport < 768
+            ? 1
+            : viewport < 1024
+                ? 2
+                : 3;
+        final columns = math.min(
+            desired,
+            math.max(
+                1, ((width + 32) / (280 * math.sqrt(scale) + 32)).floor()));
+        final cardWidth = (width - 32 * (columns - 1)) / columns;
+        final accessibilitySpace =
+            scale > 1 && cardWidth < 400 ? 200 * (scale - 1) : 0.0;
+        final extent = 256 +
+            48 +
+            58 * scale +
+            10 +
+            64 * scale +
+            190 * scale +
+            accessibilitySpace;
+        final status = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (isLoading)
+                const CircularProgressIndicator()
+              else if (error != null) ...[
+                Text(error!, textAlign: TextAlign.center),
+                TextButton(
+                    onPressed: onRetry, child: const Text('Tentar Novamente')),
+              ] else if (products.isEmpty)
+                const Text(
+                    'Nenhum produto encontrado com os filtros selecionados.')
+              else if (hasMore)
+                OutlinedButton(
+                    onPressed: onLoadMore, child: const Text('CARREGAR MAIS')),
+            ]));
+        return SliverMainAxisGroup(slivers: [
+          SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: horizontal),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    mainAxisExtent: extent,
+                    crossAxisSpacing: 32,
+                    mainAxisSpacing: 32),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final product = products[index];
+                  return GiftProductCard(
+                      key: ValueKey(product.id),
+                      product: product,
+                      onGiftPressed: () => showProductCheckout(
+                          context, product, cartController, onRetry));
+                }, childCount: products.length),
+              )),
+          SliverToBoxAdapter(child: status),
+        ]);
+      });
 }

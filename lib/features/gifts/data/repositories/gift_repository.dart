@@ -1,73 +1,89 @@
 import '../models/gift_product.dart';
 import '../models/gift_filter.dart';
+import '../models/gift_category.dart';
 import '../../../../core/network/api_client.dart';
 
 class GiftRepository {
-  final ApiClient _apiClient = ApiClient();
+  final ApiClient _apiClient;
+  List<GiftProduct>? _catalog;
+  Future<List<GiftProduct>>? _pending;
+  int _generation = 0;
 
-  Future<List<dynamic>> _fetchCatalog() async =>
-      (await _apiClient.get('/api/gifts')) as List<dynamic>;
+  GiftRepository({ApiClient? apiClient})
+      : _apiClient = apiClient ?? ApiClient();
 
-  Future<List<String>> getCategories() async {
-    final data = await _fetchCatalog();
-    return data.map((item) => item['category'] as String).toSet().toList()
-      ..sort();
+  void invalidate() {
+    _generation++;
+    _catalog = null;
+    _pending = null;
   }
 
-  Future<List<GiftProduct>> getProducts({
-    required GiftFilter filter,
-    required int page,
-    required int limit,
-    String? postalCode,
-  }) async {
-    try {
-      final List<dynamic> data = await _fetchCatalog();
+  Future<List<GiftProduct>> getCatalog() {
+    if (_catalog != null) return Future.value(_catalog);
+    return _pending ??= _fetchCatalog(_generation);
+  }
 
-      List<GiftProduct> products = data.map((json) {
+  Future<List<GiftProduct>> _fetchCatalog(int generation) async {
+    try {
+      final data = await _apiClient.get('/api/gifts') as List;
+      final products = data.map((json) {
+        final image = json['imageUrl'] as String? ?? '';
+        final uri = Uri.tryParse(image);
+        final description = json['shortDescription'] as String?;
         return GiftProduct(
-          id: json['id'],
-          name: json['name'],
-          imageUrl: json['imageUrl'] == null
+          id: json['id'] as String,
+          name: json['name'] as String,
+          imageUrl: image.isEmpty
               ? ''
-              : '${ApiClient.baseUrl}${json['imageUrl']}',
-          category: json['category'] ?? 'Outros',
-          occasion: json['occasion'] ?? 'Todas',
+              : uri?.hasScheme == true
+                  ? image
+                  : '${ApiClient.baseUrl}$image',
+          category: json['category'] as String? ?? 'Outros',
+          occasion: json['occasion'] as String? ?? 'Todas',
           priceCents: json['priceCents'] as int,
-          isBestSeller: json['featured'] ?? false,
+          isBestSeller: json['featured'] == true,
           available: json['soldOut'] != true,
-          description: json['description'] as String? ?? json['shortDescription'] as String?,
+          fullDescription: json['description'] as String?,
+          description: description?.trim().isNotEmpty == true
+              ? description
+              : json['description'] as String?,
         );
       }).toList();
-
-      // Apply filtering (if we want to do it locally, or could pass to API)
-      if (filter.categories.isNotEmpty) {
-        products = products
-            .where((p) => filter.categories.contains(p.category))
-            .toList();
-      }
-
-      // Apply sorting
-      products.sort((a, b) =>
-          a.isBestSeller == b.isBestSeller ? 0 : (a.isBestSeller ? -1 : 1));
-
-      // Apply pagination
-      final startIndex = (page - 1) * limit;
-      if (startIndex >= products.length) return [];
-
-      final endIndex = startIndex + limit;
-      return products.sublist(
-          startIndex, endIndex > products.length ? products.length : endIndex);
-    } catch (_) {
-      rethrow;
+      // Stable featured ordering, preserving the API display order for ties.
+      final sorted = List<GiftProduct>.unmodifiable([
+        ...products.where((p) => p.isBestSeller),
+        ...products.where((p) => !p.isBestSeller),
+      ]);
+      if (generation == _generation) _catalog = sorted;
+      return sorted;
+    } finally {
+      if (generation == _generation) _pending = null;
     }
   }
 
-  Future<int> getTotalCount({required GiftFilter filter}) async {
-    final data = await _fetchCatalog();
-    return data
-        .where((item) =>
-            filter.categories.isEmpty ||
-            filter.categories.contains(item['category']))
-        .length;
+  Future<List<String>> getCategories() async =>
+      (await getCatalog()).map((p) => p.category).toSet().toList()..sort();
+
+  Future<List<GiftProduct>> getProducts(
+      {required GiftFilter filter,
+      required int page,
+      required int limit,
+      String? postalCode}) async {
+    final products = _filter(await getCatalog(), filter);
+    return products.skip((page - 1) * limit).take(limit).toList();
   }
+
+  Future<int> getTotalCount({required GiftFilter filter}) async =>
+      _filter(await getCatalog(), filter).length;
+
+  List<GiftProduct> _filter(
+          List<GiftProduct> catalog, GiftFilter filter) =>
+      catalog
+          .where((p) =>
+              filter.categories.isEmpty ||
+              filter.categories
+                  .any((c) => giftCategoryId(c) == giftCategoryId(p.category)))
+          .toList();
+
+  void dispose() => _apiClient.dispose();
 }
