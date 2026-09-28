@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
@@ -198,23 +200,25 @@ class _GiftProductCardState extends State<GiftProductCard> {
         ? widget.product.fullDescription!.trim()
         : shortText;
     final preview = shortText.isNotEmpty ? shortText : fullText;
-    final titleStyle = TextStyle(
+    final inherited = DefaultTextStyle.of(context).style;
+    final titleStyle = inherited.merge(TextStyle(
       fontFamily: 'Playfair Display',
       fontSize: compact ? 16 : 18,
       height: 1.2,
       color: colors.onSurface,
-    );
-    final bodyStyle = TextStyle(
+    ));
+    final bodyStyle = inherited.merge(TextStyle(
       fontSize: compact ? 12 : 13,
       height: 1.35,
       color: colors.onSurfaceVariant,
-    );
+    ));
 
     return LayoutBuilder(builder: (context, constraints) {
-      final titleOverflows = _exceedsLines(
-          widget.product.name, titleStyle, constraints.maxWidth, 1);
+      final measureWidth = math.max(0.0, constraints.maxWidth - 1);
+      final titleOverflows =
+          _exceedsLines(widget.product.name, titleStyle, measureWidth, 1);
       final previewOverflows =
-          _exceedsLines(preview, bodyStyle, constraints.maxWidth, 1);
+          _exceedsLines(preview, bodyStyle, measureWidth, 1);
       final hasHiddenText = fullText.isNotEmpty && fullText != preview;
       final canExpand = titleOverflows || previewOverflows || hasHiddenText;
       final showFull = _expanded && canExpand;
@@ -313,33 +317,32 @@ class _GiftProductCardState extends State<GiftProductCard> {
                     fontWeight: FontWeight.bold,
                     color: colors.primary)),
           ]),
-      const SizedBox(height: 10),
+      SizedBox(height: compact ? 8 : 10),
       ElevatedButton(
           onPressed: widget.product.available ? widget.onGiftPressed : null,
           style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
               foregroundColor: colors.onPrimary,
               padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 8 : 12, vertical: compact ? 8 : 10),
-              minimumSize: const Size(0, 36),
+                  horizontal: compact ? 8 : 12, vertical: compact ? 6 : 10),
+              minimumSize: Size(0, compact ? 32 : 36),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          child: Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                if (widget.product.available)
-                  Icon(Icons.redeem, size: compact ? 16 : 18),
+          child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                if (widget.product.available) ...[
+                  Icon(Icons.redeem, size: compact ? 14 : 18),
+                  const SizedBox(width: 6),
+                ],
                 Text(
                     widget.product.available
                         ? 'Presentear os Noivos'
                         : 'PRESENTEADO',
-                    textAlign: TextAlign.center,
+                    maxLines: 1,
                     style: TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
-                        fontSize: compact ? 11 : 12)),
-              ])),
+                        fontSize: compact ? 12 : 13)),
+              ]))),
       const SizedBox(height: 8),
       Wrap(
           alignment: WrapAlignment.center,
