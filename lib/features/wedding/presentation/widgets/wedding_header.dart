@@ -77,12 +77,20 @@ class WeddingHeader extends StatelessWidget {
                             onPressed: onMenuTap,
                           ),
                         ),
-                      Text(
-                        'K&L',
-                        style: AppTextStyles.serif.copyWith(
-                          fontSize: 24,
-                          letterSpacing: 4.0,
-                          color: isScrolled ? fgColor : AppColors.white,
+                      InkWell(
+                        onTap: onHomeTap,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 8),
+                          child: Text(
+                            'K&L',
+                            style: AppTextStyles.serif.copyWith(
+                              fontSize: 24,
+                              letterSpacing: 4.0,
+                              color: isScrolled ? fgColor : AppColors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ],

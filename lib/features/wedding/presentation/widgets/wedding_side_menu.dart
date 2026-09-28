@@ -39,12 +39,20 @@ class WeddingSideMenu extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 32),
-                Text(
-                  'K&L',
-                  style: AppTextStyles.serif.copyWith(
-                    fontSize: 32,
-                    letterSpacing: 6.0,
-                    color: Colors.white,
+                InkWell(
+                  onTap: () => _handleNavigation(context, onHomeTap),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Text(
+                      'K&L',
+                      style: AppTextStyles.serif.copyWith(
+                        fontSize: 32,
+                        letterSpacing: 6.0,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

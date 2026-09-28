@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import 'mapa_casamento_widget.dart';
 
-// Coordenadas do local do evento
-const double _lat = -8.054;
-const double _lng = -34.881;
 const String _locationName = 'Casa da Mangueira Eventos';
+const String _locationAddress =
+    'Rua Itaucu, 92, Feira de Santana, Bahia, 44065-618';
+const String _locationQuery =
+    'Casa da Mangueira Eventos, Rua Itaucu, 92, Feira de Santana, Bahia, 44065-618';
 
 class CeremonySection extends StatelessWidget {
   const CeremonySection({super.key});
@@ -66,8 +66,8 @@ class CeremonySection extends StatelessWidget {
                                 context,
                                 icon: Icons.location_on_rounded,
                                 title: 'Localização',
-                                subtitle: 'Casa da Mangueira Eventos',
-                                highlight: 'Local da Cerimônia & Recepção',
+                                subtitle: _locationName,
+                                highlight: _locationAddress,
                                 showMapButton: true,
                               ),
                             ],
@@ -92,38 +92,14 @@ class CeremonySection extends StatelessWidget {
                           context,
                           icon: Icons.location_on_rounded,
                           title: 'Localização',
-                          subtitle: 'Casa da Mangueira Eventos',
-                          highlight: 'Local da Cerimônia & Recepção',
+                          subtitle: _locationName,
+                          highlight: _locationAddress,
                           showMapButton: true,
                         ),
                       ],
                     );
                   }
                 },
-              ),
-              const SizedBox(height: 56),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.map_outlined,
-                          color: AppColors.primary, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'MAPA INTERATIVO',
-                        style: AppTextStyles.sans.copyWith(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2.0,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const MapaCasamentoWidget(),
-                ],
               ),
             ],
           ),
@@ -326,25 +302,27 @@ class _NavigationBottomSheet extends StatelessWidget {
                         color: AppColors.primary, size: 22),
                   ),
                   const SizedBox(width: 14),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Como chegar',
-                        style: AppTextStyles.serif.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Como chegar',
+                          style: AppTextStyles.serif.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      Text(
-                        _locationName,
-                        style: AppTextStyles.sans.copyWith(
-                          fontSize: 12,
-                          color: AppColors.outline,
+                        Text(
+                          _locationQuery,
+                          style: AppTextStyles.sans.copyWith(
+                            fontSize: 12,
+                            color: AppColors.outline,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -357,7 +335,7 @@ class _NavigationBottomSheet extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   _launchNavigation(
-                    'waze://?ll=$_lat,$_lng&navigate=yes',
+                    'https://waze.com/ul?q=${Uri.encodeComponent(_locationQuery)}&navigate=yes',
                     context,
                   );
                 },
@@ -372,8 +350,7 @@ class _NavigationBottomSheet extends StatelessWidget {
                   Navigator.pop(context);
                   _launchNavigation(
                     'https://www.google.com/maps/dir/?api=1'
-                    '&destination=$_lat,$_lng'
-                    '&destination_place_id=ChIJa4bpNrlD1BQR6EkNChDuZKg',
+                    '&destination=${Uri.encodeComponent(_locationQuery)}',
                     context,
                   );
                 },
@@ -388,7 +365,7 @@ class _NavigationBottomSheet extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   _launchNavigation(
-                    'https://maps.apple.com/?daddr=$_lat,$_lng&dirflg=d',
+                    'https://maps.apple.com/?daddr=${Uri.encodeComponent(_locationQuery)}&dirflg=d',
                     context,
                   );
                 },

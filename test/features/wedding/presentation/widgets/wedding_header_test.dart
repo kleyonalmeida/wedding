@@ -50,6 +50,10 @@ void main() {
       expect(find.text('PRESENÇA'), findsOneWidget);
 
       // Testa interações
+      await tester.tap(find.text('K&L'));
+      expect(homeTapped, isTrue);
+
+      homeTapped = false;
       await tester.tap(find.text('HOME'));
       expect(homeTapped, isTrue);
 
