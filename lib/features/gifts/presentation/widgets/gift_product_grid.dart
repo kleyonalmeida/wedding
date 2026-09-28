@@ -5,6 +5,11 @@ import '../controllers/cart_controller.dart';
 import 'gift_product_card.dart';
 import 'gift_checkout_flow.dart';
 
+int giftGridColumnCount(double viewport, double crossAxisExtent, double scale) {
+  assert(crossAxisExtent > 0 && scale > 0);
+  return viewport < 768 ? 2 : 4;
+}
+
 /// A sliver: place directly in CustomScrollView.slivers.
 class GiftProductGrid extends StatelessWidget {
   final List<GiftProduct> products;
@@ -29,30 +34,15 @@ class GiftProductGrid extends StatelessWidget {
   Widget build(BuildContext context) =>
       SliverLayoutBuilder(builder: (context, constraints) {
         final viewport = MediaQuery.sizeOf(context).width;
-        final margin = viewport < 768 ? 20.0 : 32.0;
+        final margin = viewport < 768 ? 16.0 : 32.0;
+        final gap = viewport < 768 ? 12.0 : 16.0;
         final horizontal =
             math.max(margin, (constraints.crossAxisExtent - 1200) / 2);
-        final width = constraints.crossAxisExtent - horizontal * 2;
         final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
-        final desired = viewport < 768
-            ? 1
-            : viewport < 1024
-                ? 2
-                : 3;
-        final columns = math.min(
-            desired,
-            math.max(
-                1, ((width + 32) / (280 * math.sqrt(scale) + 32)).floor()));
-        final cardWidth = (width - 32 * (columns - 1)) / columns;
-        final accessibilitySpace =
-            scale > 1 && cardWidth < 400 ? 200 * (scale - 1) : 0.0;
-        final extent = 256 +
-            48 +
-            58 * scale +
-            10 +
-            64 * scale +
-            190 * scale +
-            accessibilitySpace;
+        final columns =
+            giftGridColumnCount(viewport, constraints.crossAxisExtent, scale);
+        final rowCount =
+            products.isEmpty ? 0 : (products.length / columns).ceil();
         final status = Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -72,20 +62,35 @@ class GiftProductGrid extends StatelessWidget {
         return SliverMainAxisGroup(slivers: [
           SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: horizontal),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columns,
-                    mainAxisExtent: extent,
-                    crossAxisSpacing: 32,
-                    mainAxisSpacing: 32),
+              sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final product = products[index];
-                  return GiftProductCard(
-                      key: ValueKey(product.id),
-                      product: product,
-                      onGiftPressed: () => showProductCheckout(
-                          context, product, cartController, onRetry));
-                }, childCount: products.length),
+                  final start = index * columns;
+                  final end = math.min(start + columns, products.length);
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: gap),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var column = 0; column < columns; column++) ...[
+                          if (column > 0) SizedBox(width: gap),
+                          Expanded(
+                            child: start + column < end
+                                ? GiftProductCard(
+                                    key: ValueKey(products[start + column].id),
+                                    product: products[start + column],
+                                    onGiftPressed: () => showProductCheckout(
+                                        context,
+                                        products[start + column],
+                                        cartController,
+                                        onRetry),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }, childCount: rowCount),
               )),
           SliverToBoxAdapter(child: status),
         ]);

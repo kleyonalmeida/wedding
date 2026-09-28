@@ -7,8 +7,8 @@ void main() {
   testWidgets('PIX sem configuração fica oculto', (tester) async {
     await tester
         .pumpWidget(const MaterialApp(home: Scaffold(body: GiftsPixSection())));
-    expect(find.byIcon(Icons.copy), findsNothing);
-    expect(find.text('Enviar Recado com Presente'), findsNothing);
+    expect(find.byIcon(Icons.content_copy), findsNothing);
+    expect(find.text('ENVIAR RECADO COM PRESENTE'), findsNothing);
   });
   Widget buildTestableWidget(Widget child) {
     return MaterialApp(
@@ -33,13 +33,13 @@ void main() {
           onAddMessage: () {}),
     ));
 
-    expect(find.text('Contribuição Afetiva Personalizada'), findsOneWidget);
+    expect(find.text('CONTRIBUIÇÃO AFETIVA PERSONALIZADA'), findsOneWidget);
     expect(find.text('Como funciona este carinho?'), findsOneWidget);
-    expect(find.text('01'), findsOneWidget);
-    expect(find.text('02'), findsOneWidget);
-    expect(find.text('03'), findsOneWidget);
-    expect(find.text('Enviar Recado com Presente'), findsOneWidget);
-    expect(find.byIcon(Icons.copy), findsOneWidget);
+    expect(find.text('01.'), findsOneWidget);
+    expect(find.text('02.'), findsOneWidget);
+    expect(find.text('03.'), findsOneWidget);
+    expect(find.text('ENVIAR RECADO COM PRESENTE'), findsOneWidget);
+    expect(find.byIcon(Icons.content_copy), findsOneWidget);
   });
 
   testWidgets('GiftsPixSection aciona callback de mensagem ao clicar no botão',
@@ -55,7 +55,7 @@ void main() {
           }),
     ));
 
-    await tester.tap(find.text('Enviar Recado com Presente'));
+    await tester.tap(find.text('ENVIAR RECADO COM PRESENTE'));
     expect(messageClicked, isTrue);
   });
 
@@ -75,7 +75,7 @@ void main() {
           onAddMessage: () {}),
     ));
 
-    await tester.tap(find.byIcon(Icons.copy));
+    await tester.tap(find.byIcon(Icons.content_copy));
     await tester.pumpAndSettle();
 
     expect(log, isNotEmpty);

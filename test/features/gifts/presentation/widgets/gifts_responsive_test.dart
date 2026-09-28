@@ -48,11 +48,7 @@ void main() {
                         ])))))));
         expect(find.byType(GiftProductCard).evaluate().length, lessThan(20));
         expect(tester.takeException(), isNull);
-        final grid = tester.widget<SliverGrid>(find.byType(SliverGrid));
-        expect(
-            (grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount)
-                .crossAxisCount,
-            lessThanOrEqualTo(3));
+        expect(giftGridColumnCount(width, width, scale), width < 768 ? 2 : 4);
       });
     }
   }

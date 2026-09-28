@@ -1,8 +1,9 @@
 import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import '../../../../core/constants/wedding_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/smooth_web_scroll.dart';
 import '../../../../core/widgets/web_scroll_mode.dart';
 import '../../../wedding/presentation/widgets/wedding_header.dart';
 import '../../../wedding/presentation/widgets/wedding_side_menu.dart';
@@ -17,6 +18,8 @@ import '../widgets/gifts_theme.dart';
 import '../widgets/gifts_hero_section.dart';
 import '../widgets/gifts_category_chips.dart';
 import '../widgets/gifts_closing_section.dart';
+import '../widgets/gifts_pix_section.dart';
+import '../widgets/gift_dedication_modal.dart';
 
 class GiftsPage extends StatefulWidget {
   final GiftRepository? repository;
@@ -51,6 +54,31 @@ class _GiftsPageState extends State<GiftsPage> {
     AppNavigation.go(context, '/');
   }
 
+  void _openPersonalizedGift() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Theme(
+        data: giftsTheme(context),
+        child: GiftDedicationModal(
+          itemTitle: 'Presente Personalizado',
+          itemValue: 'Valor a definir por você',
+          isCustomAmount: true,
+          onClose: () => Navigator.of(dialogContext).pop(),
+          onConfirm: (name, message, amount) {
+            Navigator.of(dialogContext).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Obrigado pelo carinho. Conclua a transferência na chave PIX desta página.',
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
@@ -71,17 +99,15 @@ class _GiftsPageState extends State<GiftsPage> {
                   parent: BouncingScrollPhysics(),
                 ),
       slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            height: 120, // Top padding to offset header
-            color: Theme.of(context).scaffoldBackgroundColor,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 896),
-              child: Theme(data: catalogTheme, child: const GiftsHeroSection()),
+        SliverPadding(
+          padding: const EdgeInsets.only(top: 24),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 896),
+                child:
+                    Theme(data: catalogTheme, child: const GiftsHeroSection()),
+              ),
             ),
           ),
         ),
@@ -121,6 +147,28 @@ class _GiftsPageState extends State<GiftsPage> {
               )),
         ),
         SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              isMobile ? 20 : 32,
+              64,
+              isMobile ? 20 : 32,
+              0,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Theme(
+                  data: catalogTheme,
+                  child: GiftsPixSection(
+                    pixKey: WeddingConstants.pixKey,
+                    onAddMessage: _openPersonalizedGift,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
             child: Theme(
                 data: catalogTheme,
                 child: const Padding(
@@ -134,11 +182,10 @@ class _GiftsPageState extends State<GiftsPage> {
     );
 
     final scrollArea = useSmoothWebScroll
-        ? WebSmoothScroll(
+        ? SmoothWebScroll(
             controller: _scrollController,
-            scrollSpeed: 60,
-            scrollAnimationLength: 500,
-            curve: Curves.easeOutQuart,
+            scrollAmount: 80,
+            animationDuration: const Duration(milliseconds: 500),
             child: innerScrollView,
           )
         : innerScrollView;
@@ -169,16 +216,8 @@ class _GiftsPageState extends State<GiftsPage> {
           );
         },
       ),
-      body: Stack(
+      body: Column(
         children: [
-          TexturedBackground(
-            child: Scrollbar(
-              controller: _scrollController,
-              thumbVisibility: !isMobile,
-              trackVisibility: !isMobile,
-              child: scrollArea,
-            ),
-          ),
           WeddingHeader(
             isScrolled: true, // Always solid on gifts page
             backgroundColor: const Color(0xFF957E6E),
@@ -189,6 +228,16 @@ class _GiftsPageState extends State<GiftsPage> {
             onListaTap: () {}, // Already here
             onRsvpTap: () => _navigateHome(context),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
+          ),
+          Expanded(
+            child: TexturedBackground(
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: !isMobile,
+                trackVisibility: !isMobile,
+                child: scrollArea,
+              ),
+            ),
           ),
         ],
       ),

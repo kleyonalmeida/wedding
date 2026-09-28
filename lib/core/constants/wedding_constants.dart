@@ -8,6 +8,7 @@ class WeddingConstants {
   static const String brideName = "Liandra";
   static const String groomName = "Kleyon";
   static const String coupleName = "Kleyon & Liandra";
+  static const String pixKey = "amor@kleyoneliandra.com.br";
   
   static final DateTime weddingDate = DateTime(2026, 12, 26, 16, 0);
 }

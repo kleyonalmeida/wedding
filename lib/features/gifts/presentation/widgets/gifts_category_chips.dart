@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class GiftsCategoryChips extends StatelessWidget {
@@ -61,38 +62,24 @@ class GiftsCategoryChips extends StatelessWidget {
           ),
         );
 
-        final chips = Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _categories.map((category) {
-            final isSelected = selectedCategory == category['id'];
-            final theme = Theme.of(context);
-
-            return ChoiceChip(
-              label: Text(category['label']!),
-              selected: isSelected,
-              onSelected: (_) => onCategoryChanged(category['id']!),
-              selectedColor: theme.colorScheme.primary,
-              backgroundColor: theme.colorScheme.surface,
-              labelStyle: TextStyle(
-                color: isSelected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-              showCheckmark: false,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-                side: BorderSide(
-                  color: isSelected
-                      ? Colors.transparent
-                      : theme.colorScheme.outline.withValues(alpha: 0.5),
-                ),
-              ),
-            );
-          }).toList(),
+        final chips = ScrollConfiguration(
+          behavior: const _FilterChipScrollBehavior(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var index = 0; index < _categories.length; index++) ...[
+                  if (index > 0) const SizedBox(width: 8),
+                  _CategoryChip(
+                    label: _categories[index]['label']!,
+                    selected: selectedCategory == _categories[index]['id'],
+                    onSelected: () =>
+                        onCategoryChanged(_categories[index]['id']!),
+                  ),
+                ],
+              ],
+            ),
+          ),
         );
 
         if (isMobile) {
@@ -118,4 +105,57 @@ class GiftsCategoryChips extends StatelessWidget {
       },
     );
   }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: theme.colorScheme.primary,
+      backgroundColor: theme.colorScheme.surface,
+      labelStyle: TextStyle(
+        color: selected
+            ? theme.colorScheme.onPrimary
+            : theme.colorScheme.onSurface,
+        fontFamily: 'Plus Jakarta Sans',
+        fontSize: 12,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: selected
+              ? Colors.transparent
+              : theme.colorScheme.outline.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChipScrollBehavior extends MaterialScrollBehavior {
+  const _FilterChipScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
 }

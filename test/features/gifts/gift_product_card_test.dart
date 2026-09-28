@@ -94,9 +94,99 @@ void main() {
           cartController: cart),
     ]))));
     expect(tester.getSize(find.byType(GiftProductCard).first).width,
-        greaterThan(300));
+        greaterThan(140));
     expect(find.text('Presentear os Noivos'), findsOneWidget);
     expect(find.text('PRESENTEADO'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ver mais expande o card até o texto completo', (tester) async {
+    const longText =
+        'Um texto curto na vitrine que não conta a história inteira do presente.';
+    const fullText =
+        'Um texto curto na vitrine que não conta a história inteira do presente. '
+        'Quando o convidado pede para ver mais, o card acompanha este parágrafo completo, '
+        'sem reservar uma área branca vazia antes da leitura.';
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 280,
+              child: GiftProductCard(
+                product: GiftProduct(
+                  id: 'gift-long',
+                  name: 'Jantar especial dos noivos em uma noite longa',
+                  imageUrl: '',
+                  category: 'Casa',
+                  occasion: 'Todas',
+                  priceCents: 1000,
+                  isBestSeller: false,
+                  available: true,
+                  description: longText,
+                  fullDescription: fullText,
+                ),
+                onGiftPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Ver mais'), findsOneWidget);
+    expect(find.text(fullText), findsNothing);
+    final collapsed = tester.getSize(find.byType(GiftProductCard));
+
+    await tester.tap(find.text('Ver mais'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ver menos'), findsOneWidget);
+    expect(find.text(fullText), findsOneWidget);
+    expect(tester.getSize(find.byType(GiftProductCard)).height,
+        greaterThan(collapsed.height));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cards fechados compartilham a mesma altura da faixa branca',
+      (tester) async {
+    Widget card(GiftProduct product) => SizedBox(
+          width: 280,
+          child: GiftProductCard(product: product, onGiftPressed: () {}),
+        );
+
+    GiftProduct item(String id, String name, String description) => GiftProduct(
+          id: id,
+          name: name,
+          imageUrl: '',
+          category: 'Casa',
+          occasion: 'Todas',
+          priceCents: 1000,
+          isBestSeller: false,
+          available: true,
+          description: description,
+        );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            card(item('a', 'Mesa', 'Curta')),
+            card(item(
+              'b',
+              'Jantar especial dos noivos em uma noite longa',
+              'Um texto curto na vitrine que não conta a história inteira do presente.',
+            )),
+          ],
+        ),
+      ),
+    ));
+
+    final sizes = find.byType(GiftProductCard);
+    expect(tester.getSize(sizes.at(0)).height,
+        tester.getSize(sizes.at(1)).height);
     expect(tester.takeException(), isNull);
   });
 
