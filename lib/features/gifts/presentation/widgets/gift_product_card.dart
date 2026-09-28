@@ -130,38 +130,33 @@ class _GiftProductCardState extends State<GiftProductCard> {
           height: imageHeight,
           width: double.infinity,
           color: isDark ? Colors.grey[900] : AppColors.surfaceContainerLow,
-          child: ClipRect(
-            child: AnimatedScale(
-              scale: _isHovered ? 1.05 : 1.0,
-              duration: const Duration(milliseconds: 500),
-              child: LayoutBuilder(
-                  builder: (context, constraints) => widget
-                          .product.imageUrl.isEmpty
-                      ? const Center(
-                          child: Icon(Icons.image_not_supported_outlined,
-                              size: 48))
-                      : Image.network(
-                          widget.product.imageUrl,
-                          fit: BoxFit.cover,
-                          cacheWidth: (constraints.maxWidth *
-                                  MediaQuery.devicePixelRatioOf(context))
-                              .round()
-                              .clamp(160, 1200)
-                              .toInt(),
-                          filterQuality: FilterQuality.medium,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                            Icons.image_not_supported,
-                            color: AppColors.outlineVariant,
-                            size: 48,
-                          ),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(
-                                child: Icon(Icons.image_outlined, size: 48));
-                          },
-                        )),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) => widget.product.imageUrl.isEmpty
+                ? const Center(
+                    child: Icon(Icons.image_not_supported_outlined, size: 48))
+                : Image.network(
+                    widget.product.imageUrl,
+                    width: constraints.maxWidth,
+                    height: imageHeight,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    cacheWidth: (constraints.maxWidth *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round()
+                        .clamp(160, 1200)
+                        .toInt(),
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.image_not_supported,
+                      color: AppColors.outlineVariant,
+                      size: 48,
+                    ),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                          child: Icon(Icons.image_outlined, size: 48));
+                    },
+                  ),
           ),
         ),
         Positioned(
