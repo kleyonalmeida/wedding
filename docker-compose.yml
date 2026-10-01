@@ -33,7 +33,7 @@ services:
       SUPERADMIN_INITIAL_PASSWORD: "${SUPERADMIN_INITIAL_PASSWORD:-}"
       Asaas__ApiKey: "${ASAAS_API_KEY:?Set ASAAS_API_KEY}"
       Asaas__WebhookAuthToken: "${ASAAS_WEBHOOK_AUTH_TOKEN:?Set ASAAS_WEBHOOK_AUTH_TOKEN}"
-      Asaas__Environment: "${ASAAS_ENVIRONMENT:-Sandbox}"
+      Asaas__Environment: "${ASAAS_ENVIRONMENT:?Set ASAAS_ENVIRONMENT to Sandbox or Production}"
       PublicBaseUrl: "${PUBLIC_BASE_URL:?Set PUBLIC_BASE_URL}"
       GiftImagePath: /data/gift-images
       DataProtectionKeyPath: /data/keys

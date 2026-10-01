@@ -26,6 +26,8 @@ if (IsTesting)
     builder.Configuration["Admin:PasswordHash"] = "$2a$11$eI26Vg3laC9LPxOVG4CYRudN4nn5weEPy83K8GTx.pl4VrrIn3v4C"; // Hash para 'senha_teste'
 }
 
+AsaasConfigurationValidator.Validate(builder.Configuration);
+
 // ════════════════════════════════════════════════════════════════════════════
 // DATABASE — EF Core com PostgreSQL
 // Queries 100% parametrizadas por design — SQL Injection eliminado por padrão.

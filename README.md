@@ -4,6 +4,8 @@ Flutter Web, API ASP.NET Core e PostgreSQL. A lista pública de presentes lê o 
 
 ## Configuração
 
+Para ativar pagamentos reais, siga [Ativação do Asaas em produção](PRODUCAO_ASAAS.md).
+
 1. Copie `.env.example` para `.env` e preencha os valores. Não publique `.env`.
 2. Use `PUBLIC_BASE_URL` e `ALLOWED_ORIGIN` com a URL HTTPS pública do site. A porta `127.0.0.1:8080` do Compose deve ser publicada por um proxy com TLS. Encaminhe também `/api/` e mantenha o webhook acessível ao Asaas.
 3. Configure `ASAAS_ENVIRONMENT=Sandbox` com uma chave Sandbox. Use `Production` apenas com a chave de produção correspondente. Cadastre no Asaas o webhook `https://seu-dominio/api/webhooks/asaas` com o mesmo token de `ASAAS_WEBHOOK_AUTH_TOKEN` e os eventos de checkout e pagamento necessários.
