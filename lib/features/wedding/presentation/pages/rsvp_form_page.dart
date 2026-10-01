@@ -195,8 +195,21 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Confirmação de Presença',
-            style: TextStyle(color: AppColors.dark)),
+        title: InkWell(
+          onTap: () => AppNavigation.go(context, '/'),
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Text(
+              'K&L',
+              style: AppTextStyles.serif.copyWith(
+                fontSize: 24,
+                letterSpacing: 4.0,
+                color: AppColors.dark,
+              ),
+            ),
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.dark),
@@ -341,7 +354,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               runSpacing: 8,
                               children: [
                                 ChoiceChip(
-                                  label: const Text('Sim, confirmarei'),
+                                  label: const Text('Sim, confirmo presença'),
                                   selected: _attending == true,
                                   onSelected: (_) =>
                                       setState(() => _attending = true),
@@ -368,18 +381,23 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              SegmentedButton<bool>(
-                                emptySelectionAllowed: true,
-                                segments: const [
-                                  ButtonSegment(value: true, label: Text('Sim')),
-                                  ButtonSegment(value: false, label: Text('Não')),
-                                ],
-                                selected: _bringingChildren == null
-                                    ? {}
-                                    : {_bringingChildren!},
-                                onSelectionChanged: (values) => setState(
-                                    () => _bringingChildren =
-                                        values.isEmpty ? null : values.first),
+                              Center(
+                                child: FractionallySizedBox(
+                                  widthFactor: 0.5,
+                                  child: SegmentedButton<bool>(
+                                    emptySelectionAllowed: true,
+                                    segments: const [
+                                      ButtonSegment(value: true, label: Text('Sim')),
+                                      ButtonSegment(value: false, label: Text('Não')),
+                                    ],
+                                    selected: _bringingChildren == null
+                                        ? {}
+                                        : {_bringingChildren!},
+                                    onSelectionChanged: (values) => setState(
+                                        () => _bringingChildren =
+                                            values.isEmpty ? null : values.first),
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 16),
                               if (_bringingChildren == true)
@@ -450,15 +468,45 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                   value: _acceptTerms,
                                   onChanged: (value) => setState(
                                       () => _acceptTerms = value ?? false),
-                                  title: Text(
-                                    'Li e aceito os termos de uso.',
-                                    style: AppTextStyles.sans.copyWith(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Li e aceito a política de privacidade (LGPD).',
+                                          style: AppTextStyles.sans.copyWith(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.info_outline, size: 20),
+                                        color: AppColors.primary,
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Política de Privacidade', style: TextStyle(color: AppColors.primary)),
+                                              content: const SingleChildScrollView(
+                                                child: Text(
+                                                  'Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018), informamos que os dados pessoais coletados neste formulário (identificação, e-mail, telefone e informações sobre acompanhantes) serão utilizados exclusivamente para a organização e gestão da lista de convidados do evento.\n\nAo confirmar sua presença, você consente com o tratamento desses dados para este fim. As informações não serão compartilhadas com terceiros não envolvidos na organização e serão descartadas após o evento.',
+                                                  style: TextStyle(height: 1.5, fontSize: 14),
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(),
+                                                  child: const Text('FECHAR', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
                                   controlAffinity:
                                       ListTileControlAffinity.leading,
@@ -466,14 +514,24 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                   contentPadding: EdgeInsets.zero,
                                 )),
                             const SizedBox(height: 48),
-                            SizedBox(
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _submit,
-                                child: _isLoading
-                                    ? const CircularProgressIndicator(
-                                        color: AppColors.white)
-                                    : const Text('CONFIRMAR PRESENÇA'),
+                            Center(
+                              child: FractionallySizedBox(
+                                widthFactor: 0.5,
+                                child: SizedBox(
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading ? null : _submit,
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: _isLoading
+                                        ? const CircularProgressIndicator(
+                                            color: AppColors.white)
+                                        : const Text('CONFIRMAR PRESENÇA'),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
