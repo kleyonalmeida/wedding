@@ -173,8 +173,10 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                                     const Text('Em destaque'),
                                   Wrap(children: [
                                     TextButton(
-                                        onPressed: () => _toggleStatus(product,
-                                            active: !product.active),
+                                        onPressed: (product.stockRemaining != null && product.stockRemaining! <= 0 && !product.active)
+                                            ? null
+                                            : () => _toggleStatus(product,
+                                                active: !product.active),
                                         child: Text(product.active
                                             ? 'Desativar'
                                             : 'Ativar')),
@@ -247,14 +249,18 @@ class _AdminProductsPageState extends State<AdminProductsPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              tooltip: product.active ? 'Desativar' : 'Ativar',
+                              tooltip: (product.stockRemaining != null && product.stockRemaining! <= 0 && !product.active)
+                                  ? 'Indisponível'
+                                  : (product.active ? 'Desativar' : 'Ativar'),
                               icon: Icon(
                                   product.active
                                       ? Icons.visibility
                                       : Icons.visibility_off,
                                   size: 20),
-                              onPressed: () => _toggleStatus(product,
-                                  active: !product.active),
+                              onPressed: (product.stockRemaining != null && product.stockRemaining! <= 0 && !product.active)
+                                  ? null
+                                  : () => _toggleStatus(product,
+                                      active: !product.active),
                             ),
                             IconButton(
                               tooltip: product.featured

@@ -3,59 +3,59 @@ import 'package:flutter/material.dart';
 ({String badge, String headline, String description, IconData icon})
     paymentReturnStatus(String status) => switch (status) {
           'Confirmed' => (
-              badge: 'PAGAMENTO CONFIRMADO',
+              badge: 'PRESENTE CONFIRMADO COM SUCESSO',
               headline: 'Obrigado por celebrar nosso amor',
               description:
-                  'Seu pagamento foi confirmado. Agradecemos pelo carinho e por fazer parte desta celebração.',
+                  'Recebemos a notificação do seu presente com imensa alegria e profunda gratidão. Seu gesto torna a realização do nosso sonho em uma memória eterna e inesquecível.',
               icon: Icons.verified
             ),
           'Received' => (
-              badge: 'PAGAMENTO RECEBIDO',
+              badge: 'PRESENTE CONFIRMADO COM SUCESSO',
               headline: 'Obrigado por celebrar nosso amor',
               description:
-                  'Seu pagamento foi recebido. Agradecemos pelo carinho e por fazer parte desta celebração.',
+                  'Recebemos a notificação do seu presente com imensa alegria e profunda gratidão. Seu gesto torna a realização do nosso sonho em uma memória eterna e inesquecível.',
               icon: Icons.verified
             ),
           'Pending' => (
               badge: 'CONFIRMAÇÃO PENDENTE',
               headline: 'Seu presente está aguardando confirmação',
               description:
-                  'A confirmação pode levar alguns minutos. Atualize a situação para consultar o pagamento.',
+                  'A confirmação pode levar alguns minutos. Atualize a situação para consultar a contribuição.',
               icon: Icons.schedule
             ),
           'Cancelled' => (
-              badge: 'PAGAMENTO CANCELADO',
-              headline: 'O pagamento foi cancelado',
+              badge: 'PRESENTE CANCELADO',
+              headline: 'A contribuição foi cancelada',
               description:
-                  'Este pagamento está cancelado. Fale com o noivo se precisar de ajuda.',
+                  'Esta contribuição está cancelada. Fale com os noivos se precisar de ajuda.',
               icon: Icons.cancel_outlined
             ),
           'Overdue' => (
-              badge: 'PAGAMENTO VENCIDO',
-              headline: 'O prazo do pagamento venceu',
+              badge: 'PRAZO EXPIRADO',
+              headline: 'O prazo da contribuição expirou',
               description:
-                  'O pagamento está vencido. Fale com o noivo para esclarecer a situação.',
+                  'O prazo expirou. Fale com os noivos para esclarecer a situação.',
               icon: Icons.event_busy
             ),
           'Refunded' => (
-              badge: 'PAGAMENTO REEMBOLSADO',
-              headline: 'O pagamento foi reembolsado',
+              badge: 'PRESENTE REEMBOLSADO',
+              headline: 'A contribuição foi reembolsada',
               description:
-                  'O pedido consta como reembolsado. Fale com o noivo se precisar de esclarecimentos.',
+                  'A contribuição consta como reembolsada. Fale com os noivos se precisar de esclarecimentos.',
               icon: Icons.undo
             ),
           'Disputed' => (
-              badge: 'PAGAMENTO EM CONTESTAÇÃO',
-              headline: 'O pagamento está em contestação',
+              badge: 'PRESENTE EM CONTESTAÇÃO',
+              headline: 'A contribuição está em contestação',
               description:
-                  'A situação precisa de acompanhamento. Entre em contato diretamente com o noivo.',
+                  'A situação precisa de acompanhamento. Entre em contato diretamente com os noivos.',
               icon: Icons.info_outline
             ),
           _ => (
               badge: 'SITUAÇÃO EM VERIFICAÇÃO',
               headline: 'Estamos verificando a situação',
               description:
-                  'Não há uma confirmação disponível para esta situação. Atualize a consulta ou fale com o noivo.',
+                  'Não há uma confirmação disponível para esta situação. Atualize a consulta ou fale com os noivos.',
               icon: Icons.info_outline
             ),
         };

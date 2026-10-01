@@ -44,6 +44,19 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
   bool _isLoading = false;
   String? _error;
 
+  bool get _isOutOfStock {
+    final text = _stock.text.trim();
+    if (text.isEmpty) return false;
+    final amount = int.tryParse(text);
+    return amount != null && amount <= 0;
+  }
+
+  void _onStockChanged() {
+    if (_isOutOfStock && _active) {
+      setState(() => _active = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +65,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
     if (widget.productId != null) {
       _loadProduct();
     }
+    _stock.addListener(_onStockChanged);
   }
 
   Future<void> _loadProduct() async {
@@ -82,6 +96,9 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
         _error = 'Não foi possível carregar o produto.';
         _isLoading = false;
       });
+    }
+    if (_isOutOfStock && _active) {
+      _active = false;
     }
   }
 
@@ -454,8 +471,10 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                         children: [
                                           Switch(
                                               value: _active,
-                                              onChanged: (v) =>
-                                                  setState(() => _active = v)),
+                                              onChanged: _isOutOfStock
+                                                  ? null
+                                                  : (v) => setState(
+                                                      () => _active = v)),
                                           const Flexible(
                                               child: Text('Produto Ativo')),
                                         ]),
@@ -553,6 +572,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
     _displayOrder.dispose();
     _shortDesc.dispose();
     _desc.dispose();
+    _stock.removeListener(_onStockChanged);
     super.dispose();
   }
 }

@@ -23,16 +23,16 @@ class PaymentReturnStatusCard extends StatelessWidget {
         ? status.badge
         : switch (state) {
             PaymentReturnState.invalidLink => 'LINK INCOMPLETO OU INVÁLIDO',
-            PaymentReturnState.inaccessible => 'PEDIDO INDISPONÍVEL',
+            PaymentReturnState.inaccessible => 'PRESENTE INDISPONÍVEL',
             _ => 'CONSULTA INDISPONÍVEL',
           };
     final headline = valid
         ? status.headline
         : switch (state) {
             PaymentReturnState.loading => 'Consultando seu presente',
-            PaymentReturnState.invalidLink => 'Confira o link do seu pedido',
+            PaymentReturnState.invalidLink => 'Confira o link do seu presente',
             PaymentReturnState.inaccessible =>
-              'Não foi possível acessar este pedido',
+              'Não foi possível acessar este presente',
             _ => 'A consulta está indisponível',
           };
     final description = valid
@@ -41,7 +41,7 @@ class PaymentReturnStatusCard extends StatelessWidget {
             PaymentReturnState.loading =>
               'Aguarde enquanto consultamos as informações.',
             PaymentReturnState.invalidLink =>
-              'O link está incompleto ou é inválido. Solicite ajuda ao noivo.',
+              'O link está incompleto ou é inválido. Solicite ajuda aos noivos.',
             _ => controller.errorMessage ?? 'Tente novamente mais tarde.',
           };
     return ConstrainedBox(

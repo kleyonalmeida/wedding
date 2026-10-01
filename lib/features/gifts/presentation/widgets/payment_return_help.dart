@@ -16,8 +16,8 @@ class PaymentReturnHelp extends StatelessWidget {
     if (!_validNumber) return;
 
     final message = orderId != null
-        ? 'Olá, estou entrando em contato sobre o pedido de presente #$orderId.'
-        : 'Olá, estou entrando em contato sobre o pedido do presente.';
+        ? 'Olá, estou entrando em contato sobre a contribuição do presente #KL-$orderId.'
+        : 'Olá, estou entrando em contato sobre a contribuição do presente.';
 
     final encodedMessage = Uri.encodeComponent(message);
     final url = Uri.parse('https://wa.me/$whatsappNumber?text=$encodedMessage');
@@ -97,7 +97,7 @@ class PaymentReturnHelp extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Se precisar de ajuda com este pedido, entre em contato diretamente com o noivo.',
+                        'Se precisar de ajuda com esta contribuição, entre em contato diretamente com os noivos.',
                         style: AppTextStyles.workSans.copyWith(
                           fontSize: 12,
                           color: colors.onSurfaceVariant,

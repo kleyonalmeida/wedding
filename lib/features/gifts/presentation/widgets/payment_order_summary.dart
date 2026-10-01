@@ -65,7 +65,14 @@ class _PaymentOrderSummaryState extends State<PaymentOrderSummary> {
                     final details = Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${item.quantity} × ${item.name}',
+                          Text('ITEM ESCOLHIDO',
+                              style: TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 12,
+                                  letterSpacing: 1,
+                                  color: colors.onSurfaceVariant)),
+                          const SizedBox(height: 4),
+                          Text('${item.quantity > 1 ? '${item.quantity} × ' : ''}${item.name}',
                               style: TextStyle(
                                   fontFamily: 'Bodoni Moda',
                                   fontSize: 20,
@@ -118,7 +125,7 @@ class _PaymentOrderSummaryState extends State<PaymentOrderSummary> {
             ],
             const Divider(),
             const SizedBox(height: 16),
-            Text('TOTAL DO PEDIDO',
+            Text('VALOR CONTRIBUÍDO',
                 style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 12,
@@ -155,19 +162,19 @@ class _PaymentOrderSummaryState extends State<PaymentOrderSummary> {
                   style: TextStyle(fontSize: 14, color: colors.onSurface))
             ]));
         return Wrap(spacing: 24, runSpacing: 24, children: [
-          field('CÓDIGO DO PEDIDO', order.id),
+          field('CÓDIGO DO PEDIDO', '#KL-${order.id.replaceAll(RegExp(r'[^0-9]'), '')}'),
           field('FORMA DE PAGAMENTO', _method(order.paymentMethod)),
-          field('PEDIDO CRIADO EM', _date(order.createdAtUtc)),
+          field('DATA & HORÁRIO', _date(order.createdAtUtc)),
           field(
-              'SITUAÇÃO DO PAGAMENTO', paymentReturnStatus(order.status).badge),
+              'STATUS DO REPASSE', paymentReturnStatus(order.status).badge),
         ]);
       }),
       if (order.receivedAtUtc != null || order.confirmedAtUtc != null) ...[
         const SizedBox(height: 20),
         Text(
             order.receivedAtUtc != null
-                ? 'Pagamento recebido em ${_date(order.receivedAtUtc!)}'
-                : 'Pagamento confirmado em ${_date(order.confirmedAtUtc!)}',
+                ? 'Contribuição recebida em ${_date(order.receivedAtUtc!)}'
+                : 'Presente confirmado em ${_date(order.confirmedAtUtc!)}',
             style: TextStyle(color: colors.onSurfaceVariant)),
       ],
       if (order.message?.trim().isNotEmpty == true) ...[
@@ -181,7 +188,7 @@ class _PaymentOrderSummaryState extends State<PaymentOrderSummary> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Icon(Icons.format_quote, color: colors.secondary),
               const SizedBox(height: 8),
-              Text('DEDICATÓRIA DE ${order.senderName}',
+              Text('MENSAGEM ENVIADA AOS NOIVOS:',
                   style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 12,
