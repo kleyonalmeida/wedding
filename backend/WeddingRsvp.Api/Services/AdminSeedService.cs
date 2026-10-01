@@ -10,7 +10,7 @@ public static class AdminSeedService
 
     public static async Task SeedSuperAdminAsync(IServiceProvider serviceProvider, IConfiguration configuration)
     {
-        await _semaphore.WaitAsync();
+        await _semaphore.WaitAsync(TimeSpan.FromSeconds(30));
         try
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();

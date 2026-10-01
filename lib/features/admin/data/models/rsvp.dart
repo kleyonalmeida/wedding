@@ -6,7 +6,6 @@ class Rsvp {
   final bool vaiComparecer;
   final int qtdAdultos;
   final int qtdCriancas;
-  final String? observacoes;
   final DateTime criadoEm;
 
   Rsvp({
@@ -17,20 +16,18 @@ class Rsvp {
     required this.vaiComparecer,
     required this.qtdAdultos,
     required this.qtdCriancas,
-    this.observacoes,
     required this.criadoEm,
   });
 
   factory Rsvp.fromJson(Map<String, dynamic> json) {
     return Rsvp(
       id: json['id'].toString(),
-      nome: json['nome'] as String? ?? '',
+      nome: json['identificacaoNoConvite'] as String? ?? '',
       email: json['email'] as String? ?? '',
       telefone: json['telefone'] as String? ?? '',
       vaiComparecer: json['vaiComparecer'] as bool? ?? false,
       qtdAdultos: json['qtdAdultos'] as int? ?? 0,
       qtdCriancas: json['qtdCriancas'] as int? ?? 0,
-      observacoes: json['observacoes'] as String?,
       criadoEm: DateTime.parse(json['criadoEm'] as String),
     );
   }
@@ -43,6 +40,7 @@ class AttendanceSummary {
   final int totalAdultos;
   final int totalCriancas;
   final int totalPessoas;
+  final int linhasPendentes;
 
   AttendanceSummary({
     required this.totalRespostas,
@@ -51,16 +49,19 @@ class AttendanceSummary {
     required this.totalAdultos,
     required this.totalCriancas,
     required this.totalPessoas,
+    required this.linhasPendentes,
   });
 
   factory AttendanceSummary.fromJson(Map<String, dynamic> json) {
     return AttendanceSummary(
-      totalRespostas: json['totalRespostas'] as int? ?? 0,
-      confirmados: json['confirmados'] as int? ?? 0,
-      naoVao: json['naoVao'] as int? ?? 0,
+      totalRespostas: (json['linhasConfirmadas'] as int? ?? 0) +
+          (json['linhasRecusadas'] as int? ?? 0),
+      confirmados: json['linhasConfirmadas'] as int? ?? 0,
+      naoVao: json['linhasRecusadas'] as int? ?? 0,
       totalAdultos: json['totalAdultos'] as int? ?? 0,
       totalCriancas: json['totalCriancas'] as int? ?? 0,
       totalPessoas: json['totalPessoas'] as int? ?? 0,
+      linhasPendentes: json['linhasPendentes'] as int? ?? 0,
     );
   }
 }

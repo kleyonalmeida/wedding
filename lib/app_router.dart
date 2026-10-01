@@ -6,6 +6,8 @@ import 'features/admin/presentation/admin_page_route.dart';
 import 'features/gifts/presentation/pages/gifts_page.dart';
 import 'features/gifts/presentation/pages/payment_return_page.dart';
 import 'features/wedding/presentation/pages/wedding_page.dart';
+import 'features/wedding/presentation/pages/rsvp_notice_page.dart';
+import 'features/wedding/presentation/pages/rsvp_form_page.dart';
 
 class AppRouteInformationParser extends RouteInformationParser<String> {
   @override
@@ -31,6 +33,7 @@ class AppRouterDelegate extends RouterDelegate<String>
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   String _path = '/';
+  bool _rsvpNoticeAcknowledged = false;
 
   @override
   String get currentConfiguration => _path;
@@ -45,6 +48,9 @@ class AppRouterDelegate extends RouterDelegate<String>
   void go(String path) => _setPath(path);
 
   void _setPath(String path) {
+    if (Uri.parse(path).path == rsvpForm && !_rsvpNoticeAcknowledged) {
+      path = rsvpNotice;
+    }
     if (_path == path) return;
     _path = path;
     notifyListeners();
@@ -58,6 +64,15 @@ class AppRouterDelegate extends RouterDelegate<String>
           if (page.key == ValueKey(_path)) go('/');
         },
       );
+
+  /// Rotas RSVP — QR code genérico
+  static const String rsvpNotice = '/confirmar-presenca';
+  static const String rsvpForm = '/confirmar-presenca/formulario';
+
+  void openRsvpFormFromNotice() {
+    _rsvpNoticeAcknowledged = true;
+    go(rsvpForm);
+  }
 
   Page<void> _pageFor(String path) {
     final uri = Uri.parse(path);
@@ -75,6 +90,20 @@ class AppRouterDelegate extends RouterDelegate<String>
         key: ValueKey('/'),
         name: '/',
         child: WeddingPage(),
+      );
+    }
+    if (routePath == rsvpNotice) {
+      return const MaterialPage<void>(
+        key: ValueKey(rsvpNotice),
+        name: rsvpNotice,
+        child: RsvpNoticePage(),
+      );
+    }
+    if (routePath == rsvpForm) {
+      return const MaterialPage<void>(
+        key: ValueKey(rsvpForm),
+        name: rsvpForm,
+        child: RsvpFormPage(),
       );
     }
     if (routePath == '/presentes') {

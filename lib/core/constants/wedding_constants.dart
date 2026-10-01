@@ -10,5 +10,8 @@ class WeddingConstants {
   static const String coupleName = "Kleyon & Liandra";
   static const String pixKey = "amor@kleyoneliandra.com.br";
   
-  static final DateTime weddingDate = DateTime(2026, 12, 26, 16, 0);
+  static final DateTime weddingDate = DateTime(2026, 12, 26, 15, 30);
+
+  static const String venueName = 'Casa da Mangueira Eventos';
+  static const String venueCity = 'Feira de Santana/BA';
 }

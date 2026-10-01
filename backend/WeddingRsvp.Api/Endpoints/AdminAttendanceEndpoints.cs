@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingRsvp.Api.Data;
-using WeddingRsvp.Api.Entities;
 using WeddingRsvp.Api.Services;
 
 namespace WeddingRsvp.Api.Endpoints;
@@ -12,7 +11,7 @@ public static class AdminAttendanceEndpoints
         var group = app.MapGroup("/api/admin/attendance")
             .RequireAuthorization("SuperAdmin").RequireRateLimiting("AdminPolicy");
 
-        // Listar RSVPs paginado
+        // Listar RSVPs paginado — incluindo identificação da linha
         group.MapGet("/", async (
             AppDbContext db,
             string? search = null,
@@ -20,18 +19,21 @@ public static class AdminAttendanceEndpoints
             int page = 1,
             int pageSize = 20) =>
         {
-            var query = db.Rsvps.AsNoTracking().AsQueryable();
+            var query = db.Rsvps
+                .AsNoTracking()
+                .Include(r => r.InvitationLine)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
                 var s = search.ToLower();
-                query = query.Where(r => r.Nome.ToLower().Contains(s) || r.Email.ToLower().Contains(s));
+                query = query.Where(r =>
+                    r.IdentificacaoNoConvite.ToLower().Contains(s) ||
+                    r.Email.ToLower().Contains(s));
             }
 
             if (vaiComparecer.HasValue)
-            {
                 query = query.Where(r => r.VaiComparecer == vaiComparecer.Value);
-            }
 
             query = query.OrderByDescending(r => r.CriadoEm);
 
@@ -40,7 +42,18 @@ public static class AdminAttendanceEndpoints
 
             return Results.Ok(new
             {
-                data = items,
+                data = items.Select(r => new
+                {
+                    r.Id,
+                    r.IdentificacaoNoConvite,
+                    r.Email,
+                    r.Telefone,
+                    r.VaiComparecer,
+                    r.QtdAdultos,
+                    r.QtdCriancas,
+                    r.CriadoEm,
+                    InvitationLineId = r.InvitationLineId
+                }),
                 total,
                 page,
                 pageSize,
@@ -48,43 +61,68 @@ public static class AdminAttendanceEndpoints
             });
         });
 
-        // Resumo estatístico
+        // Resumo estatístico — por linhas de convite
         group.MapGet("/summary", async (AppDbContext db) =>
         {
-            var rsvps = await db.Rsvps.AsNoTracking().ToListAsync();
-            
-            var confirmados = rsvps.Where(r => r.VaiComparecer).ToList();
-            var naoVao = rsvps.Where(r => !r.VaiComparecer).ToList();
-            
-            var totalAdultos = confirmados.Sum(r => r.QtdAdultos);
-            var totalCriancas = confirmados.Sum(r => r.QtdCriancas);
+            var totalLinhas = await db.InvitationLines.CountAsync(l => l.Ativo);
+            var linhasComResposta = await db.InvitationLines
+                .AsNoTracking()
+                .Include(l => l.Rsvp)
+                .Where(l => l.Ativo && l.Rsvp != null)
+                .ToListAsync();
+
+            var linhasConfirmadas = linhasComResposta.Where(l => l.Rsvp!.VaiComparecer).ToList();
+            var linhasRecusadas = linhasComResposta.Where(l => !l.Rsvp!.VaiComparecer).ToList();
+            var linhasPendentes = totalLinhas - linhasComResposta.Count;
+
+            var totalAdultos = linhasConfirmadas.Sum(l => l.Rsvp!.QtdAdultos);
+            var totalCriancas = linhasConfirmadas.Sum(l => l.Rsvp!.QtdCriancas);
 
             return Results.Ok(new
             {
-                totalRespostas = rsvps.Count,
-                confirmados = confirmados.Count,
-                naoVao = naoVao.Count,
+                totalLinhas,
+                linhasPendentes,
+                linhasConfirmadas = linhasConfirmadas.Count,
+                linhasRecusadas = linhasRecusadas.Count,
                 totalAdultos,
                 totalCriancas,
                 totalPessoas = totalAdultos + totalCriancas
             });
         });
 
-        // Detalhe
+        // Detalhe de um RSVP
         group.MapGet("/{id:guid}", async (Guid id, AppDbContext db) =>
         {
-            var rsvp = await db.Rsvps.FindAsync(id);
-            return rsvp != null ? Results.Ok(rsvp) : Results.NotFound();
+            var rsvp = await db.Rsvps
+                .AsNoTracking()
+                .Include(r => r.InvitationLine)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (rsvp == null) return Results.NotFound();
+
+            return Results.Ok(new
+            {
+                rsvp.Id,
+                rsvp.IdentificacaoNoConvite,
+                rsvp.Email,
+                rsvp.Telefone,
+                rsvp.VaiComparecer,
+                rsvp.QtdAdultos,
+                rsvp.QtdCriancas,
+                rsvp.CriadoEm,
+                rsvp.InvitationLineId
+            });
         });
 
-        // Edição manual
+        // Edição manual pelo Admin (com auditoria e motivo obrigatório)
         group.MapPatch("/{id:guid}", async (
             Guid id,
             RsvpPatchRequest request,
             AppDbContext db,
             IAuditService auditService) =>
         {
-            var rsvp = await db.Rsvps.FindAsync(id);
+            var rsvp = await db.Rsvps.Include(r => r.InvitationLine)
+                .FirstOrDefaultAsync(r => r.Id == id);
             if (rsvp == null) return Results.NotFound();
 
             if (string.IsNullOrWhiteSpace(request.Motivo))
@@ -96,21 +134,23 @@ public static class AdminAttendanceEndpoints
             {
                 rsvp.VaiComparecer,
                 rsvp.QtdAdultos,
-                rsvp.QtdCriancas,
-                rsvp.Observacoes
+                rsvp.QtdCriancas
             };
 
+            if (request.QtdCriancas is < 0 or > 10)
+                return Results.BadRequest(new { message = "Quantidade de crianças deve ser entre 0 e 10." });
+
             if (request.VaiComparecer.HasValue) rsvp.VaiComparecer = request.VaiComparecer.Value;
-            if (request.QtdAdultos.HasValue) rsvp.QtdAdultos = request.QtdAdultos.Value;
-            if (request.QtdCriancas.HasValue) rsvp.QtdCriancas = request.QtdCriancas.Value;
-            if (request.Observacoes != null) rsvp.Observacoes = request.Observacoes;
+            rsvp.QtdAdultos = rsvp.VaiComparecer
+                ? rsvp.InvitationLine!.QuantidadeAdultos : 0;
+            rsvp.QtdCriancas = rsvp.VaiComparecer
+                ? request.QtdCriancas ?? rsvp.QtdCriancas : 0;
 
             var newValues = new
             {
                 rsvp.VaiComparecer,
                 rsvp.QtdAdultos,
-                rsvp.QtdCriancas,
-                rsvp.Observacoes
+                rsvp.QtdCriancas
             };
 
             await auditService.LogAsync(
@@ -123,15 +163,20 @@ public static class AdminAttendanceEndpoints
 
             await db.SaveChangesAsync();
 
-            return Results.Ok(rsvp);
+            return Results.Ok(new
+            {
+                rsvp.Id,
+                rsvp.IdentificacaoNoConvite,
+                rsvp.VaiComparecer,
+                rsvp.QtdAdultos,
+                rsvp.QtdCriancas
+            });
         });
     }
 }
 
 public record RsvpPatchRequest(
     bool? VaiComparecer,
-    int? QtdAdultos,
     int? QtdCriancas,
-    string? Observacoes,
     string? Motivo
 );

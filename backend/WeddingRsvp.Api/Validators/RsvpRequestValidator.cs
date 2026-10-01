@@ -4,59 +4,53 @@ using WeddingRsvp.Api.Models;
 namespace WeddingRsvp.Api.Validators;
 
 /// <summary>
-/// Valida os dados de entrada do RSVP com regras estritas de segurança.
-/// Rejeita payloads maliciosos ANTES de qualquer interação com o banco de dados.
+/// Valida os dados de entrada do RSVP por QR code genérico.
+/// O cliente informa identificação, contatos, presença e crianças.
+/// Adultos são derivados do Admin — não validados aqui.
 /// </summary>
 public class RsvpRequestValidator : AbstractValidator<RsvpRequest>
 {
     public RsvpRequestValidator()
     {
-        // ── Nome ──────────────────────────────────────────────────────────────
-        // \p{L} cobre letras Unicode (inclui acentos: ã, ç, é, etc.)
-        // Rejeita qualquer caractere especial, números, HTML ou SQL injection
-        RuleFor(x => x.Nome)
-            .NotEmpty().WithMessage("Nome é obrigatório.")
-            .MaximumLength(100).WithMessage("Nome deve ter no máximo 100 caracteres.")
-            .Matches(@"^[\p{L}\s]+$")
-            .WithMessage("Nome deve conter apenas letras e espaços.");
+        // ── IdentificacaoNoConvite ─────────────────────────────────────────────
+        // Aceita qualquer texto que possa aparecer em um convite impresso.
+        // Rejeita apenas caracteres de controle e tags HTML (XSS).
+        // A verificação semântica (se a linha existe) é feita na camada de negócio.
+        RuleFor(x => x.IdentificacaoNoConvite)
+            .NotEmpty().WithMessage("A identificação do convite é obrigatória.")
+            .MaximumLength(200).WithMessage("Identificação deve ter no máximo 200 caracteres.")
+            .Must(s => s is not null && !s.Any(char.IsControl) && !s.Contains('<') && !s.Contains('>'))
+            .WithMessage("Identificação contém caracteres inválidos.");
+
 
         // ── Email ─────────────────────────────────────────────────────────────
-        // RFC 5321 limita endereços a 254 caracteres no total
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email é obrigatório.")
-            .MaximumLength(254).WithMessage("Email deve ter no máximo 254 caracteres.")
+            .NotEmpty().WithMessage("E-mail é obrigatório.")
+            .MaximumLength(254).WithMessage("E-mail deve ter no máximo 254 caracteres.")
             .EmailAddress().WithMessage("Formato de e-mail inválido.");
 
         // ── Telefone ──────────────────────────────────────────────────────────
-        // Aceita: (11) 91234-5678 | 11 91234-5678 | 11912345678 | (11)912345678
-        // Suporta celular (9 dígitos) e fixo (8 dígitos)
         RuleFor(x => x.Telefone)
             .NotEmpty().WithMessage("Telefone é obrigatório.")
             .MaximumLength(20).WithMessage("Telefone deve ter no máximo 20 caracteres.")
             .Matches(@"^\(?\d{2}\)?[\s\-]?\d{4,5}[\s\-]?\d{4}$")
             .WithMessage("Telefone inválido. Use o formato (11) 91234-5678.");
 
-        // ── QtdAdultos ────────────────────────────────────────────────────────
-        // Mínimo 1: pelo menos o próprio convidado
-        RuleFor(x => x.QtdAdultos)
-            .InclusiveBetween(1, 20)
-            .WithMessage("Quantidade de adultos deve ser entre 1 e 20.")
-            .When(x => x.VaiComparecer);
-        RuleFor(x => x.QtdAdultos).Equal(0).When(x => !x.VaiComparecer);
-
         // ── QtdCriancas ───────────────────────────────────────────────────────
+        // Máximo 10 conforme planejamento; 0 quando recusa.
         RuleFor(x => x.QtdCriancas)
-            .InclusiveBetween(0, 15)
-            .WithMessage("Quantidade de crianças deve ser entre 0 e 15.")
+            .InclusiveBetween(0, 10)
+            .WithMessage("Quantidade de crianças deve ser entre 0 e 10.")
             .When(x => x.VaiComparecer);
-        RuleFor(x => x.QtdCriancas).Equal(0).When(x => !x.VaiComparecer);
 
-        // ── Observações ───────────────────────────────────────────────────────
-        // Campo opcional — limita tamanho para evitar abuso de memória
-        // Aceita texto livre, mas o campo é salvo como texto (não renderizado como HTML)
-        RuleFor(x => x.Observacoes)
-            .MaximumLength(500)
-            .WithMessage("Observações deve ter no máximo 500 caracteres.")
-            .When(x => x.Observacoes is not null);
+        RuleFor(x => x.QtdCriancas)
+            .Equal(0)
+            .WithMessage("Quantidade de crianças deve ser 0 quando não vai comparecer.")
+            .When(x => !x.VaiComparecer);
+
+        // ── AceitouTermos ─────────────────────────────────────────────────────
+        RuleFor(x => x.AceitouTermos)
+            .Equal(true)
+            .WithMessage("É necessário aceitar os termos de uso.");
     }
 }

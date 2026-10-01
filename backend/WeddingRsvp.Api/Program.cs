@@ -55,6 +55,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Registrado no DI para ser injetado no ValidationFilter<T>
 // ════════════════════════════════════════════════════════════════════════════
 builder.Services.AddScoped<IValidator<RsvpRequest>, RsvpRequestValidator>();
+builder.Services.AddScoped<IValidator<CreateInvitationLineRequest>, CreateInvitationLineRequestValidator>();
+builder.Services.AddScoped<IValidator<UpdateInvitationLineRequest>, UpdateInvitationLineRequestValidator>();
 
 // ════════════════════════════════════════════════════════════════════════════
 // IDENTITY & AUTHENTICATION
@@ -141,10 +143,11 @@ builder.Services.AddCors(options =>
 // ════════════════════════════════════════════════════════════════════════════
 builder.Services.AddRateLimiter(options =>
 {
+    var isTesting = Program.IsTesting;
     options.AddFixedWindowLimiter("RsvpPolicy", limiter =>
     {
         limiter.Window              = TimeSpan.FromMinutes(1);
-        limiter.PermitLimit         = 10;
+        limiter.PermitLimit         = isTesting ? 1000 : 10;
         limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiter.QueueLimit          = 0; // Sem fila — rejeita imediatamente ao exceder
     });
@@ -153,7 +156,7 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("AdminPolicy", limiter =>
     {
         limiter.Window      = TimeSpan.FromMinutes(1);
-        limiter.PermitLimit = 30;
+        limiter.PermitLimit = isTesting ? 1000 : 30;
         limiter.QueueLimit  = 0;
     });
 
@@ -269,6 +272,7 @@ app.MapAdminSecurityEndpoints();
 app.MapAdminAuditEndpoints();
 app.MapAdminAttendanceEndpoints();
 app.MapAdminDashboardEndpoints();
+app.MapAdminInvitationLineEndpoints();
 app.MapAdminProductEndpoints();
 app.MapAdminPaymentEndpoints();
 app.MapAdminSettingsEndpoints();

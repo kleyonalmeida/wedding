@@ -43,18 +43,14 @@ class AttendanceRepository {
   Future<Rsvp> patch(
     String id, {
     bool? vaiComparecer,
-    int? qtdAdultos,
     int? qtdCriancas,
-    String? observacoes,
     required String motivo,
   }) async {
     final data = <String, dynamic>{
       'motivo': motivo,
     };
     if (vaiComparecer != null) data['vaiComparecer'] = vaiComparecer;
-    if (qtdAdultos != null) data['qtdAdultos'] = qtdAdultos;
     if (qtdCriancas != null) data['qtdCriancas'] = qtdCriancas;
-    if (observacoes != null) data['observacoes'] = observacoes;
 
     final response = await api.patch('/api/admin/attendance/$id', data);
     return Rsvp.fromJson(response);

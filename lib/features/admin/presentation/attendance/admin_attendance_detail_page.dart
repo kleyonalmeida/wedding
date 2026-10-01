@@ -30,9 +30,7 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
 
   Future<void> _edit(Rsvp rsvp) async {
     final formKey = GlobalKey<FormState>();
-    final adults = TextEditingController(text: rsvp.qtdAdultos.toString());
     final children = TextEditingController(text: rsvp.qtdCriancas.toString());
-    final notes = TextEditingController(text: rsvp.observacoes ?? '');
     final reason = TextEditingController();
     var attending = rsvp.vaiComparecer;
     var saving = false;
@@ -56,26 +54,19 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
                           value: attending,
                           onChanged: (value) =>
                               update(() => attending = value)),
-                      TextFormField(
-                          controller: adults,
-                          keyboardType: TextInputType.number,
-                          decoration:
-                              const InputDecoration(labelText: 'Adultos'),
-                          validator: (v) => int.tryParse(v ?? '') == null
-                              ? 'Informe um número'
-                              : null),
+                      Text(
+                          'Adultos: ${rsvp.qtdAdultos} (definidos no convite)'),
                       TextFormField(
                           controller: children,
                           keyboardType: TextInputType.number,
                           decoration:
                               const InputDecoration(labelText: 'Crianças'),
-                          validator: (v) => int.tryParse(v ?? '') == null
-                              ? 'Informe um número'
-                              : null),
-                      TextFormField(
-                          controller: notes,
-                          decoration:
-                              const InputDecoration(labelText: 'Observações')),
+                          validator: (value) {
+                            final count = int.tryParse(value ?? '');
+                            return count == null || count < 0 || count > 10
+                                ? 'Informe de 0 a 10 crianças.'
+                                : null;
+                          }),
                       TextFormField(
                           controller: reason,
                           decoration: const InputDecoration(
@@ -101,9 +92,7 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
                         try {
                           await _repository.patch(rsvp.id,
                               vaiComparecer: attending,
-                              qtdAdultos: int.parse(adults.text),
                               qtdCriancas: int.parse(children.text),
-                              observacoes: notes.text,
                               motivo: reason.text.trim());
                           if (dialogContext.mounted) {
                             Navigator.pop(dialogContext);
@@ -126,9 +115,7 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
         ),
       );
     } finally {
-      adults.dispose();
       children.dispose();
-      notes.dispose();
       reason.dispose();
     }
   }
@@ -167,14 +154,13 @@ class _AdminAttendanceDetailPageState extends State<AdminAttendanceDetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _field('Nome', rsvp.nome),
+                          _field('Identificação no convite', rsvp.nome),
                           _field('E-mail', rsvp.email),
                           _field('Telefone', rsvp.telefone),
                           _field('Status',
                               rsvp.vaiComparecer ? 'Confirmado' : 'Recusado'),
                           _field('Adultos', '${rsvp.qtdAdultos}'),
                           _field('Crianças', '${rsvp.qtdCriancas}'),
-                          _field('Observações', rsvp.observacoes),
                           _field(
                               'Criado em', rsvp.criadoEm.toLocal().toString()),
                           FilledButton.icon(

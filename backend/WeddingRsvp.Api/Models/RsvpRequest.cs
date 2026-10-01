@@ -1,16 +1,21 @@
 namespace WeddingRsvp.Api.Models;
 
 /// <summary>
-/// DTO de entrada para confirmação de presença.
-/// Desacoplado da entidade Rsvp para prevenir Over-Posting Attacks:
-/// o cliente não pode injetar campos como Id, CriadoEm, etc.
+/// DTO de entrada para confirmação de presença via QR code genérico.
+/// O cliente informa a identificação exata do convite, presença e crianças.
+/// A quantidade de adultos é derivada do Admin — o cliente não informa.
 /// </summary>
 public record RsvpRequest(
-    string Nome,
+    /// <summary>Identificação exatamente como impressa no convite. Exemplo: "Jorge e Amanda".</summary>
+    string IdentificacaoNoConvite,
+    /// <summary>E-mail de contato.</summary>
     string Email,
+    /// <summary>Telefone em formato brasileiro.</summary>
     string Telefone,
+    /// <summary>Confirma ou recusa presença.</summary>
     bool VaiComparecer,
-    int QtdAdultos,
+    /// <summary>Quantidade de crianças (0–10). Só válido quando VaiComparecer = true.</summary>
     int QtdCriancas,
-    string? Observacoes
+    /// <summary>O convidado aceitou os termos de uso.</summary>
+    bool AceitouTermos
 );

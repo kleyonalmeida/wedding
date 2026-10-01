@@ -124,9 +124,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
 
   Future<void> _openEditModal(Rsvp rsvp) async {
     final vaiComparecer = ValueNotifier<bool>(rsvp.vaiComparecer);
-    final adultos = TextEditingController(text: rsvp.qtdAdultos.toString());
     final criancas = TextEditingController(text: rsvp.qtdCriancas.toString());
-    final observacoes = TextEditingController(text: rsvp.observacoes ?? '');
     final motivo = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
@@ -154,36 +152,19 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: adultos,
-                            decoration: const InputDecoration(
-                                labelText: 'Adultos',
-                                border: OutlineInputBorder()),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: criancas,
-                            decoration: const InputDecoration(
-                                labelText: 'Crianças',
-                                border: OutlineInputBorder()),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
+                    Text('Adultos: ${rsvp.qtdAdultos} (definidos no convite)'),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: observacoes,
+                      controller: criancas,
                       decoration: const InputDecoration(
-                          labelText: 'Observações',
-                          border: OutlineInputBorder()),
-                      maxLines: 2,
+                          labelText: 'Crianças', border: OutlineInputBorder()),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        final count = int.tryParse(value ?? '');
+                        return count == null || count < 0 || count > 10
+                            ? 'Informe de 0 a 10 crianças.'
+                            : null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -215,9 +196,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                           await _repository.patch(
                             rsvp.id,
                             vaiComparecer: vaiComparecer.value,
-                            qtdAdultos: int.tryParse(adultos.text) ?? 0,
                             qtdCriancas: int.tryParse(criancas.text) ?? 0,
-                            observacoes: observacoes.text,
                             motivo: motivo.text,
                           );
                           if (context.mounted) Navigator.pop(context);
@@ -300,6 +279,12 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
               value: '${data.totalRespostas}',
               icon: Icons.mark_email_read,
               iconColor: Theme.of(context).colorScheme.primary,
+            ),
+            AdminMetricCard(
+              label: 'CONVITES PENDENTES',
+              value: '${data.linhasPendentes}',
+              icon: Icons.pending_actions,
+              iconColor: Theme.of(context).colorScheme.secondary,
             ),
             AdminMetricCard(
               label: 'CONFIRMADOS',

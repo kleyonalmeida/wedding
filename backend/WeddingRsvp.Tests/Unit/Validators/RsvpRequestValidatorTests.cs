@@ -5,6 +5,10 @@ using Xunit;
 
 namespace WeddingRsvp.Tests.Unit.Validators;
 
+/// <summary>
+/// Testes do RsvpRequestValidator com o novo contrato:
+/// IdentificacaoNoConvite, sem QtdAdultos (derivado do Admin), crianças 0-10.
+/// </summary>
 public class RsvpRequestValidatorTests
 {
     private readonly RsvpRequestValidator _validator;
@@ -14,44 +18,39 @@ public class RsvpRequestValidatorTests
         _validator = new RsvpRequestValidator();
     }
 
+    // ── IdentificacaoNoConvite ─────────────────────────────────────────────────
+
     [Theory]
     [InlineData("")]
-    [InlineData(null)]
-    public void Nome_Vazio_DeveSerInvalido(string nome)
+    public void Identificacao_Vazia_DeveSerInvalido(string identificacao)
     {
-        var model = CreateModel(nome: nome);
+        var model = CreateModel(identificacao: identificacao);
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Nome);
+        result.ShouldHaveValidationErrorFor(x => x.IdentificacaoNoConvite);
     }
 
     [Theory]
-    [InlineData("Ana Lima")]
-    [InlineData("João Conceição")]
-    public void Nome_SomenteLetras_DeveSerValido(string nome)
+    [InlineData("Jorge e Amanda")]
+    [InlineData("Antônio Souza")]
+    [InlineData("Maria-José")]
+    public void Identificacao_Valida_DevePassar(string identificacao)
     {
-        var model = CreateModel(nome: nome);
+        var model = CreateModel(identificacao: identificacao);
         var result = _validator.TestValidate(model);
-        result.ShouldNotHaveValidationErrorFor(x => x.Nome);
+        result.ShouldNotHaveValidationErrorFor(x => x.IdentificacaoNoConvite);
     }
 
     [Theory]
-    [InlineData("Ana123")]
-    [InlineData("Ana!")]
-    [InlineData("<script>alert('1')</script>")]
-    public void Nome_CaracteresInvalidos_DeveSerInvalido(string nome)
+    [InlineData("<script>alert('xss')</script>")]
+    [InlineData("<b>nome</b>")]
+    public void Identificacao_ComHTML_DeveSerInvalido(string identificacao)
     {
-        var model = CreateModel(nome: nome);
+        var model = CreateModel(identificacao: identificacao);
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Nome);
+        result.ShouldHaveValidationErrorFor(x => x.IdentificacaoNoConvite);
     }
 
-    [Fact]
-    public void Nome_MuitoLongo_DeveSerInvalido()
-    {
-        var model = CreateModel(nome: new string('a', 101));
-        var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Nome);
-    }
+    // ── Email ─────────────────────────────────────────────────────────────────
 
     [Theory]
     [InlineData("naoeemail")]
@@ -71,6 +70,8 @@ public class RsvpRequestValidatorTests
         var result = _validator.TestValidate(model);
         result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
+
+    // ── Telefone ──────────────────────────────────────────────────────────────
 
     [Theory]
     [InlineData("abc")]
@@ -94,51 +95,55 @@ public class RsvpRequestValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.Telefone);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(21)]
-    public void QtdAdultos_ForaDoRange_DeveSerInvalido(int qtd)
-    {
-        var model = CreateModel(qtdAdultos: qtd);
-        var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.QtdAdultos);
-    }
+    // ── QtdCriancas ───────────────────────────────────────────────────────────
 
     [Theory]
     [InlineData(-1)]
-    [InlineData(16)]
+    [InlineData(11)] // Máximo é 10 conforme planejamento
     public void QtdCriancas_ForaDoRange_DeveSerInvalido(int qtd)
     {
-        var model = CreateModel(qtdCriancas: qtd);
+        var model = CreateModel(qtdCriancas: qtd, vaiComparecer: true);
         var result = _validator.TestValidate(model);
         result.ShouldHaveValidationErrorFor(x => x.QtdCriancas);
     }
 
-    [Fact]
-    public void Observacoes_Nula_DeveSerValida()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(10)]
+    public void QtdCriancas_DentroDoRange_DeveSerValido(int qtd)
     {
-        var model = CreateModel(observacoes: null);
+        var model = CreateModel(qtdCriancas: qtd, vaiComparecer: true);
         var result = _validator.TestValidate(model);
-        result.ShouldNotHaveValidationErrorFor(x => x.Observacoes);
+        result.ShouldNotHaveValidationErrorFor(x => x.QtdCriancas);
     }
 
     [Fact]
-    public void Observacoes_MuitoLonga_DeveSerInvalida()
+    public void Recusa_QtdCriancasDeveSer0()
     {
-        var model = CreateModel(observacoes: new string('a', 501));
+        var model = CreateModel(qtdCriancas: 1, vaiComparecer: false);
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Observacoes);
+        result.ShouldHaveValidationErrorFor(x => x.QtdCriancas);
+    }
+
+    // ── AceitouTermos ─────────────────────────────────────────────────────────
+
+    [Fact]
+    public void AceitouTermos_False_DeveSerInvalido()
+    {
+        var model = CreateModel(aceitouTermos: false);
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.AceitouTermos);
     }
 
     private RsvpRequest CreateModel(
-        string nome = "Teste Silva",
+        string identificacao = "Jorge e Amanda",
         string email = "teste@example.com",
         string telefone = "11987654321",
         bool vaiComparecer = true,
-        int qtdAdultos = 2,
         int qtdCriancas = 0,
-        string? observacoes = null)
+        bool aceitouTermos = true)
     {
-        return new RsvpRequest(nome, email, telefone, vaiComparecer, qtdAdultos, qtdCriancas, observacoes);
+        return new RsvpRequest(identificacao, email, telefone, vaiComparecer, qtdCriancas, aceitouTermos);
     }
 }

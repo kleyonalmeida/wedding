@@ -49,48 +49,93 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     }
 }
 
+/// <summary>
+/// Testes de integração básicos do endpoint POST /api/rsvp.
+/// Nota: com a nova lógica, POST /api/rsvp exige linha cadastrada previamente.
+/// Testes mais completos estão em InvitationLineEndpointsTests.cs.
+/// </summary>
 public class RsvpEndpointsTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
+    private readonly CustomWebApplicationFactory _factory;
 
     public RsvpEndpointsTests(CustomWebApplicationFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
-    [Fact]
-    public async Task POST_Valido_Retorna201()
+    private async Task<HttpClient> GetAuthenticatedClientAsync()
     {
-        var request = new RsvpRequest(
-            "Convidado Teste", "convidado1@teste.com", "(11) 91234-5678", true, 2, 0, null);
+        var client = _factory.CreateClient();
+        var loginRequest = new AdminLoginRequest("admin@wedding.com", "Admin@123!");
+        var loginResponse = await client.PostAsJsonAsync("/api/admin/auth/login", loginRequest);
 
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        var cookies = loginResponse.Headers.GetValues("Set-Cookie");
+        var authCookie = cookies.FirstOrDefault(c => c.StartsWith(".Wedding.Admin"));
+        if (authCookie != null)
+            client.DefaultRequestHeaders.Add("Cookie", authCookie.Split(';')[0]);
+
+        await CustomWebApplicationFactory.AddCsrfAsync(client);
+        return client;
+    }
+
+    private async Task<string> CriarLinhaAsync(HttpClient adminClient, string identificacao, int adultos)
+    {
+        var response = await adminClient.PostAsJsonAsync("/api/admin/invitation-lines",
+            new { identificacaoNoConvite = identificacao, quantidadeAdultos = adultos });
+        response.EnsureSuccessStatusCode();
+        return identificacao;
+    }
+
+    [Fact]
+    public async Task POST_IdentificacaoDesconhecida_Retorna422()
+    {
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = "Ninguem " + Guid.NewGuid().ToString("N"),
+            vaiComparecer = true,
+            qtdCriancas = 0,
+            email = $"x{Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task POST_LinhaValida_Retorna201()
+    {
+        var adminClient = await GetAuthenticatedClientAsync();
+        var id = "Convidado Valido " + Guid.NewGuid().ToString("N")[..6];
+        await CriarLinhaAsync(adminClient, id, 2);
+
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = id,
+            vaiComparecer = true,
+            qtdCriancas = 0,
+            email = $"{Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 
     [Fact]
-    public async Task POST_EmailDuplicado_Retorna409()
+    public async Task POST_PayloadSemAceitarTermos_Retorna400()
     {
-        var request = new RsvpRequest(
-            "Convidado Duplicado", "duplicado@teste.com", "11987654321", true, 2, 0, null);
-
-        // Primeiro envio
-        await _client.PostAsJsonAsync("/api/rsvp", request);
-
-        // Segundo envio com o mesmo e-mail
-        var response2 = await _client.PostAsJsonAsync("/api/rsvp", request);
-
-        Assert.Equal(HttpStatusCode.Conflict, response2.StatusCode);
-    }
-
-    [Fact]
-    public async Task POST_NomeVazio_Retorna400()
-    {
-        var request = new RsvpRequest(
-            "", "invalido1@teste.com", "11987654321", true, 2, 0, null);
-
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = "Qualquer Um",
+            vaiComparecer = true,
+            qtdCriancas = 0,
+            email = $"{Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = false // não aceita
+        });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -98,40 +143,51 @@ public class RsvpEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task POST_EmailInvalido_Retorna400()
     {
-        var request = new RsvpRequest(
-            "Convidado", "emailinvalido", "11987654321", true, 2, 0, null);
-
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task POST_PayloadSql_Retorna400()
-    {
-        var request = new RsvpRequest(
-            "1' OR '1'='1", "sql@teste.com", "11987654321", true, 2, 0, null);
-
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = "Qualquer Um",
+            vaiComparecer = true,
+            qtdCriancas = 0,
+            email = "emailinvalido",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task POST_RecusaComZeroPessoas_Retorna201()
+    public async Task POST_RecusaComLinhaValida_Retorna201()
     {
-        var request = new RsvpRequest("Convidado Recusou", "recusou@teste.com", "11987654321", false, 0, 0, null);
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        var adminClient = await GetAuthenticatedClientAsync();
+        var id = "Recusa Simples " + Guid.NewGuid().ToString("N")[..6];
+        await CriarLinhaAsync(adminClient, id, 1);
+
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = id,
+            vaiComparecer = false,
+            qtdCriancas = 0,
+            email = $"{Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
+
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 
     [Fact]
-    public async Task POST_QtdAdultosZero_Retorna400()
+    public async Task POST_OnzeCriancas_Retorna400()
     {
-        var request = new RsvpRequest(
-            "Convidado", "adultozero@teste.com", "11987654321", true, 0, 0, null);
-
-        var response = await _client.PostAsJsonAsync("/api/rsvp", request);
+        var response = await _client.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = "Qualquer Um",
+            vaiComparecer = true,
+            qtdCriancas = 11, // Acima do máximo (10)
+            email = $"{Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }

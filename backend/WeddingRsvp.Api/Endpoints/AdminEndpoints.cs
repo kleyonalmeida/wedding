@@ -27,13 +27,12 @@ public static class AdminEndpoints
                 .Select(r => new
                 {
                     r.Id,
-                    r.Nome,
+                    r.IdentificacaoNoConvite,
                     r.Email,
                     r.Telefone,
                     r.VaiComparecer,
                     r.QtdAdultos,
                     r.QtdCriancas,
-                    r.Observacoes,
                     r.CriadoEm
                 })
                 .AsNoTracking() // Read-only — evita overhead de change tracking

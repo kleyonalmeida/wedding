@@ -14,6 +14,7 @@ class AdminShell extends StatelessWidget {
     (path: '/admin/produtos', label: 'Produtos', icon: Icons.inventory_2),
     (path: '/admin/pagamentos', label: 'Pagamentos', icon: Icons.payments),
     (path: '/admin/presenca', label: 'Presença', icon: Icons.how_to_reg),
+    (path: '/admin/convites', label: 'Convites', icon: Icons.mail_outline),
     (path: '/admin/logs', label: 'Logs', icon: Icons.history),
     (
       path: '/admin/configuracoes',
@@ -201,7 +202,7 @@ class AdminShell extends StatelessWidget {
                             ? theme.colorScheme.onPrimaryContainer
                             : theme.colorScheme.onSurfaceVariant,
                         fontWeight:
-                            isActive ? FontWeight.w500 : FontWeight.w400,
+                            isActive ? FontWeight.w600 : FontWeight.w500,
                       ))),
             ],
           ),

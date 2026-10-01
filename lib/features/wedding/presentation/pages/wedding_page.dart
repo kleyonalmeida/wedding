@@ -11,9 +11,9 @@ import '../widgets/welcome_section.dart';
 import '../widgets/countdown_section.dart';
 import '../widgets/couple_section.dart';
 import '../widgets/ceremony_section.dart';
-import '../widgets/rsvp_section.dart';
 import '../widgets/wedding_footer.dart';
 import '../widgets/wedding_side_menu.dart';
+import '../../../../app_router.dart';
 
 class WeddingPage extends StatefulWidget {
   const WeddingPage({super.key});
@@ -35,7 +35,6 @@ class _WeddingPageState extends State<WeddingPage> {
   final GlobalKey _casalKey = GlobalKey();
   final GlobalKey _recepcaoKey = GlobalKey();
   final GlobalKey _listaKey = GlobalKey();
-  final GlobalKey _rsvpKey = GlobalKey();
 
   @override
   void initState() {
@@ -169,10 +168,6 @@ class _WeddingPageState extends State<WeddingPage> {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          key: _rsvpKey,
-          child: const RsvpSection(),
-        ),
         const SliverToBoxAdapter(
           child: WeddingFooter(),
         ),
@@ -201,7 +196,10 @@ class _WeddingPageState extends State<WeddingPage> {
           Navigator.of(context).pop(); // close drawer
           AppNavigation.go(context, '/presentes');
         },
-        onRsvpTap: () => _scrollTo(_rsvpKey),
+        onRsvpTap: () {
+          Navigator.of(context).pop();
+          AppNavigation.go(context, AppRouterDelegate.rsvpNotice);
+        },
       ),
       body: Stack(
         children: [
@@ -217,7 +215,7 @@ class _WeddingPageState extends State<WeddingPage> {
             onCasalTap: () => _scrollTo(_casalKey),
             onRecepcaoTap: () => _scrollTo(_recepcaoKey),
             onListaTap: () => AppNavigation.go(context, '/presentes'),
-            onRsvpTap: () => _scrollTo(_rsvpKey),
+            onRsvpTap: () => AppNavigation.go(context, AppRouterDelegate.rsvpNotice),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           if (isMobile)

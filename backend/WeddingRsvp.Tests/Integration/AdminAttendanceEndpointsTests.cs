@@ -33,6 +33,34 @@ public class AdminAttendanceEndpointsTests : IClassFixture<CustomWebApplicationF
         return client;
     }
 
+    private async Task<System.Text.Json.JsonElement> CriarLinhaERespostaAsync(
+        HttpClient adminClient,
+        string identificacao,
+        int adultos,
+        bool vaiComparecer = true)
+    {
+        // Cadastrar linha
+        await adminClient.PostAsJsonAsync("/api/admin/invitation-lines",
+            new { identificacaoNoConvite = identificacao, quantidadeAdultos = adultos });
+
+        // Enviar RSVP como público
+        var publicClient = _factory.CreateClient();
+        await publicClient.PostAsJsonAsync("/api/rsvp", new
+        {
+            identificacaoNoConvite = identificacao,
+            vaiComparecer = vaiComparecer,
+            qtdCriancas = 0,
+            email = $"{System.Guid.NewGuid():N}@teste.com",
+            telefone = "11987654321",
+            aceitouTermos = true
+        });
+
+        // Retorna o RSVP criado
+        var listResponse = await adminClient.GetFromJsonAsync<System.Text.Json.JsonElement>(
+            $"/api/admin/attendance?search={Uri.EscapeDataString(identificacao)}");
+        return listResponse.GetProperty("data").EnumerateArray().First();
+    }
+
     [Fact]
     public async Task GET_Attendance_Unauthenticated_Returns401()
     {
@@ -53,23 +81,21 @@ public class AdminAttendanceEndpointsTests : IClassFixture<CustomWebApplicationF
     public async Task PATCH_Attendance_ValidUpdate_UpdatesAndAudits()
     {
         var client = await GetAuthenticatedClientAsync();
+        var id = "Patch Test " + Guid.NewGuid().ToString("N")[..6];
         
-        // 1. Create a dummy RSVP
-        var rsvpRequest = new RsvpRequest("Test Update", "update@test.com", "11999999999", true, 2, 0, null);
-        await client.PostAsJsonAsync("/api/rsvp", rsvpRequest);
+        // Cria linha e RSVP
+        var item = await CriarLinhaERespostaAsync(client, id, 2);
+        var rsvpId = item.GetProperty("id").GetGuid();
         
-        // 2. Fetch the RSVP list to get its ID
-        var listResponse = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/admin/attendance?search=update@test.com");
-        var items = listResponse.GetProperty("data").EnumerateArray().ToList();
-        Assert.Single(items);
-        var id = items[0].GetProperty("id").GetGuid();
-        
-        // 3. Patch it
-        var patchResponse = await client.PatchAsJsonAsync($"/api/admin/attendance/{id}", new { vaiComparecer = false, motivo = "Manual override" });
+        // Patch
+        var patchResponse = await client.PatchAsJsonAsync(
+            $"/api/admin/attendance/{rsvpId}",
+            new { vaiComparecer = false, motivo = "Manual override" });
         Assert.Equal(HttpStatusCode.OK, patchResponse.StatusCode);
         
-        // 4. Verify it was updated
-        var getResponse = await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/admin/attendance/{id}");
+        // Verifica atualização
+        var getResponse = await client.GetFromJsonAsync<System.Text.Json.JsonElement>(
+            $"/api/admin/attendance/{rsvpId}");
         Assert.False(getResponse.GetProperty("vaiComparecer").GetBoolean());
     }
 }

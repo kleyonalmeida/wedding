@@ -15,6 +15,7 @@ public class AppDbContext : IdentityDbContext<AdminUser, IdentityRole<Guid>, Gui
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Rsvp> Rsvps => Set<Rsvp>();
+    public DbSet<InvitationLine> InvitationLines => Set<InvitationLine>();
     public DbSet<Gift> Gifts => Set<Gift>();
     public DbSet<GiftImage> GiftImages => Set<GiftImage>();
     public DbSet<GiftOrder> GiftOrders => Set<GiftOrder>();
@@ -28,18 +29,39 @@ public class AppDbContext : IdentityDbContext<AdminUser, IdentityRole<Guid>, Gui
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Rsvp>(entity =>
+        // ── InvitationLine ─────────────────────────────────────────────────
+        modelBuilder.Entity<InvitationLine>(entity =>
         {
-            if (Database.IsRelational())
-            {
-                entity.ToTable("rsvps");
-            }
+            if (Database.IsRelational()) entity.ToTable("invitation_lines");
             entity.HasKey(e => e.Id);
 
-            // Limites de tamanho reforçados no banco (dupla camada de proteção)
-            entity.Property(e => e.Nome)
+            entity.Property(e => e.IdentificacaoNoConvite)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(200);
+
+            entity.Property(e => e.IdentificacaoNormalizada)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            // Unicidade: impede duas linhas ativas com mesma identificação normalizada.
+            // Índice único na coluna normalizada — não no texto original (preserva acentos).
+            var idx = entity.HasIndex(e => e.IdentificacaoNormalizada).IsUnique();
+            if (Database.IsRelational())
+                idx.HasDatabaseName("ix_invitation_lines_normalized");
+
+            if (Database.IsRelational())
+                entity.Property(e => e.CriadoEm).HasDefaultValueSql("NOW()");
+        });
+
+        // ── Rsvp ──────────────────────────────────────────────────────────────
+        modelBuilder.Entity<Rsvp>(entity =>
+        {
+            if (Database.IsRelational()) entity.ToTable("rsvps");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.IdentificacaoNoConvite)
+                .IsRequired()
+                .HasMaxLength(200);
 
             entity.Property(e => e.Email)
                 .IsRequired()
@@ -49,24 +71,19 @@ public class AppDbContext : IdentityDbContext<AdminUser, IdentityRole<Guid>, Gui
                 .IsRequired()
                 .HasMaxLength(20);
 
-            entity.Property(e => e.Observacoes)
-                .HasMaxLength(500);
+            // Unicidade por linha de convite — não por e-mail.
+            // E-mail pode ser compartilhado entre linhas diferentes.
+            var idx = entity.HasIndex(e => e.InvitationLineId).IsUnique();
+            if (Database.IsRelational())
+                idx.HasDatabaseName("ix_rsvps_invitation_line_id");
 
-            // Índice único em Email: garante que cada pessoa confirme apenas uma vez
-            var index = entity.HasIndex(e => e.Email)
-                .IsUnique();
+            entity.HasOne(e => e.InvitationLine)
+                .WithOne(l => l.Rsvp)
+                .HasForeignKey<Rsvp>(e => e.InvitationLineId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             if (Database.IsRelational())
-            {
-                index.HasDatabaseName("ix_rsvps_email");
-            }
-
-            // Timestamp gerado com precisão UTC pelo PostgreSQL
-            if (Database.IsRelational())
-            {
-                entity.Property(e => e.CriadoEm)
-                    .HasDefaultValueSql("NOW()");
-            }
+                entity.Property(e => e.CriadoEm).HasDefaultValueSql("NOW()");
         });
 
         modelBuilder.Entity<Gift>(entity =>

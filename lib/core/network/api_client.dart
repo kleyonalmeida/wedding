@@ -8,10 +8,12 @@ import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart'
 class ApiException implements Exception {
   final int statusCode;
   final String? message;
-  const ApiException(this.statusCode, [this.message]);
+  final String? code;
+  const ApiException(this.statusCode, [this.message, this.code]);
 
   @override
-  String toString() => message == null ? 'HTTP $statusCode' : 'HTTP $statusCode: $message';
+  String toString() =>
+      message == null ? 'HTTP $statusCode' : 'HTTP $statusCode: $message';
 }
 
 class ApiClient {
@@ -89,13 +91,15 @@ class ApiClient {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? message;
+      String? code;
       try {
         final body = jsonDecode(response.body);
-        if (body is Map<String, dynamic> && body['message'] is String) {
-          message = body['message'] as String;
+        if (body is Map<String, dynamic>) {
+          if (body['message'] is String) message = body['message'] as String;
+          if (body['code'] is String) code = body['code'] as String;
         }
       } catch (_) {}
-      throw ApiException(response.statusCode, message);
+      throw ApiException(response.statusCode, message, code);
     }
     if (response.body.isEmpty) return null;
     return jsonDecode(response.body);

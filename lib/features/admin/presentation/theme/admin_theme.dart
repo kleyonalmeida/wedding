@@ -51,21 +51,21 @@ class AdminTheme {
         // section-title
         headlineMedium: GoogleFonts.bodoniModa(
           fontSize: 27,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w600,
           height: 1.2,
           color: colorScheme.onSurface,
         ),
         // body-md
         bodyMedium: GoogleFonts.workSans(
           fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w500,
           height: 1.45,
           color: colorScheme.onSurface,
         ),
         // label-caps
         labelSmall: GoogleFonts.plusJakartaSans(
           fontSize: 10,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           height: 1.3,
           letterSpacing: 1.3,
           color: colorScheme.onSurfaceVariant,
