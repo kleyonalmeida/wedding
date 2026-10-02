@@ -49,9 +49,31 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
       builder: (context) => AlertDialog(
         title: const Text('Identificação não encontrada',
             style: TextStyle(color: AppColors.primary)),
-        content: Text(
-          'Verificamos que "$textDigitado" não consta em nossa lista de convidados para o casamento. Confira no convite a forma exata como os nomes estão escritos. Se a identificação foi digitada corretamente e este aviso continua aparecendo, lamentamos o transtorno, mas ela não consta em nossa lista. Pedimos que não insista em novas tentativas. Se desejar esclarecimentos, entre em contato com o noivo ou com a noiva.',
-          style: const TextStyle(fontSize: 15, height: 1.5),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Verificamos que "$textDigitado" não consta em nossa lista de convidados para o casamento. Por favor verifique se:',
+                style: const TextStyle(fontSize: 15, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.only(left: 16.0),
+                child: Text(
+                  '• O nome está exatamente conforme escrito no convite\n• Devem ser escritos ambos os nomes na caixinha de texto',
+                  style: TextStyle(fontSize: 15, height: 1.5),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Caso esteja correto e o aviso continua aparecendo a você, lamentamos o transtorno, mas isso quer dizer que você não foi convidado. Pedimos que não insista em novas tentativas. Se desejar esclarecimentos, entre em contato com o noivo ou com a noiva.',
+                style: TextStyle(fontSize: 15, height: 1.5),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
