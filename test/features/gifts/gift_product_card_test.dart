@@ -75,6 +75,27 @@ void main() {
     expect(presses, 1);
   });
 
+  testWidgets('detalhes do presente mostram o preço formatado', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 350,
+          height: 600,
+          child: GiftProductCard(
+            product: gift(available: true),
+            onGiftPressed: () {},
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.image_not_supported_outlined).first);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.text('R\$ 43,21'), findsNWidgets(2));
+  });
+
   testWidgets('grade móvel mantém botão inteiro em uma coluna', (tester) async {
     tester.view.physicalSize = const Size(390, 1500);
     tester.view.devicePixelRatio = 1;

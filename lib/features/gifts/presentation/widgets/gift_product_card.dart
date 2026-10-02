@@ -463,7 +463,15 @@ class _GiftProductCardState extends State<GiftProductCard> {
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 12),
-                        GiftPrice(priceCents: widget.product.priceCents, large: true),
+                        Text(
+                          formatGiftPrice(widget.product.priceCents),
+                          style: TextStyle(
+                            fontFamily: 'Playfair Display',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         if (widget.product.description?.isNotEmpty == true) ...[
                           Text(
