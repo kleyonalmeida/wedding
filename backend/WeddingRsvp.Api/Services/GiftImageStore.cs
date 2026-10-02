@@ -1,4 +1,5 @@
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace WeddingRsvp.Api.Services;
 
@@ -39,15 +40,19 @@ public sealed class GiftImageStore
         var key = Guid.NewGuid().ToString("N") + ".webp";
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, key);
+        var thumbPath = Path.Combine(_directory, "thumb_" + key);
         try
         {
-            await using var output = File.Create(path);
-            await bitmap.SaveAsWebpAsync(output, cancellationToken);
+            await using (var output = File.Create(path))
+                await bitmap.SaveAsWebpAsync(output, cancellationToken);
+
+            await WriteThumbnailAsync(bitmap, thumbPath, cancellationToken);
+
             return (key, "image/webp", new FileInfo(path).Length, bitmap.Width, bitmap.Height);
         }
         catch
         {
-            File.Delete(path);
+            DeleteArtifacts(key);
             throw;
         }
     }
@@ -56,5 +61,87 @@ public sealed class GiftImageStore
     {
         if (Path.GetFileName(key) != key || key.Contains("..")) throw new ArgumentException("Invalid image key.");
         return Path.Combine(_directory, key);
+    }
+
+    public string PathForThumb(string key)
+    {
+        if (Path.GetFileName(key) != key || key.Contains("..")) throw new ArgumentException("Invalid image key.");
+        return Path.Combine(_directory, "thumb_" + key);
+    }
+
+    public void DeleteArtifacts(string key)
+    {
+        File.Delete(PathFor(key));
+        File.Delete(PathForThumb(key));
+    }
+
+    public async Task EnsureThumbnailsAsync(CancellationToken cancellationToken = default)
+    {
+        if (!Directory.Exists(_directory)) return;
+
+        var files = Directory.GetFiles(_directory, "*.webp");
+        foreach (var file in files)
+        {
+            var fileName = Path.GetFileName(file);
+            if (fileName.StartsWith("thumb_")) continue;
+
+            var thumbPath = PathForThumb(fileName);
+            if (await IsValidThumbnailAsync(thumbPath, cancellationToken)) continue;
+
+            try
+            {
+                using var image = await Image.LoadAsync(file, cancellationToken);
+                await WriteThumbnailAsync(image, thumbPath, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // Um arquivo inválido não pode bloquear a próxima tentativa.
+                try { File.Delete(thumbPath); }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
+            }
+        }
+    }
+
+    private static async Task<bool> IsValidThumbnailAsync(string path, CancellationToken cancellationToken)
+    {
+        if (!File.Exists(path)) return false;
+        try
+        {
+            using var image = await Image.LoadAsync(path, cancellationToken);
+            return image.Width <= 480 && image.Height <= 480;
+        }
+        catch (UnknownImageFormatException) { return false; }
+        catch (InvalidImageContentException) { return false; }
+        catch (IOException) { return false; }
+        catch (UnauthorizedAccessException) { return false; }
+    }
+
+    private static async Task WriteThumbnailAsync(Image source, string path, CancellationToken cancellationToken)
+    {
+        var temporaryPath = path + ".tmp." + Guid.NewGuid().ToString("N");
+        try
+        {
+            using var thumbnail = source.Clone(context =>
+            {
+                if (source.Width > 480 || source.Height > 480)
+                    context.Resize(new ResizeOptions
+                    {
+                        Mode = ResizeMode.Max,
+                        Size = new Size(480, 480)
+                    });
+            });
+            await using (var output = File.Create(temporaryPath))
+                await thumbnail.SaveAsWebpAsync(output, cancellationToken);
+            File.Move(temporaryPath, path, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(temporaryPath);
+        }
     }
 }

@@ -58,7 +58,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('VOLTAR',
                 style: TextStyle(
-                    color: AppColors.primary, fontWeight: FontWeight.bold)),
+                    color: AppColors.primary, fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -86,7 +86,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
             },
             child: const Text('VER O SITE',
                 style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.bold)),
+                    color: Colors.green, fontWeight: FontWeight.w800)),
           ),
           if (!attending)
             TextButton(
@@ -172,7 +172,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                     fontSize: 12,
                     letterSpacing: 1.5,
                     color: AppColors.primary,
-                    fontWeight: FontWeight.w600)),
+                    fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(title,
                 textAlign: TextAlign.center,
@@ -183,7 +183,9 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
             const SizedBox(height: 4),
             Text(detail,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.onSurfaceVariant)),
+                style: const TextStyle(
+                    color: AppColors.onSurfaceVariant,
+                    fontWeight: FontWeight.w500)),
           ]),
         ),
       ),
@@ -225,13 +227,14 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                         fontSize: 12,
                         letterSpacing: 2,
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600)),
+                        fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
                 const Text('Celebre Este Dia Conosco',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontFamily: 'Playfair Display',
                         fontSize: 36,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.primary)),
                 const SizedBox(height: 12),
                 ConstrainedBox(
@@ -242,6 +245,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                     style: TextStyle(
                         fontSize: 16,
                         height: 1.5,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.onSurfaceVariant),
                   ),
                 ),
@@ -300,6 +304,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                     MediaQuery.of(context).size.width >= 768
                                         ? 76
                                         : 44,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
                               ),
                               textAlign: TextAlign.center,
@@ -310,7 +315,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 12,
                                 letterSpacing: 2.0,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -328,7 +333,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               ),
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                               validator: (value) =>
@@ -344,7 +349,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 11,
                                 letterSpacing: 1.8,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.primary,
                               ),
                             ),
@@ -376,42 +381,46 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                 style: AppTextStyles.sans.copyWith(
                                   fontSize: 11,
                                   letterSpacing: 1.8,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                   color: AppColors.primary,
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Center(
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.5,
-                                  child: SegmentedButton<bool>(
-                                    emptySelectionAllowed: true,
-                                    segments: const [
-                                      ButtonSegment(value: true, label: Text('Sim')),
-                                      ButtonSegment(value: false, label: Text('Não')),
-                                    ],
-                                    selected: _bringingChildren == null
-                                        ? {}
-                                        : {_bringingChildren!},
-                                    onSelectionChanged: (values) => setState(
-                                        () => _bringingChildren =
-                                            values.isEmpty ? null : values.first),
-                                  ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: SegmentedButton<bool>(
+                                  emptySelectionAllowed: true,
+                                  segments: const [
+                                    ButtonSegment(value: true, label: Text('Sim')),
+                                    ButtonSegment(value: false, label: Text('Não')),
+                                  ],
+                                  selected: _bringingChildren == null
+                                      ? {}
+                                      : {_bringingChildren!},
+                                  onSelectionChanged: (values) => setState(
+                                      () => _bringingChildren =
+                                          values.isEmpty ? null : values.first),
                                 ),
                               ),
                               const SizedBox(height: 16),
                               if (_bringingChildren == true)
-                                DropdownButtonFormField<int>(
-                                  decoration: const InputDecoration(
-                                    labelText: 'QUANTIDADE DE CRIANÇAS',
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: SizedBox(
+                                    width: 180,
+                                    child: DropdownButtonFormField<int>(
+                                      decoration: const InputDecoration(
+                                        labelText: 'QTD. DE CRIANÇAS',
+                                      ),
+                                      initialValue: _children,
+                                      items: List.generate(5, (index) => index + 1)
+                                          .map((e) => DropdownMenuItem(
+                                              value: e, child: Text(e.toString())))
+                                          .toList(),
+                                      onChanged: (value) =>
+                                          setState(() => _children = value!),
+                                    ),
                                   ),
-                                  initialValue: _children,
-                                  items: List.generate(10, (index) => index + 1)
-                                      .map((e) => DropdownMenuItem(
-                                          value: e, child: Text(e.toString())))
-                                      .toList(),
-                                  onChanged: (value) =>
-                                      setState(() => _children = value!),
                                 ),
                               const SizedBox(height: 24),
                             ],
@@ -421,7 +430,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               ),
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                               keyboardType: TextInputType.emailAddress,
@@ -444,7 +453,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                               ),
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                               keyboardType: TextInputType.phone,
@@ -475,7 +484,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                           'Li e aceito a política de privacidade (LGPD).',
                                           style: AppTextStyles.sans.copyWith(
                                             fontSize: 13,
-                                            fontWeight: FontWeight.w500,
+                                            fontWeight: FontWeight.w600,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface,
@@ -560,11 +569,12 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                           children: [
                             Text('Precisa de ajuda com o seu convite?',
                                 style: TextStyle(
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     color: AppColors.primary)),
                             SizedBox(height: 4),
                             Text(
-                                'Entre em contato com os noivos para esclarecer qualquer dúvida.'),
+                                'Entre em contato com os noivos para esclarecer qualquer dúvida.',
+                                style: TextStyle(fontWeight: FontWeight.w500)),
                           ],
                         )),
                       ]),
@@ -586,6 +596,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                     style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 1.5,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.primary)),
               ]),
             ),

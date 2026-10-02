@@ -23,8 +23,8 @@ void main() {
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Identificação como está no convite'),
         'jorge e amanda');
-    await tester.ensureVisible(find.text('Sim, confirmarei'));
-    await tester.tap(find.text('Sim, confirmarei'));
+    await tester.ensureVisible(find.text('Sim, confirmo presença'));
+    await tester.tap(find.text('Sim, confirmo presença'));
     await tester.pump();
     await tester.ensureVisible(find.text('Não').last);
     await tester.tap(find.text('Não').last);
@@ -33,8 +33,8 @@ void main() {
     await tester.enterText(
         find.widgetWithText(TextFormField, 'TELEFONE / WHATSAPP'),
         '11987654321');
-    await tester.ensureVisible(find.text('Li e aceito os termos de uso.'));
-    await tester.tap(find.text('Li e aceito os termos de uso.'));
+    await tester.ensureVisible(find.text('Li e aceito a política de privacidade (LGPD).'));
+    await tester.tap(find.text('Li e aceito a política de privacidade (LGPD).'));
     await tester.ensureVisible(find.text('CONFIRMAR PRESENÇA'));
     await tester.tap(find.text('CONFIRMAR PRESENÇA'));
     await tester.pump();
@@ -53,14 +53,14 @@ void main() {
 
     expect(find.text('Identificação como está no convite'), findsOneWidget);
     expect(find.text('Terá acompanhante?'), findsNothing);
-    await tester.ensureVisible(find.text('Sim, confirmarei'));
-    await tester.tap(find.text('Sim, confirmarei'));
+    await tester.ensureVisible(find.text('Sim, confirmo presença'));
+    await tester.tap(find.text('Sim, confirmo presença'));
     await tester.pump();
     expect(find.text('LEVARÃO CRIANÇAS?'), findsOneWidget);
     await tester.ensureVisible(find.text('Sim').last);
     await tester.tap(find.text('Sim').last);
     await tester.pump();
-    expect(find.text('QUANTIDADE DE CRIANÇAS'), findsOneWidget);
+    expect(find.text('QTD. DE CRIANÇAS'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

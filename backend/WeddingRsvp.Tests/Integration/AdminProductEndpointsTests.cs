@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using WeddingRsvp.Api.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Microsoft.Extensions.DependencyInjection;
+using WeddingRsvp.Api.Services;
 using Xunit;
 
 namespace WeddingRsvp.Tests.Integration;
@@ -115,10 +117,79 @@ public class AdminProductEndpointsTests : IClassFixture<CustomWebApplicationFact
         var imageResponse = await client.GetAsync(imageUrl);
         Assert.Equal(HttpStatusCode.OK, imageResponse.StatusCode);
         Assert.Equal("image/webp", imageResponse.Content.Headers.ContentType?.MediaType);
+        var originalKey = Path.GetFileName(imageUrl);
+        var store = _factory.Services.GetRequiredService<GiftImageStore>();
+        Assert.True(File.Exists(store.PathForThumb(originalKey)));
+        using (var thumbnail = await Image.LoadAsync(store.PathForThumb(originalKey)))
+        {
+            Assert.Equal(2, thumbnail.Width);
+            Assert.Equal(2, thumbnail.Height);
+        }
         using var replacementForm = new MultipartFormDataContent();
         replacementForm.Add(new ByteArrayContent(bytes.ToArray()) { Headers = { ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png") } }, "image", "replacement.png");
         var replacement = await client.PostAsync($"/api/admin/products/{id}/images", replacementForm);
         Assert.Equal(HttpStatusCode.Created, replacement.StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync(imageUrl)).StatusCode);
+        Assert.False(File.Exists(store.PathFor(originalKey)));
+        Assert.False(File.Exists(store.PathForThumb(originalKey)));
+    }
+
+    [Fact]
+    public async Task POST_Image_GeneratesThumbnailAndReturnsItInPublicCatalog()
+    {
+        var client = await GetAuthenticatedClientAsync();
+        var create = await client.PostAsJsonAsync("/api/admin/products", new
+        {
+            name = "Thumb Gift", slug = "gift-thumb-unique", priceCents = 1000, category = "Casa"
+        });
+        create.EnsureSuccessStatusCode();
+        var gift = await create.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        var id = gift.GetProperty("id").GetString();
+        using var bitmap = new Image<Rgba32>(1000, 1000);
+        await using var bytes = new MemoryStream();
+        await bitmap.SaveAsPngAsync(bytes);
+        using var form = new MultipartFormDataContent();
+        form.Add(new ByteArrayContent(bytes.ToArray()) { Headers = { ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png") } }, "image", "gift.png");
+        var upload = await client.PostAsync($"/api/admin/products/{id}/images", form);
+        Assert.Equal(HttpStatusCode.Created, upload.StatusCode);
+
+        var publicGiftsResponse = await client.GetAsync("/api/gifts");
+        var publicGifts = await publicGiftsResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        var publicGift = publicGifts.EnumerateArray().FirstOrDefault(g => g.GetProperty("slug").GetString() == "gift-thumb-unique");
+
+        var thumbUrl = publicGift.GetProperty("imageUrl").GetString();
+        Assert.NotNull(thumbUrl);
+        Assert.Contains("thumb_", thumbUrl); // Verifica se usou a URL de thumbnail
+
+        // Detalhe usa a original (ou suporta a original)
+        var detailGiftResponse = await client.GetAsync("/api/gifts/gift-thumb-unique");
+        var detailGift = await detailGiftResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        var originalUrl = detailGift.GetProperty("imageUrl").GetString();
+        Assert.NotNull(originalUrl);
+        Assert.DoesNotContain("thumb_", originalUrl); // Detalhe usa original
+
+        // Validar Cache-Control na resposta da imagem usando cliente anônimo para evitar headers de auth
+        var anonymousClient = _factory.CreateClient();
+        var thumbResponse = await anonymousClient.GetAsync(thumbUrl);
+        Assert.Equal(HttpStatusCode.OK, thumbResponse.StatusCode);
+        var cacheControlString = thumbResponse.Headers.CacheControl?.ToString() ?? thumbResponse.Headers.GetValues("Cache-Control").FirstOrDefault() ?? "";
+        Assert.Contains("public", cacheControlString);
+        Assert.Contains("max-age=604800", cacheControlString);
+        Assert.Contains("immutable", cacheControlString);
+        using (var thumbnail = await Image.LoadAsync(await thumbResponse.Content.ReadAsStreamAsync()))
+        {
+            Assert.Equal(480, thumbnail.Width);
+            Assert.Equal(480, thumbnail.Height);
+        }
+
+        var originalResponse = await anonymousClient.GetAsync(originalUrl);
+        Assert.Equal(HttpStatusCode.OK, originalResponse.StatusCode);
+        Assert.NotNull(originalResponse.Headers.CacheControl);
+
+        var imageStore = _factory.Services.GetRequiredService<GiftImageStore>();
+        File.Delete(imageStore.PathForThumb(Path.GetFileName(originalUrl)));
+        var fallbackResponse = await anonymousClient.GetAsync(thumbUrl);
+        Assert.Equal(HttpStatusCode.OK, fallbackResponse.StatusCode);
+        Assert.True(fallbackResponse.Headers.CacheControl?.NoStore);
     }
 }

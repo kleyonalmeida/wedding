@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../core/constants/wedding_constants.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/smooth_web_scroll.dart';
-import '../../../../core/widgets/web_scroll_mode.dart';
 import '../../../wedding/presentation/widgets/wedding_header.dart';
 import '../../../wedding/presentation/widgets/wedding_side_menu.dart';
 import '../../../wedding/presentation/widgets/wedding_footer.dart';
@@ -83,21 +81,16 @@ class _GiftsPageState extends State<GiftsPage> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isDesktopWeb = kIsWeb && !isMobile;
-    final useSmoothWebScroll =
-        isDesktopWeb && resolveWebScrollMode() == WebScrollMode.smooth;
-
     final catalogTheme = giftsTheme(context);
-    final innerScrollView = CustomScrollView(
+    final scrollArea = CustomScrollView(
       controller: _scrollController,
-      physics: useSmoothWebScroll
-          ? const NeverScrollableScrollPhysics()
-          : isDesktopWeb
-              ? const ClampingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                )
-              : const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
+      physics: isDesktopWeb
+          ? const ClampingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            )
+          : const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.only(top: 24),
@@ -180,15 +173,6 @@ class _GiftsPageState extends State<GiftsPage> {
         ),
       ],
     );
-
-    final scrollArea = useSmoothWebScroll
-        ? SmoothWebScroll(
-            controller: _scrollController,
-            scrollAmount: 80,
-            animationDuration: const Duration(milliseconds: 500),
-            child: innerScrollView,
-          )
-        : innerScrollView;
 
     return Scaffold(
       key: _scaffoldKey,

@@ -12,12 +12,11 @@ class GiftFilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -75,7 +74,6 @@ class GiftFilterPanel extends StatelessWidget {
     required List<String> selectedItems,
     required ValueChanged<String> onToggle,
   }) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(

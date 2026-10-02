@@ -130,12 +130,12 @@ void main() {
                                         controller: c)))))))));
         expect(tester.takeException(), isNull);
         expect(find.text('Cartão de crédito'), findsOneWidget);
-        expect(find.textContaining('Pagamento recebido em'), findsOneWidget);
-        expect(find.text('1 × Presente especial 10'), findsNothing);
+        expect(find.textContaining('Contribuição recebida em'), findsOneWidget);
+        expect(find.text('Presente especial 10'), findsNothing);
         await tester.ensureVisible(find.text('Próximos itens'));
         await tester.tap(find.text('Próximos itens'));
         await tester.pump();
-        expect(find.text('1 × Presente especial 10'), findsOneWidget);
+        expect(find.text('Presente especial 10'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

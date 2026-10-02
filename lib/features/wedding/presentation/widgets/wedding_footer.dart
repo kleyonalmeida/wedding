@@ -30,7 +30,7 @@ class WeddingFooter extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.5,
-              color: onSurface.withOpacity(0.85),
+              color: onSurface.withValues(alpha: 0.85),
               fontStyle: FontStyle.italic,
             ),
           ),

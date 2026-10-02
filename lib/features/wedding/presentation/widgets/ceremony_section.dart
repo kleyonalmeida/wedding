@@ -125,7 +125,7 @@ class CeremonySection extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 4 / 3,
           child: Image.asset(
-            'assets/images/ceremony-1600.webp',
+            'assets/images/ceremony.png',
             fit: BoxFit.cover,
             cacheWidth: 1200,
             filterQuality: FilterQuality.medium,

@@ -121,7 +121,7 @@ class _CountdownSectionState extends State<CountdownSection> {
             fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 2.0,
-            color: AppColors.white.withOpacity(0.9),
+            color: AppColors.white.withValues(alpha: 0.9),
           ),
         ),
       ],

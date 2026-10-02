@@ -13,13 +13,27 @@ public static class PublicGiftEndpoints
 {
     public static void MapPublicGiftEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapGet("/api/images/{key}", async (string key, GiftImageStore store, AppDbContext db) =>
+        routes.MapGet("/api/images/{key}", async (string key, HttpContext context, GiftImageStore store, AppDbContext db) =>
         {
-            if (key != Path.GetFileName(key) || key.Contains("..")) return Results.BadRequest();
-            var image = await db.GiftImages.AsNoTracking().FirstOrDefaultAsync(i => i.StorageKey == key && i.Gift != null && i.Gift.Active && i.Gift.DeletedAtUtc == null);
+            var isThumb = key.StartsWith("thumb_", StringComparison.Ordinal);
+            var actualKey = isThumb ? key[6..] : key;
+
+            if (actualKey != Path.GetFileName(actualKey) || actualKey.Contains("..")) return Results.BadRequest();
+            var image = await db.GiftImages.AsNoTracking().FirstOrDefaultAsync(i => i.StorageKey == actualKey && i.Gift != null && i.Gift.Active && i.Gift.DeletedAtUtc == null);
             if (image == null) return Results.NotFound();
-            var path = store.PathFor(key);
-            return File.Exists(path) ? Results.File(path, image.MimeType) : Results.NotFound();
+            var path = isThumb ? store.PathForThumb(actualKey) : store.PathFor(actualKey);
+            var fallbackToOriginal = isThumb && !File.Exists(path);
+            if (fallbackToOriginal) path = store.PathFor(actualKey);
+
+            if (!File.Exists(path)) return Results.NotFound();
+
+            context.Response.OnStarting(() => {
+                context.Response.Headers.CacheControl = fallbackToOriginal
+                    ? "no-store"
+                    : "public, max-age=604800, immutable";
+                return Task.CompletedTask;
+            });
+            return Results.File(path, image.MimeType);
         });
         var group = routes.MapGroup("/api/gifts").WithTags("Public Gifts");
 
@@ -44,7 +58,7 @@ public static class PublicGiftEndpoints
                     g.Featured,
                     SoldOut = g.StockRemaining == 0,
                     ImageUrl = g.Images.Where(img => img.IsPrimary)
-                        .Select(img => $"/api/images/{img.StorageKey}").FirstOrDefault()
+                        .Select(img => $"/api/images/thumb_{img.StorageKey}").FirstOrDefault()
                 })
                 .ToList();
 

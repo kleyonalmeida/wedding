@@ -251,6 +251,12 @@ using (var scope = app.Services.CreateScope())
 
     // Seed do SuperAdmin
     WeddingRsvp.Api.Services.AdminSeedService.SeedSuperAdminAsync(scope.ServiceProvider, app.Configuration).GetAwaiter().GetResult();
+
+    if (!Program.IsTesting)
+    {
+        var giftImageStore = scope.ServiceProvider.GetRequiredService<WeddingRsvp.Api.Services.GiftImageStore>();
+        giftImageStore.EnsureThumbnailsAsync().GetAwaiter().GetResult();
+    }
 }
 
 // ════════════════════════════════════════════════════════════════════════════

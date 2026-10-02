@@ -12,6 +12,38 @@ double giftCardImageHeightFor(double cardWidth) {
   return 124;
 }
 
+class _TextMeasurementCacheKey {
+  final String text;
+  final TextStyle style;
+  final double maxWidth;
+  final int lines;
+  final TextScaler textScaler;
+  final TextDirection direction;
+  final Locale? locale;
+
+  _TextMeasurementCacheKey(this.text, this.style, this.maxWidth, this.lines,
+      this.textScaler, this.direction, this.locale);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is _TextMeasurementCacheKey &&
+        other.text == text &&
+        other.style == style &&
+        other.maxWidth == maxWidth &&
+        other.lines == lines &&
+        other.textScaler == textScaler &&
+        other.direction == direction &&
+        other.locale == locale;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(text, style, maxWidth, lines, textScaler, direction, locale);
+}
+
+final _textMeasurementCache = <_TextMeasurementCacheKey, bool>{};
+
 class GiftProductCard extends StatefulWidget {
   final GiftProduct product;
   final VoidCallback onGiftPressed;
@@ -32,13 +64,30 @@ class _GiftProductCardState extends State<GiftProductCard> {
 
   bool _exceedsLines(String text, TextStyle style, double maxWidth, int lines) {
     if (text.isEmpty || !maxWidth.isFinite) return false;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    final locale = Localizations.maybeLocaleOf(context);
+
+    final key = _TextMeasurementCacheKey(
+        text, style, maxWidth, lines, textScaler, direction, locale);
+    if (_textMeasurementCache.containsKey(key)) {
+      return _textMeasurementCache[key]!;
+    }
+
     final painter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: lines,
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: direction,
+      textScaler: textScaler,
+      locale: locale,
     )..layout(maxWidth: maxWidth);
-    return painter.didExceedMaxLines;
+
+    final result = painter.didExceedMaxLines;
+    if (_textMeasurementCache.length > 1000) {
+      _textMeasurementCache.clear();
+    }
+    _textMeasurementCache[key] = result;
+    return result;
   }
 
   @override
@@ -95,32 +144,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
           ),
         ),
       );
-      if (widget.product.available) return card;
-      return ColorFiltered(
-        colorFilter: const ColorFilter.matrix([
-          0.2126,
-          0.7152,
-          0.0722,
-          0,
-          0,
-          0.2126,
-          0.7152,
-          0.0722,
-          0,
-          0,
-          0.2126,
-          0.7152,
-          0.0722,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-        ]),
-        child: Opacity(opacity: 0.72, child: card),
-      );
+      return card;
     });
   }
 
@@ -132,8 +156,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
           height: imageHeight,
           width: double.infinity,
           color: isDark ? Colors.grey[900] : AppColors.surfaceContainerLow,
-          child: LayoutBuilder(
-            builder: (context, constraints) => widget.product.imageUrl.isEmpty
+          child: LayoutBuilder(builder: (context, constraints) {
+            Widget content = widget.product.imageUrl.isEmpty
                 ? const Center(
                     child: Icon(Icons.image_not_supported_outlined, size: 48))
                 : Image.network(
@@ -158,8 +182,36 @@ class _GiftProductCardState extends State<GiftProductCard> {
                       return const Center(
                           child: Icon(Icons.image_outlined, size: 48));
                     },
-                  ),
-          ),
+                  );
+            if (!widget.product.available) {
+              content = ColorFiltered(
+                colorFilter: const ColorFilter.matrix([
+                  0.2126,
+                  0.7152,
+                  0.0722,
+                  0,
+                  0,
+                  0.2126,
+                  0.7152,
+                  0.0722,
+                  0,
+                  0,
+                  0.2126,
+                  0.7152,
+                  0.0722,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                ]),
+                child: content,
+              );
+            }
+            return content;
+          }),
         ),
         Positioned(
           top: 16,
@@ -201,16 +253,23 @@ class _GiftProductCardState extends State<GiftProductCard> {
         : shortText;
     final preview = shortText.isNotEmpty ? shortText : fullText;
     final inherited = DefaultTextStyle.of(context).style;
+    final titleColor = widget.product.available
+        ? colors.onSurface
+        : colors.onSurface.withValues(alpha: 0.5);
+    final bodyColor = widget.product.available
+        ? colors.onSurfaceVariant
+        : colors.onSurfaceVariant.withValues(alpha: 0.5);
+
     final titleStyle = inherited.merge(TextStyle(
       fontFamily: 'Playfair Display',
       fontSize: compact ? 16 : 18,
       height: 1.2,
-      color: colors.onSurface,
+      color: titleColor,
     ));
     final bodyStyle = inherited.merge(TextStyle(
       fontSize: compact ? 12 : 13,
       height: 1.35,
-      color: colors.onSurfaceVariant,
+      color: bodyColor,
     ));
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -315,7 +374,9 @@ class _GiftProductCardState extends State<GiftProductCard> {
                     fontFamily: 'Playfair Display',
                     fontSize: compact ? 16 : 18,
                     fontWeight: FontWeight.bold,
-                    color: colors.primary)),
+                    color: widget.product.available
+                        ? colors.primary
+                        : colors.primary.withValues(alpha: 0.5))),
           ]),
       SizedBox(height: compact ? 8 : 10),
       ElevatedButton(

@@ -193,7 +193,7 @@ public static class AdminProductEndpoints
                 if (transaction != null) await transaction.CommitAsync(cancellationToken);
                 foreach (var previous in images)
                 {
-                    try { File.Delete(store.PathFor(previous.StorageKey)); }
+                    try { store.DeleteArtifacts(previous.StorageKey); }
                     catch (IOException) { /* The database already points to the new image. */ }
                     catch (UnauthorizedAccessException) { /* Cleanup can be retried operationally. */ }
                 }
@@ -201,7 +201,7 @@ public static class AdminProductEndpoints
             }
             catch
             {
-                File.Delete(store.PathFor(saved.Key));
+                store.DeleteArtifacts(saved.Key);
                 throw;
             }
         }).DisableAntiforgery().WithMetadata(new RequestSizeLimitAttribute(10 * 1024 * 1024));

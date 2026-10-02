@@ -57,8 +57,7 @@ void main() {
 
       // Dispara um PointerScrollEvent simulando o scroll do mouse para baixo
       final center = tester.getCenter(find.byType(SmoothWebScroll));
-      final gesture =
-          await tester.startGesture(center, kind: PointerDeviceKind.mouse);
+      await tester.startGesture(center, kind: PointerDeviceKind.mouse);
       await tester.sendEventToBinding(PointerScrollEvent(
         position: center,
         scrollDelta: const Offset(0, 50), // Mouse scroll down
@@ -97,8 +96,7 @@ void main() {
 
       // Dispara o evento de scroll para baixo
       final center = tester.getCenter(find.byType(SmoothWebScroll));
-      final gesture =
-          await tester.startGesture(center, kind: PointerDeviceKind.mouse);
+      await tester.startGesture(center, kind: PointerDeviceKind.mouse);
       await tester.sendEventToBinding(PointerScrollEvent(
         position: center,
         scrollDelta: const Offset(0, 50), // Mouse scroll down

@@ -13,6 +13,7 @@ import 'package:wedding_app/features/gifts/presentation/widgets/gifts_closing_se
 import 'package:wedding_app/features/gifts/presentation/widgets/gift_filter_panel.dart';
 import 'package:wedding_app/features/wedding/presentation/widgets/wedding_header.dart';
 import 'package:wedding_app/features/wedding/presentation/widgets/wedding_footer.dart';
+import 'package:wedding_app/core/widgets/smooth_web_scroll.dart';
 
 void main() {
   Widget createWidgetUnderTest() {
@@ -59,6 +60,24 @@ void main() {
       expect(find.byType(GiftFilterPanel), findsNothing);
       // The mobile filter button should also be gone
       expect(find.text('Filtros'), findsNothing);
+    });
+
+    testWidgets('uses native scroll by default and no SmoothWebScroll',
+        (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // SmoothWebScroll shouldn't be present
+      expect(find.byType(SmoothWebScroll), findsNothing);
+
+      // Scroll physics shouldn't be NeverScrollableScrollPhysics
+      final customScrollViewFinder = find.byType(CustomScrollView);
+      expect(customScrollViewFinder, findsOneWidget);
+
+      final customScrollView =
+          tester.widget<CustomScrollView>(customScrollViewFinder);
+      expect(
+          customScrollView.physics, isNot(isA<NeverScrollableScrollPhysics>()));
     });
   });
 }
