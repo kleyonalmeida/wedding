@@ -1,18 +1,15 @@
-import 'package:wedding_app/app_navigation.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../data/repositories/attendance_repository.dart';
-import '../../data/models/rsvp.dart';
+import 'package:wedding_app/app_navigation.dart';
+
+import '../../data/repositories/invitation_line_repository.dart';
 import '../shell/admin_session_controller.dart';
 import '../widgets/admin_page_header.dart';
 import '../widgets/admin_state_widgets.dart';
-import '../widgets/admin_metric_card.dart';
-import '../widgets/admin_metric_grid.dart';
 
 class AdminAttendancePage extends StatefulWidget {
   final int initialPage;
   final String? initialSearch;
-  final bool? initialStatus;
+  final String? initialStatus;
   const AdminAttendancePage(
       {super.key,
       this.initialPage = 1,
@@ -24,459 +21,283 @@ class AdminAttendancePage extends StatefulWidget {
 }
 
 class _AdminAttendancePageState extends State<AdminAttendancePage> {
-  late AttendanceRepository _repository;
-
-  Future<AttendanceSummary>? _summaryFuture;
-
-  PaginatedRsvps? _data;
-  bool _isLoading = false;
-  String? _error;
-
-  late int _page;
-  String? _searchQuery;
-  bool? _filterStatus; // null = all, true = confirmed, false = declined
-
+  late final InvitationLineRepository _repository;
   final _searchController = TextEditingController();
-  Timer? _searchDebounce;
-  int _requestVersion = 0;
+  InvitationLinePageData? _data;
+  String? _error;
+  bool _loading = false;
+  late int _page;
+  String? _filterStatus; // 'all', 'confirmed', 'declined', 'pending'
 
   @override
   void initState() {
     super.initState();
     _page = widget.initialPage;
-    _searchQuery = widget.initialSearch;
-    _filterStatus = widget.initialStatus;
+    _filterStatus = widget.initialStatus ?? 'all';
     _searchController.text = widget.initialSearch ?? '';
-    _repository = AttendanceRepository(AdminSessionController.instance.api);
-    _loadSummary();
-    _loadData();
-  }
-
-  void _loadSummary() {
-    setState(() {
-      _summaryFuture = _repository.getSummary();
-    });
-  }
-
-  Future<void> _loadData() async {
-    final requestVersion = ++_requestVersion;
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-      final result = await _repository.list(
-        page: _page,
-        search: _searchQuery,
-        vaiComparecer: _filterStatus,
-      );
-      if (mounted && requestVersion == _requestVersion) {
-        setState(() {
-          _data = result;
-          _isLoading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted && requestVersion == _requestVersion) {
-        setState(() {
-          _error = 'Não foi possível carregar as presenças.';
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _onSearch(String value) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      if (value.trim() == (_searchQuery ?? '')) return;
-      AppNavigation.replace(context, _route(page: 1, search: value.trim()));
-    });
-  }
-
-  void _onFilterChanged(bool? value) {
-    _searchDebounce?.cancel();
-    AppNavigation.replace(
-        context,
-        _route(
-            page: 1,
-            search: _searchController.text.trim(),
-            status: value,
-            preserveStatus: false));
-  }
-
-  String _route(
-          {required int page,
-          String? search,
-          bool? status,
-          bool preserveStatus = true}) =>
-      Uri(
-        path: '/admin/presenca',
-        queryParameters: {
-          'page': '$page',
-          if ((search ?? _searchQuery)?.isNotEmpty == true)
-            'search': search ?? _searchQuery!,
-          if ((preserveStatus ? status ?? _filterStatus : status) != null)
-            'status': '${preserveStatus ? status ?? _filterStatus : status}',
-        },
-      ).toString();
-
-  Future<void> _openEditModal(Rsvp rsvp) async {
-    final vaiComparecer = ValueNotifier<bool>(rsvp.vaiComparecer);
-    final criancas = TextEditingController(text: rsvp.qtdCriancas.toString());
-    final motivo = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    bool saving = false;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          return AlertDialog(
-            title: Text('Editar Presença: ${rsvp.nome}'),
-            content: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable: vaiComparecer,
-                      builder: (context, val, _) => SwitchListTile(
-                        title: const Text('Vai comparecer?'),
-                        value: val,
-                        onChanged: (v) => vaiComparecer.value = v,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text('Adultos: ${rsvp.qtdAdultos} (definidos no convite)'),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: criancas,
-                      decoration: const InputDecoration(
-                          labelText: 'Crianças', border: OutlineInputBorder()),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        final count = int.tryParse(value ?? '');
-                        return count == null || count < 0 || count > 10
-                            ? 'Informe de 0 a 10 crianças.'
-                            : null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: motivo,
-                      decoration: const InputDecoration(
-                          labelText: 'Motivo da alteração (obrigatório)',
-                          border: OutlineInputBorder()),
-                      validator: (v) => v!.trim().isEmpty
-                          ? 'Obrigatório para auditoria'
-                          : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: saving ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: saving
-                    ? null
-                    : () async {
-                        if (!formKey.currentState!.validate()) return;
-
-                        setModalState(() => saving = true);
-                        try {
-                          await _repository.patch(
-                            rsvp.id,
-                            vaiComparecer: vaiComparecer.value,
-                            qtdCriancas: int.tryParse(criancas.text) ?? 0,
-                            motivo: motivo.text,
-                          );
-                          if (context.mounted) Navigator.pop(context);
-                          if (mounted) {
-                            _loadData();
-                            _loadSummary();
-                          }
-                        } catch (_) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Erro ao salvar edição.')));
-                            setModalState(() => saving = false);
-                          }
-                        }
-                      },
-                child: saving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Salvar'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(24),
-          child: AdminPageHeader(
-            title: 'Gestão de Presenças',
-            subtitle: 'RSVP',
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildSummaryCards(),
-                const SizedBox(height: 20),
-                _buildListSection(),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCards() {
-    return FutureBuilder<AttendanceSummary>(
-      future: _summaryFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 150, child: AdminLoadingState());
-        }
-        if (snapshot.hasError) {
-          return SizedBox(
-              height: 150,
-              child: AdminErrorState(message: 'Falha.', onRetry: _loadSummary));
-        }
-
-        final data = snapshot.data!;
-
-        return AdminMetricGrid(
-          children: [
-            AdminMetricCard(
-              label: 'TOTAL DE RESPOSTAS',
-              value: '${data.totalRespostas}',
-              icon: Icons.mark_email_read,
-              iconColor: Theme.of(context).colorScheme.primary,
-            ),
-            AdminMetricCard(
-              label: 'CONVITES PENDENTES',
-              value: '${data.linhasPendentes}',
-              icon: Icons.pending_actions,
-              iconColor: Theme.of(context).colorScheme.secondary,
-            ),
-            AdminMetricCard(
-              label: 'CONFIRMADOS',
-              value: '${data.confirmados}',
-              icon: Icons.check_circle,
-              iconColor: Colors.green,
-            ),
-            AdminMetricCard(
-              label: 'RECUSADOS',
-              value: '${data.naoVao}',
-              icon: Icons.cancel,
-              iconColor: Theme.of(context).colorScheme.error,
-            ),
-            AdminMetricCard(
-              label: 'TOTAL DE PESSOAS',
-              value: '${data.totalPessoas}',
-              suffixText: '${data.totalAdultos} A / ${data.totalCriancas} C',
-              icon: Icons.groups,
-              iconColor: Theme.of(context).colorScheme.secondary,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildListSection() {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: LayoutBuilder(
-                builder: (context, constraints) => Wrap(
-                      spacing: 16,
-                      runSpacing: 12,
-                      children: [
-                        SizedBox(
-                          width: constraints.maxWidth < 600
-                              ? constraints.maxWidth
-                              : constraints.maxWidth - 220,
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: const InputDecoration(
-                              labelText: 'Buscar por nome ou e-mail',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.search),
-                            ),
-                            onChanged: _onSearch,
-                          ),
-                        ),
-                        DropdownMenu<bool?>(
-                          initialSelection: _filterStatus,
-                          label: const Text('Status'),
-                          onSelected: _onFilterChanged,
-                          dropdownMenuEntries: const [
-                            DropdownMenuEntry(value: null, label: 'Todos'),
-                            DropdownMenuEntry(
-                                value: true, label: 'Confirmados'),
-                            DropdownMenuEntry(value: false, label: 'Recusados'),
-                          ],
-                        ),
-                      ],
-                    )),
-          ),
-          if (_isLoading && _data == null)
-            const AdminLoadingState(message: 'Carregando lista...')
-          else if (_error != null)
-            AdminErrorState(message: _error!, onRetry: _loadData)
-          else if (_data == null || _data!.data.isEmpty)
-            const AdminEmptyState(message: 'Nenhuma resposta encontrada.')
-          else ...[
-            LayoutBuilder(builder: (context, constraints) {
-              if (constraints.maxWidth < 650) {
-                return Column(
-                    children: _data!.data
-                        .map((rsvp) => Card(
-                              child: ListTile(
-                                title: Text(rsvp.nome),
-                                subtitle: Text(
-                                    '${rsvp.email}\n${rsvp.vaiComparecer ? 'Confirmado' : 'Recusado'} • ${rsvp.qtdAdultos} adultos / ${rsvp.qtdCriancas} crianças'),
-                                isThreeLine: true,
-                                trailing: const Icon(Icons.arrow_forward),
-                                onTap: () => AppNavigation.go(
-                                    context, '/admin/presenca/${rsvp.id}'),
-                              ),
-                            ))
-                        .toList());
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Convidado')),
-                    DataColumn(label: Text('Telefone')),
-                    DataColumn(label: Text('Adultos/Crianças')),
-                    DataColumn(label: Text('Status')),
-                    DataColumn(label: Text('Data')),
-                    DataColumn(label: Text('Ações')),
-                  ],
-                  rows: _data!.data.map((rsvp) {
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(rsvp.nome,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w500)),
-                              Text(rsvp.email,
-                                  style: Theme.of(context).textTheme.bodySmall),
-                            ],
-                          ),
-                        ),
-                        DataCell(Text(rsvp.telefone)),
-                        DataCell(
-                            Text('${rsvp.qtdAdultos} / ${rsvp.qtdCriancas}')),
-                        DataCell(
-                          Chip(
-                            label: Text(
-                                rsvp.vaiComparecer ? 'Confirmado' : 'Recusado'),
-                            backgroundColor: rsvp.vaiComparecer
-                                ? Colors.green.withValues(alpha: 0.2)
-                                : Theme.of(context).colorScheme.errorContainer,
-                            side: BorderSide.none,
-                          ),
-                        ),
-                        DataCell(Text(
-                            '${rsvp.criadoEm.day.toString().padLeft(2, '0')}/${rsvp.criadoEm.month.toString().padLeft(2, '0')}/${rsvp.criadoEm.year}')),
-                        DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
-                          IconButton(
-                            tooltip: 'Ver detalhes',
-                            icon: const Icon(Icons.visibility),
-                            onPressed: () => AppNavigation.go(
-                                context, '/admin/presenca/${rsvp.id}'),
-                          ),
-                          IconButton(
-                            tooltip: 'Editar Manualmente',
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => _openEditModal(rsvp),
-                          ),
-                        ])),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              );
-            }),
-            if (_data!.totalPages > 1)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: _page > 1
-                          ? () {
-                              AppNavigation.go(
-                                  context, _route(page: _page - 1));
-                            }
-                          : null,
-                      child: const Text('Anterior'),
-                    ),
-                    const SizedBox(width: 16),
-                    Text('Página $_page de ${_data!.totalPages}',
-                        style: Theme.of(context).textTheme.labelSmall),
-                    const SizedBox(width: 16),
-                    TextButton(
-                      onPressed: _page < _data!.totalPages
-                          ? () {
-                              AppNavigation.go(
-                                  context, _route(page: _page + 1));
-                            }
-                          : null,
-                      child: const Text('Próxima'),
-                    ),
-                  ],
-                ),
-              ),
-          ]
-        ],
-      ),
-    );
+    _repository = InvitationLineRepository(AdminSessionController.instance.api);
+    _load();
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final data = await _repository.list(
+          page: _page,
+          search: _searchController.text.trim(),
+          filterStatus: _filterStatus == 'all' ? null : _filterStatus);
+      if (mounted) setState(() => _data = data);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Não foi possível carregar os convidados.');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _openEditor([InvitationLine? line]) async {
+    final name = TextEditingController(text: line?.identification ?? '');
+    final adults = TextEditingController(text: '${line?.adults ?? 1}');
+    final reason = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool active = line?.active ?? true;
+    bool saving = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(line == null ? 'Cadastrar convidado' : 'Editar convidado'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                TextFormField(
+                  controller: name,
+                  readOnly: line != null,
+                  decoration: const InputDecoration(
+                    labelText: 'Identificação como no convite',
+                    hintText: 'Jorge e Amanda',
+                  ),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Informe a identificação do convite.'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: adults,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantidade de adultos',
+                    helperText: 'Jorge e Amanda = 2 adultos',
+                  ),
+                  validator: (value) => (int.tryParse(value ?? '') ?? 0) < 1
+                      ? 'Informe pelo menos um adulto.'
+                      : null,
+                ),
+                if (line != null) ...[
+                  SwitchListTile(
+                    title: const Text('Convite ativo'),
+                    value: active,
+                    onChanged: (value) => setDialogState(() => active = value),
+                  ),
+                  TextFormField(
+                    controller: reason,
+                    decoration:
+                        const InputDecoration(labelText: 'Motivo da alteração'),
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Informe o motivo para auditoria.'
+                        : null,
+                  ),
+                ],
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: saving ? null : () => Navigator.pop(dialogContext),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setDialogState(() => saving = true);
+                      try {
+                        if (line == null) {
+                          await _repository.create(
+                              name.text.trim(), int.parse(adults.text));
+                        } else {
+                          await _repository.update(line,
+                              adults: int.parse(adults.text),
+                              active: active,
+                              reason: reason.text.trim());
+                        }
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                        if (mounted) await _load();
+                      } catch (error) {
+                        if (dialogContext.mounted) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('Não foi possível salvar: $error')),
+                          );
+                          setDialogState(() => saving = false);
+                        }
+                      }
+                    },
+              child: Text(saving ? 'Salvando...' : 'Salvar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _status(InvitationLine line) {
+    if (!line.active) return 'Inativo';
+    if (!line.responded) return 'Pendente';
+    return line.attending == true ? 'Confirmado' : 'Recusado';
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: AdminPageHeader(
+              title: 'Presença / Convidados',
+              subtitle: 'Gerencie a lista de convidados e suas respostas',
+              trailing: FilledButton.icon(
+                onPressed: () => _openEditor(),
+                icon: const Icon(Icons.add),
+                label: const Text('Novo convidado'),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Buscar convite',
+                      suffixIcon: IconButton(
+                        tooltip: 'Buscar',
+                        icon: const Icon(Icons.search),
+                        onPressed: () {
+                          _page = 1;
+                          _load();
+                        },
+                      ),
+                    ),
+                    onSubmitted: (_) {
+                      _page = 1;
+                      _load();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: DropdownButton<String>(
+                    value: _filterStatus,
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(value: 'all', child: Text('Todos')),
+                      DropdownMenuItem(value: 'confirmed', child: Text('Confirmados')),
+                      DropdownMenuItem(value: 'declined', child: Text('Recusados')),
+                      DropdownMenuItem(value: 'pending', child: Text('Pendentes')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _filterStatus = value;
+                        _page = 1;
+                      });
+                      _load();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: _loading && _data == null
+                ? const AdminLoadingState(message: 'Carregando lista...')
+                : _error != null
+                    ? AdminErrorState(message: _error!, onRetry: _load)
+                    : _data == null || _data!.items.isEmpty
+                        ? const AdminEmptyState(
+                            message: 'Nenhum registro encontrado.')
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            itemCount: _data!.items.length,
+                            itemBuilder: (context, index) {
+                              final line = _data!.items[index];
+                              return Card(
+                                child: ListTile(
+                                  onTap: line.rsvpId != null
+                                      ? () => AppNavigation.go(
+                                          context, '/admin/presenca/${line.rsvpId}')
+                                      : null,
+                                  title: Text(line.identification),
+                                  subtitle: Text(
+                                    '${line.adultsConfirmed ?? line.adults} adulto(s) • ${_status(line)}'
+                                    '${line.attending == true ? ' • ${line.children} criança(s)' : ''}',
+                                  ),
+                                  trailing: IconButton(
+                                    tooltip: 'Editar convidado',
+                                    icon: const Icon(Icons.edit_outlined),
+                                    onPressed: () => _openEditor(line),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+          ),
+          if (_data != null && _data!.totalPages > 1)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                IconButton(
+                  tooltip: 'Página anterior',
+                  onPressed: _page > 1
+                      ? () {
+                          _page--;
+                          _load();
+                        }
+                      : null,
+                  icon: const Icon(Icons.chevron_left),
+                ),
+                Text('$_page de ${_data!.totalPages}'),
+                IconButton(
+                  tooltip: 'Próxima página',
+                  onPressed: _page < _data!.totalPages
+                      ? () {
+                          _page++;
+                          _load();
+                        }
+                      : null,
+                  icon: const Icon(Icons.chevron_right),
+                ),
+              ]),
+            ),
+        ],
+      );
 }

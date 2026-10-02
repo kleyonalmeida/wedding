@@ -19,6 +19,11 @@ public static class AdminDashboardEndpoints
             var recusados = rsvps.Where(r => !r.VaiComparecer).ToList();
             var totalPessoas = confirmados.Sum(r => r.QtdAdultos + r.QtdCriancas);
 
+            var linhasAtivas = await db.InvitationLines.AsNoTracking().Where(l => l.Ativo).CountAsync();
+            var pessoasEsperadas = await db.InvitationLines.AsNoTracking().Where(l => l.Ativo).SumAsync(l => l.QuantidadeAdultos);
+            var linhasRespondidas = rsvps.Select(r => r.InvitationLineId).Distinct().Count();
+            var pendentes = linhasAtivas > linhasRespondidas ? linhasAtivas - linhasRespondidas : 0;
+
             // Produtos
             var gifts = await db.Gifts.AsNoTracking().ToListAsync();
             var totalGifts = gifts.Count;
@@ -45,7 +50,10 @@ public static class AdminDashboardEndpoints
                     total = rsvps.Count,
                     confirmados = confirmados.Count,
                     recusados = recusados.Count,
-                    totalPessoas
+                    totalPessoas,
+                    linhasAtivas,
+                    pendentes,
+                    pessoasEsperadas
                 },
                 products = new
                 {

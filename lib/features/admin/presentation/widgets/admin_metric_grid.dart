@@ -8,13 +8,14 @@ class AdminMetricGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
-          final columns = constraints.maxWidth >= 900
-              ? 4
-              : constraints.maxWidth >= 500
-                  ? 2
-                  : 1;
-          const gap = 14.0;
-          final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
+          const double maxCardWidth = 280.0;
+          
+          int columns = (constraints.maxWidth / maxCardWidth).ceil();
+          if (columns < 1) columns = 1;
+          
+          const gap = 16.0;
+          final width = (constraints.maxWidth - (gap * (columns - 1))) / columns;
+          
           return Wrap(
             spacing: gap,
             runSpacing: gap,

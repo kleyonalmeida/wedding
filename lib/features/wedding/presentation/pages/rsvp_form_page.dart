@@ -69,7 +69,12 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Caso esteja correto e o aviso continua aparecendo a você, lamentamos o transtorno, mas isso quer dizer que você não foi convidado. Pedimos que não insista em novas tentativas. Se desejar esclarecimentos, entre em contato com o noivo ou com a noiva.',
+                'Caso esteja correto e o aviso continua aparecendo a você, lamentamos o transtorno, mas isso quer dizer que você não foi convidado.',
+                style: TextStyle(fontSize: 15, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Pedimos que não insista em novas tentativas. Se desejar esclarecimentos, entre em contato com o noivo ou com a noiva.',
                 style: TextStyle(fontSize: 15, height: 1.5),
               ),
             ],
@@ -90,16 +95,31 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
   }
 
   void _showSuccessModal(bool attending, String identificacao) {
-    final msg = attending
-        ? 'Agradecemos por confirmar a presença de $identificacao. Será uma alegria celebrar este momento juntos!'
-        : 'Sabemos que a data é um pouco complicada devido às festividades, mas agradecemos o tempo que dedicou para nos responder aqui. Sinta-se à vontade para apreciar o site, ver as fotos e, se quiser, visitar nossa área de presentes.';
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Sucesso!', style: TextStyle(color: Colors.green)),
-        content: Text(msg, style: const TextStyle(fontSize: 15, height: 1.5)),
+        title: Text(attending ? 'Que Felicidade!!' : 'Tudo certo!',
+            style: const TextStyle(color: AppColors.primary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              attending
+                  ? 'Agradecemos por confirmar a presença de $identificacao. Nosso dia ficou ainda mais especial! Será de grande alegria celebrar esse momento juntos.'
+                  : 'Sabemos que a data é um pouco complicada devido às festividades, mas agradecemos o tempo que dedicou para nos responder aqui.',
+              style: const TextStyle(fontSize: 15, height: 1.5),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              attending
+                  ? 'Fique à vontade para olhar nosso site e explorá-lo.'
+                  : 'Sinta-se à vontade para apreciar o site, ver as fotos e, se quiser, visitar nossa área de presentes.',
+              style: const TextStyle(fontSize: 15, height: 1.5),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -108,7 +128,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
             },
             child: const Text('VER O SITE',
                 style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.w800)),
+                    color: AppColors.primary, fontWeight: FontWeight.w800)),
           ),
           if (!attending)
             TextButton(
@@ -116,7 +136,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                 Navigator.of(context).pop();
                 AppNavigation.go(this.context, '/presentes');
               },
-              child: const Text('VER PRESENTES'),
+              child: const Text('VER PRESENTES', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800)),
             ),
         ],
       ),

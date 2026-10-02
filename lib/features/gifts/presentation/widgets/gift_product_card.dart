@@ -104,42 +104,45 @@ class _GiftProductCardState extends State<GiftProductCard> {
         onExit: (_) {
           if (_isHovered) setState(() => _isHovered = false);
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          transform: Matrix4.translationValues(0, _isHovered ? -4 : 0, 0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-                color: AppColors.outlineVariant.withValues(alpha: 0.6),
-                width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-              if (_isHovered)
+        child: GestureDetector(
+          onTap: () => _showProductDetailsModal(context),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            transform: Matrix4.translationValues(0, _isHovered ? -4 : 0, 0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                  color: AppColors.outlineVariant.withValues(alpha: 0.6),
+                  width: 1.2),
+              boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryContainer.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                )
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildImageSection(context, imageHeight),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(horizontalPad, compact ? 10 : 12,
-                      horizontalPad, compact ? 10 : 12),
-                  child: _buildBody(context, compact: compact),
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
+                if (_isHovered)
+                  BoxShadow(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  )
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildImageSection(context, imageHeight),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(horizontalPad, compact ? 10 : 12,
+                        horizontalPad, compact ? 10 : 12),
+                    child: _buildBody(context, compact: compact),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -186,26 +189,10 @@ class _GiftProductCardState extends State<GiftProductCard> {
             if (!widget.product.available) {
               content = ColorFiltered(
                 colorFilter: const ColorFilter.matrix([
-                  0.2126,
-                  0.7152,
-                  0.0722,
-                  0,
-                  0,
-                  0.2126,
-                  0.7152,
-                  0.0722,
-                  0,
-                  0,
-                  0.2126,
-                  0.7152,
-                  0.0722,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  1,
-                  0,
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0,      0,      0,      1, 0,
                 ]),
                 child: content,
               );
@@ -217,29 +204,31 @@ class _GiftProductCardState extends State<GiftProductCard> {
           top: 16,
           left: 16,
           right: 16,
-          child: Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.grey[900]!.withValues(alpha: 0.9)
-                      : AppColors.surfaceContainerLowest.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  giftCategoryLabel(widget.product.category).toUpperCase(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5,
-                    color: Theme.of(context).colorScheme.secondary,
+          child: IgnorePointer(
+            child: Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.grey[900]!.withValues(alpha: 0.9)
+                        : AppColors.surfaceContainerLowest.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ),
-              )),
+                  child: Text(
+                    giftCategoryLabel(widget.product.category).toUpperCase(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                )),
+          ),
         ),
       ],
     );
@@ -418,5 +407,98 @@ class _GiftProductCardState extends State<GiftProductCard> {
                     color: colors.onSurfaceVariant)),
           ]),
     ]);
+  }
+
+  void _showProductDetailsModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Stack(
+                    children: [
+                      Container(
+                        height: 320,
+                        width: double.infinity,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : AppColors.surfaceContainerLow,
+                        child: widget.product.imageUrl.isEmpty
+                            ? const Center(child: Icon(Icons.image_not_supported_outlined, size: 64))
+                            : InteractiveViewer(
+                                child: Image.network(
+                                  widget.product.imageUrl,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                      ),
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.product.name,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 12),
+                        GiftPrice(priceCents: widget.product.priceCents, large: true),
+                        const SizedBox(height: 24),
+                        if (widget.product.description?.isNotEmpty == true) ...[
+                          Text(
+                            widget.product.description!,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: FilledButton.icon(
+                            icon: const Icon(Icons.redeem),
+                            onPressed: widget.product.available
+                                ? () {
+                                    Navigator.of(context).pop();
+                                    widget.onGiftPressed();
+                                  }
+                                : null,
+                            label: Text(
+                              widget.product.available ? 'Presentear os Noivos' : 'PRESENTEADO',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

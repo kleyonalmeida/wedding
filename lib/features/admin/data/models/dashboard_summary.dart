@@ -26,12 +26,18 @@ class DashboardRsvps {
   final int confirmados;
   final int recusados;
   final int totalPessoas;
+  final int linhasAtivas;
+  final int pendentes;
+  final int pessoasEsperadas;
 
   DashboardRsvps({
     required this.total,
     required this.confirmados,
     required this.recusados,
     required this.totalPessoas,
+    required this.linhasAtivas,
+    required this.pendentes,
+    required this.pessoasEsperadas,
   });
 
   factory DashboardRsvps.fromJson(Map<String, dynamic> json) {
@@ -40,6 +46,9 @@ class DashboardRsvps {
       confirmados: json['confirmados'] as int? ?? 0,
       recusados: json['recusados'] as int? ?? 0,
       totalPessoas: json['totalPessoas'] as int? ?? 0,
+      linhasAtivas: json['linhasAtivas'] as int? ?? 0,
+      pendentes: json['pendentes'] as int? ?? 0,
+      pessoasEsperadas: json['pessoasEsperadas'] as int? ?? 0,
     );
   }
 }

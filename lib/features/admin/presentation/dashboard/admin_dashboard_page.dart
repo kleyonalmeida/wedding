@@ -201,9 +201,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
 
         final data = snapshot.data!;
 
-        final rsvpProg = data.rsvps.total == 0
+        final rsvpProg = data.rsvps.linhasAtivas == 0
             ? 0.0
-            : (data.rsvps.confirmados / data.rsvps.total);
+            : (data.rsvps.confirmados / data.rsvps.linhasAtivas);
 
         return AdminMetricGrid(
           children: [
@@ -213,8 +213,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
               suffixText: 'pessoas',
               icon: Icons.how_to_reg,
               progress: rsvpProg,
-              progressLabel: 'Respostas recebidas',
-              progressValue: '${(rsvpProg * 100).toStringAsFixed(1)}%',
+              progressLabel: '${data.rsvps.confirmados} conf. / ${data.rsvps.pendentes} pend.',
+              progressValue: '${data.rsvps.confirmados}/${data.rsvps.linhasAtivas} (${(rsvpProg * 100).toStringAsFixed(1)}%)',
             ),
             AdminMetricCard(
               label: 'ARRECADAÇÃO CONFIRMADA',

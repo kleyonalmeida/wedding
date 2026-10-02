@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'attendance/admin_attendance_detail_page.dart';
 import 'attendance/admin_attendance_page.dart';
-import 'attendance/admin_invitation_lines_page.dart';
 import 'audit/admin_audit_detail_page.dart';
 import 'audit/admin_audit_page.dart';
 import 'dashboard/admin_dashboard_page.dart';
@@ -41,16 +40,10 @@ Widget resolveAdminPage(String path) {
     return AdminAttendancePage(
       initialPage: safePage,
       initialSearch: uri.queryParameters['search'],
-      initialStatus: switch (uri.queryParameters['status']) {
-        'true' => true,
-        'false' => false,
-        _ => null,
-      },
+      initialStatus: uri.queryParameters['status'],
     );
   }
-  if (path == '/admin/convites') {
-    return const AdminInvitationLinesPage();
-  }
+
   if (path.startsWith('/admin/presenca/') &&
       path.length > '/admin/presenca/'.length) {
     return AdminAttendanceDetailPage(

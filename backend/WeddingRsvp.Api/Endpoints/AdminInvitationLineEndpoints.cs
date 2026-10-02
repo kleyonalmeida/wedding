@@ -78,13 +78,11 @@ public static class AdminInvitationLineEndpoints
             string? search = null,
             bool? ativo = null,
             bool? respondida = null,
+            bool? pendente = null,
             int page = 1,
-            int pageSize = 20) =>
+            int pageSize = 15) =>
         {
-            var query = db.InvitationLines
-                .AsNoTracking()
-                .Include(l => l.Rsvp)
-                .AsQueryable();
+            var query = db.InvitationLines.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -98,14 +96,35 @@ public static class AdminInvitationLineEndpoints
             if (respondida.HasValue)
                 query = query.Where(l => respondida.Value ? l.Rsvp != null : l.Rsvp == null);
 
+            if (pendente.HasValue)
+            {
+                if (pendente.Value) query = query.Where(l => l.Rsvp == null);
+                else query = query.Where(l => l.Rsvp != null);
+            }
+
             query = query.OrderBy(l => l.IdentificacaoNormalizada);
 
             var total = await query.CountAsync();
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
+                .Select(l => new 
+                {
+                    l.Id,
+                    l.IdentificacaoNoConvite,
+                    l.IdentificacaoNormalizada,
+                    l.QuantidadeAdultos,
+                    l.Ativo,
+                    l.CriadoEm,
+                    RsvpId = l.Rsvp != null ? (Guid?)l.Rsvp.Id : null,
+                    VaiComparecer = l.Rsvp != null ? (bool?)l.Rsvp.VaiComparecer : null,
+                    QtdAdultosConfirmados = l.Rsvp != null ? (int?)l.Rsvp.QtdAdultos : null,
+                    QtdCriancasConfirmadas = l.Rsvp != null ? (int?)l.Rsvp.QtdCriancas : null,
+                    DataResposta = l.Rsvp != null ? (DateTimeOffset?)l.Rsvp.CriadoEm : null
+                })
+                .ToListAsync();
 
             return Results.Ok(new
             {
-                data = items.Select(MapToResponse),
+                data = items,
                 total,
                 page,
                 pageSize,

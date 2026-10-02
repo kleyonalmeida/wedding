@@ -2,24 +2,25 @@ import '../../../../core/network/api_client.dart';
 
 class InvitationLine {
   final String id;
+  final String? rsvpId;
   final String identification;
   final int adults;
   final bool active;
   final bool responded;
   final bool? attending;
   final int children;
+  final int? adultsConfirmed;
 
   InvitationLine.fromJson(Map<String, dynamic> json)
       : id = json['id'] as String,
+        rsvpId = json['rsvpId'] as String?,
         identification = json['identificacaoNoConvite'] as String,
         adults = json['quantidadeAdultos'] as int,
         active = json['ativo'] as bool,
-        responded = json['respondida'] as bool? ?? false,
-        attending =
-            (json['rsvp'] as Map<String, dynamic>?)?['vaiComparecer'] as bool?,
-        children =
-            (json['rsvp'] as Map<String, dynamic>?)?['qtdCriancas'] as int? ??
-                0;
+        responded = json['rsvpId'] != null,
+        attending = json['vaiComparecer'] as bool?,
+        children = json['qtdCriancasConfirmadas'] as int? ?? 0,
+        adultsConfirmed = json['qtdAdultosConfirmados'] as int?;
 }
 
 class InvitationLinePageData {
@@ -35,12 +36,24 @@ class InvitationLineRepository {
   InvitationLineRepository(this.api);
 
   Future<InvitationLinePageData> list(
-      {int page = 1, String search = ''}) async {
-    final query = Uri(queryParameters: {
+      {int page = 1, String search = '', String? filterStatus}) async {
+    final Map<String, String> queryParams = {
       'page': '$page',
-      'pageSize': '20',
-      if (search.isNotEmpty) 'search': search,
-    }).query;
+      'pageSize': '15',
+    };
+    if (search.isNotEmpty) queryParams['search'] = search;
+    
+    if (filterStatus == 'confirmed') {
+      queryParams['respondida'] = 'true';
+      queryParams['vaiComparecer'] = 'true';
+    } else if (filterStatus == 'declined') {
+      queryParams['respondida'] = 'true';
+      queryParams['vaiComparecer'] = 'false';
+    } else if (filterStatus == 'pending') {
+      queryParams['pendente'] = 'true';
+    }
+
+    final query = Uri(queryParameters: queryParams).query;
     final response = await api.get('/api/admin/invitation-lines?$query')
         as Map<String, dynamic>;
     return InvitationLinePageData(
