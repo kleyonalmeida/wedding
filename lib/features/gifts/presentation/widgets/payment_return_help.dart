@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 class PaymentReturnHelp extends StatelessWidget {
@@ -15,9 +16,8 @@ class PaymentReturnHelp extends StatelessWidget {
   Future<void> _launchWhatsApp(BuildContext context) async {
     if (!_validNumber) return;
 
-    final message = orderId != null
-        ? 'Olá, estou entrando em contato sobre a contribuição do presente #KL-$orderId.'
-        : 'Olá, estou entrando em contato sobre a contribuição do presente.';
+    const message =
+        'Olá Kleyon & Liandra! Estou entrando em contato sobre o presente que enviei para vocês. 💛';
 
     final encodedMessage = Uri.encodeComponent(message);
     final url = Uri.parse('https://wa.me/$whatsappNumber?text=$encodedMessage');
@@ -33,14 +33,16 @@ class PaymentReturnHelp extends StatelessWidget {
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Não foi possível abrir o WhatsApp.')),
+            const SnackBar(
+                content: Text('Não foi possível abrir o WhatsApp.')),
           );
         }
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível abrir o WhatsApp.')),
+          const SnackBar(
+              content: Text('Não foi possível abrir o WhatsApp.')),
         );
       }
     }
@@ -58,8 +60,11 @@ class PaymentReturnHelp extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(isMobile ? 16.0 : 20.0),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHigh.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
+        color: colors.surfaceContainerLow.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.3),
+        ),
       ),
       child: Flex(
         direction: isMobile ? Axis.vertical : Axis.horizontal,
@@ -73,14 +78,14 @@ class PaymentReturnHelp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colors.surface,
+                    color: AppColors.secondary.withValues(alpha: 0.12),
                   ),
-                  child:
-                      Icon(Icons.info_outline, color: colors.primary, size: 20),
+                  child: Icon(Icons.support_agent_rounded,
+                      color: AppColors.secondary, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -88,16 +93,16 @@ class PaymentReturnHelp extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Precisa consultar a situação ou atualizar os dados?',
+                        'Dúvidas ou precisa falar conosco?',
                         style: AppTextStyles.workSans.copyWith(
-                          fontSize: isMobile ? 12 : 14,
-                          fontWeight: FontWeight.w500,
+                          fontSize: isMobile ? 13 : 14,
+                          fontWeight: FontWeight.w600,
                           color: colors.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Se precisar de ajuda com esta contribuição, entre em contato diretamente com os noivos.',
+                        'Nosso cerimonial está disponível para lhe auxiliar diretamente.',
                         style: AppTextStyles.workSans.copyWith(
                           fontSize: 12,
                           color: colors.onSurfaceVariant,
@@ -111,25 +116,25 @@ class PaymentReturnHelp extends StatelessWidget {
           ),
           if (hasWhatsApp) ...[
             if (isMobile) const SizedBox(height: 16),
-            ElevatedButton.icon(
+            OutlinedButton.icon(
               onPressed: () => _launchWhatsApp(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.surface,
-                foregroundColor: colors.onSurface,
-                elevation: 1,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF25D366),
+                side: const BorderSide(color: Color(0xFF25D366)),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(100)),
               ),
-              icon: const Text(
-                'Falar no WhatsApp',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2),
+              icon: const Icon(Icons.chat_rounded, size: 18),
+              label: Text(
+                'FALAR NO WHATSAPP',
+                style: AppTextStyles.sans.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
               ),
-              label: const Icon(Icons.open_in_new, size: 16),
             ),
           ]
         ],

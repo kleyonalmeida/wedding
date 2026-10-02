@@ -20,38 +20,11 @@ class PaymentReturnActions extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 640;
 
     return Wrap(
-      spacing: 16,
-      runSpacing: 16,
+      spacing: 12,
+      runSpacing: 12,
       alignment: WrapAlignment.center,
       children: [
-        if (showRefresh)
-          SizedBox(
-            width: isMobile ? double.infinity : null,
-            child: ElevatedButton.icon(
-              onPressed: isRefreshing ? null : onRefresh,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.surfaceContainerLow,
-                foregroundColor: colors.onSurface,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              icon: isRefreshing
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.refresh),
-              label: Text(
-                'ATUALIZAR SITUAÇÃO',
-                style: AppTextStyles.sans.copyWith(
-                    fontSize: 12,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+        // Voltar ao Início — botão primário (pill)
         SizedBox(
           width: isMobile ? double.infinity : null,
           child: ElevatedButton(
@@ -59,39 +32,69 @@ class PaymentReturnActions extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
               foregroundColor: colors.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(100)),
+              elevation: 2,
             ),
             child: Text(
               'VOLTAR AO INÍCIO',
               style: AppTextStyles.sans.copyWith(
-                  fontSize: 12,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold),
+                fontSize: 12,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
+
+        // Ver Outros Presentes — botão secundário (pill contornado)
         SizedBox(
           width: isMobile ? double.infinity : null,
-          child: ElevatedButton(
+          child: OutlinedButton(
             onPressed: () => AppNavigation.replace(context, '/presentes'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.surfaceContainerLow,
+            style: OutlinedButton.styleFrom(
               foregroundColor: colors.onSurface,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              side: BorderSide(color: colors.outlineVariant),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(100)),
             ),
             child: Text(
               'VER OUTROS PRESENTES',
               style: AppTextStyles.sans.copyWith(
-                  fontSize: 12,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold),
+                fontSize: 12,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
+
+        // Atualizar (somente quando necessário, estilo discreto)
+        if (showRefresh)
+          SizedBox(
+            width: isMobile ? double.infinity : null,
+            child: TextButton.icon(
+              onPressed: isRefreshing ? null : onRefresh,
+              icon: isRefreshing
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.refresh_rounded, size: 16),
+              label: Text(
+                'ATUALIZAR SITUAÇÃO',
+                style: AppTextStyles.sans.copyWith(
+                  fontSize: 11,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
