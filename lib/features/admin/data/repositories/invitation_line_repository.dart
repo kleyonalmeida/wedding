@@ -73,13 +73,18 @@ class InvitationLineRepository {
   }
 
   Future<void> update(InvitationLine line,
-      {required int adults,
+      {String? identification,
+      required int adults,
       required bool active,
       required String reason}) async {
-    await api.put('/api/admin/invitation-lines/${line.id}', {
+    final data = <String, dynamic>{
       'quantidadeAdultos': adults,
       'ativo': active,
       'motivo': reason,
-    });
+    };
+    if (identification != null) {
+      data['identificacaoNoConvite'] = identification;
+    }
+    await api.put('/api/admin/invitation-lines/${line.id}', data);
   }
 }

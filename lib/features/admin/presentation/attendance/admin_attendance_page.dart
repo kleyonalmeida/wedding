@@ -84,7 +84,6 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 TextFormField(
                   controller: name,
-                  readOnly: line != null,
                   decoration: const InputDecoration(
                     labelText: 'Identificação como no convite',
                     hintText: 'Jorge e Amanda',
@@ -140,6 +139,7 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                               name.text.trim(), int.parse(adults.text));
                         } else {
                           await _repository.update(line,
+                              identification: name.text.trim(),
                               adults: int.parse(adults.text),
                               active: active,
                               reason: reason.text.trim());

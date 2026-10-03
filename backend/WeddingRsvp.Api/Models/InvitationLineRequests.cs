@@ -14,6 +14,8 @@ public record CreateInvitationLineRequest(
 /// DTO para editar uma linha de convite existente.
 /// </summary>
 public record UpdateInvitationLineRequest(
+    /// <summary>Nova identificação do convite.</summary>
+    string? IdentificacaoNoConvite,
     /// <summary>Nova quantidade de adultos.</summary>
     int? QuantidadeAdultos,
     /// <summary>Estado ativo/inativo.</summary>

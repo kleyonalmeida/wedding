@@ -167,7 +167,23 @@ public static class AdminInvitationLineEndpoints
 
             if (line == null) return Results.NotFound();
 
-            var oldValues = new { line.QuantidadeAdultos, line.Ativo };
+            var oldValues = new { line.QuantidadeAdultos, line.Ativo, line.IdentificacaoNoConvite };
+
+            if (!string.IsNullOrWhiteSpace(request.IdentificacaoNoConvite))
+            {
+                var normalizada = Normalize(request.IdentificacaoNoConvite);
+                if (line.IdentificacaoNormalizada != normalizada)
+                {
+                    var existe = await db.InvitationLines.AnyAsync(l => l.IdentificacaoNormalizada == normalizada && l.Id != id);
+                    if (existe) return Results.Conflict(new { message = "Já existe uma linha com esta identificação." });
+                }
+                line.IdentificacaoNoConvite = request.IdentificacaoNoConvite.Trim();
+                line.IdentificacaoNormalizada = normalizada;
+                if (line.Rsvp != null)
+                {
+                    line.Rsvp.IdentificacaoNoConvite = line.IdentificacaoNoConvite;
+                }
+            }
 
             if (request.QuantidadeAdultos.HasValue)
             {
@@ -181,7 +197,7 @@ public static class AdminInvitationLineEndpoints
 
             line.AtualizadoEm = DateTimeOffset.UtcNow;
 
-            var newValues = new { line.QuantidadeAdultos, line.Ativo };
+            var newValues = new { line.QuantidadeAdultos, line.Ativo, line.IdentificacaoNoConvite };
 
             await auditService.LogAsync(
                 action: "Update",
