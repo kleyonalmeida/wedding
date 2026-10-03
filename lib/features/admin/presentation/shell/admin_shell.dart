@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'admin_session_controller.dart';
 import '../theme/admin_theme.dart';
 
+final ValueNotifier<bool> adminIsDarkMode = ValueNotifier<bool>(false);
+
 class AdminShell extends StatelessWidget {
   final Widget child;
   final String currentPath;
@@ -26,41 +28,44 @@ class AdminShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: AdminTheme.theme,
-      child: Scaffold(
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth > 900;
-            return Row(
-              children: [
-                if (isDesktop) _buildSidebar(context),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Builder(
-                        builder: (headerContext) =>
-                            _buildHeader(headerContext, isDesktop),
-                      ),
-                      Expanded(
-                        child: Container(
-                          color: Theme.of(context).colorScheme.surface,
-                          child: child,
+    return ValueListenableBuilder<bool>(
+      valueListenable: adminIsDarkMode,
+      builder: (context, isDark, _) => Theme(
+        data: isDark ? AdminTheme.darkTheme : AdminTheme.theme,
+        child: Scaffold(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final isDesktop = constraints.maxWidth > 900;
+              return Row(
+                children: [
+                  if (isDesktop) _buildSidebar(context),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Builder(
+                          builder: (headerContext) =>
+                              _buildHeader(headerContext, isDesktop),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Container(
+                            color: Theme.of(context).colorScheme.surface,
+                            child: child,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
+          drawer: MediaQuery.of(context).size.width <= 900
+              ? Drawer(
+                  child: Builder(
+                      builder: (drawerContext) =>
+                          _buildSidebar(drawerContext, isDrawer: true)))
+              : null,
         ),
-        drawer: MediaQuery.of(context).size.width <= 900
-            ? Drawer(
-                child: Builder(
-                    builder: (drawerContext) =>
-                        _buildSidebar(drawerContext, isDrawer: true)))
-            : null,
       ),
     );
   }
@@ -274,6 +279,14 @@ class AdminShell extends StatelessWidget {
                   ],
                 ),
               if (isDesktop) const SizedBox(width: 12),
+              IconButton(
+                icon: Icon(adminIsDarkMode.value ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () {
+                  adminIsDarkMode.value = !adminIsDarkMode.value;
+                },
+                tooltip: adminIsDarkMode.value ? 'Modo Claro' : 'Modo Escuro',
+              ),
+              const SizedBox(width: 8),
               CircleAvatar(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
