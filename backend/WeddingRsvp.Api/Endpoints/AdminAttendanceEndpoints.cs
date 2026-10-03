@@ -64,12 +64,14 @@ public static class AdminAttendanceEndpoints
         // Resumo estatístico — por linhas de convite
         group.MapGet("/summary", async (AppDbContext db) =>
         {
-            var totalLinhas = await db.InvitationLines.CountAsync(l => l.Ativo);
-            var linhasComResposta = await db.InvitationLines
+            var todasAsLinhasAtivas = await db.InvitationLines
                 .AsNoTracking()
                 .Include(l => l.Rsvp)
-                .Where(l => l.Ativo && l.Rsvp != null)
+                .Where(l => l.Ativo)
                 .ToListAsync();
+
+            var totalLinhas = todasAsLinhasAtivas.Count;
+            var linhasComResposta = todasAsLinhasAtivas.Where(l => l.Rsvp != null).ToList();
 
             var linhasConfirmadas = linhasComResposta.Where(l => l.Rsvp!.VaiComparecer).ToList();
             var linhasRecusadas = linhasComResposta.Where(l => !l.Rsvp!.VaiComparecer).ToList();
@@ -77,6 +79,11 @@ public static class AdminAttendanceEndpoints
 
             var totalAdultos = linhasConfirmadas.Sum(l => l.Rsvp!.QtdAdultos);
             var totalCriancas = linhasConfirmadas.Sum(l => l.Rsvp!.QtdCriancas);
+            var totalPessoasConfirmadas = totalAdultos + totalCriancas;
+
+            var totalPessoasEsperadas = todasAsLinhasAtivas.Sum(l => l.QuantidadeAdultos + l.QuantidadeCriancas);
+            var linhasPendentesList = todasAsLinhasAtivas.Where(l => l.Rsvp == null).ToList();
+            var pessoasPendentes = linhasPendentesList.Sum(l => l.QuantidadeAdultos + l.QuantidadeCriancas);
 
             return Results.Ok(new
             {
@@ -86,7 +93,9 @@ public static class AdminAttendanceEndpoints
                 linhasRecusadas = linhasRecusadas.Count,
                 totalAdultos,
                 totalCriancas,
-                totalPessoas = totalAdultos + totalCriancas
+                totalPessoas = totalPessoasConfirmadas,
+                totalPessoasEsperadas,
+                pessoasPendentes
             });
         });
 

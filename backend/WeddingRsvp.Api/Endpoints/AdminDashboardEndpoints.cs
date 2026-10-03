@@ -14,15 +14,22 @@ public static class AdminDashboardEndpoints
         group.MapGet("/summary", async (AppDbContext db) =>
         {
             // RSVPs
-            var rsvps = await db.Rsvps.AsNoTracking().ToListAsync();
-            var confirmados = rsvps.Where(r => r.VaiComparecer).ToList();
-            var recusados = rsvps.Where(r => !r.VaiComparecer).ToList();
-            var totalPessoas = confirmados.Sum(r => r.QtdAdultos + r.QtdCriancas);
+            var linhasAtivasList = await db.InvitationLines
+                .AsNoTracking()
+                .Include(l => l.Rsvp)
+                .Where(l => l.Ativo)
+                .ToListAsync();
 
-            var linhasAtivas = await db.InvitationLines.AsNoTracking().Where(l => l.Ativo).CountAsync();
-            var pessoasEsperadas = await db.InvitationLines.AsNoTracking().Where(l => l.Ativo).SumAsync(l => l.QuantidadeAdultos);
-            var linhasRespondidas = rsvps.Select(r => r.InvitationLineId).Distinct().Count();
-            var pendentes = linhasAtivas > linhasRespondidas ? linhasAtivas - linhasRespondidas : 0;
+            var confirmadas = linhasAtivasList.Where(l => l.Rsvp != null && l.Rsvp.VaiComparecer).ToList();
+            var recusadas = linhasAtivasList.Where(l => l.Rsvp != null && !l.Rsvp.VaiComparecer).ToList();
+            var pendentesList = linhasAtivasList.Where(l => l.Rsvp == null).ToList();
+
+            var totalPessoas = confirmadas.Sum(l => l.Rsvp!.QtdAdultos + l.Rsvp!.QtdCriancas);
+            var linhasAtivas = linhasAtivasList.Count;
+            var pessoasEsperadas = linhasAtivasList.Sum(l => l.QuantidadeAdultos + l.QuantidadeCriancas);
+            var pendentes = pendentesList.Count;
+            var pessoasPendentes = pendentesList.Sum(l => l.QuantidadeAdultos + l.QuantidadeCriancas);
+            var rsvpsTotal = confirmadas.Count + recusadas.Count;
 
             // Produtos
             var gifts = await db.Gifts.AsNoTracking().ToListAsync();
@@ -47,13 +54,14 @@ public static class AdminDashboardEndpoints
             {
                 rsvps = new
                 {
-                    total = rsvps.Count,
-                    confirmados = confirmados.Count,
-                    recusados = recusados.Count,
+                    total = rsvpsTotal,
+                    confirmados = confirmadas.Count,
+                    recusados = recusadas.Count,
                     totalPessoas,
                     linhasAtivas,
                     pendentes,
-                    pessoasEsperadas
+                    pessoasEsperadas,
+                    pessoasPendentes
                 },
                 products = new
                 {
