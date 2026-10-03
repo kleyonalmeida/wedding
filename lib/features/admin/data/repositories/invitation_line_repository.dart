@@ -8,6 +8,7 @@ class InvitationLine {
   final bool active;
   final bool responded;
   final bool? attending;
+  final int childrenLimit;
   final int children;
   final int? adultsConfirmed;
 
@@ -19,6 +20,7 @@ class InvitationLine {
         active = json['ativo'] as bool,
         responded = json['rsvpId'] != null,
         attending = json['vaiComparecer'] as bool?,
+        childrenLimit = json['quantidadeCriancas'] as int? ?? 0,
         children = json['qtdCriancasConfirmadas'] as int? ?? 0,
         adultsConfirmed = json['qtdAdultosConfirmados'] as int?;
 }
@@ -65,16 +67,18 @@ class InvitationLineRepository {
     );
   }
 
-  Future<void> create(String identification, int adults) async {
+  Future<void> create(String identification, int adults, [int childrenLimit = 0]) async {
     await api.post('/api/admin/invitation-lines', {
       'identificacaoNoConvite': identification,
       'quantidadeAdultos': adults,
+      'quantidadeCriancas': childrenLimit,
     });
   }
 
   Future<void> update(InvitationLine line,
       {String? identification,
       required int adults,
+      int? childrenLimit,
       required bool active,
       required String reason}) async {
     final data = <String, dynamic>{
@@ -82,6 +86,9 @@ class InvitationLineRepository {
       'ativo': active,
       'motivo': reason,
     };
+    if (childrenLimit != null) {
+      data['quantidadeCriancas'] = childrenLimit;
+    }
     if (identification != null) {
       data['identificacaoNoConvite'] = identification;
     }

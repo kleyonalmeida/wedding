@@ -72,6 +72,8 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
     final formKey = GlobalKey<FormState>();
     bool active = line?.active ?? true;
     bool saving = false;
+    bool allowChildren = (line?.childrenLimit ?? 0) > 0;
+    final childrenLimit = TextEditingController(text: allowChildren ? '${line?.childrenLimit}' : '');
 
     await showDialog<void>(
       context: context,
@@ -104,6 +106,30 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                       ? 'Informe pelo menos um adulto.'
                       : null,
                 ),
+                SwitchListTile(
+                  title: const Text('Crianças Irão?'),
+                  value: allowChildren,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      allowChildren = value;
+                      if (!value) childrenLimit.clear();
+                    });
+                  },
+                ),
+                if (allowChildren)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: TextFormField(
+                      controller: childrenLimit,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Quantidade limite de crianças',
+                      ),
+                      validator: (value) => (int.tryParse(value ?? '') ?? 0) < 1
+                          ? 'Informe uma quantidade válida.'
+                          : null,
+                    ),
+                  ),
                 if (line != null) ...[
                   SwitchListTile(
                     title: const Text('Convite ativo'),
@@ -134,13 +160,15 @@ class _AdminAttendancePageState extends State<AdminAttendancePage> {
                       if (!formKey.currentState!.validate()) return;
                       setDialogState(() => saving = true);
                       try {
+                        int children = allowChildren ? (int.tryParse(childrenLimit.text) ?? 0) : 0;
                         if (line == null) {
                           await _repository.create(
-                              name.text.trim(), int.parse(adults.text));
+                              name.text.trim(), int.parse(adults.text), children);
                         } else {
                           await _repository.update(line,
                               identification: name.text.trim(),
                               adults: int.parse(adults.text),
+                              childrenLimit: children,
                               active: active,
                               reason: reason.text.trim());
                         }

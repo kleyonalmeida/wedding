@@ -28,6 +28,12 @@ public class InvitationLine
     /// </summary>
     public int QuantidadeAdultos { get; set; }
 
+    /// <summary>
+    /// Quantidade limite de crianças representadas por esta linha (0 ou mais).
+    /// Definida pelo Admin.
+    /// </summary>
+    public int QuantidadeCriancas { get; set; }
+
     /// <summary>Se false, a linha não aceita novas respostas.</summary>
     public bool Ativo { get; set; } = true;
 

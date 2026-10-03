@@ -57,6 +57,7 @@ public static class AdminInvitationLineEndpoints
                 IdentificacaoNoConvite = request.IdentificacaoNoConvite.Trim(),
                 IdentificacaoNormalizada = normalizada,
                 QuantidadeAdultos = request.QuantidadeAdultos,
+                QuantidadeCriancas = request.QuantidadeCriancas,
                 Ativo = true,
                 CriadoEm = DateTimeOffset.UtcNow
             };
@@ -112,6 +113,7 @@ public static class AdminInvitationLineEndpoints
                     l.IdentificacaoNoConvite,
                     l.IdentificacaoNormalizada,
                     l.QuantidadeAdultos,
+                    l.QuantidadeCriancas,
                     l.Ativo,
                     l.CriadoEm,
                     RsvpId = l.Rsvp != null ? (Guid?)l.Rsvp.Id : null,
@@ -167,7 +169,7 @@ public static class AdminInvitationLineEndpoints
 
             if (line == null) return Results.NotFound();
 
-            var oldValues = new { line.QuantidadeAdultos, line.Ativo, line.IdentificacaoNoConvite };
+            var oldValues = new { line.QuantidadeAdultos, line.QuantidadeCriancas, line.Ativo, line.IdentificacaoNoConvite };
 
             if (!string.IsNullOrWhiteSpace(request.IdentificacaoNoConvite))
             {
@@ -192,12 +194,17 @@ public static class AdminInvitationLineEndpoints
                     line.Rsvp.QtdAdultos = request.QuantidadeAdultos.Value;
             }
 
+            if (request.QuantidadeCriancas.HasValue)
+            {
+                line.QuantidadeCriancas = request.QuantidadeCriancas.Value;
+            }
+
             if (request.Ativo.HasValue)
                 line.Ativo = request.Ativo.Value;
 
             line.AtualizadoEm = DateTimeOffset.UtcNow;
 
-            var newValues = new { line.QuantidadeAdultos, line.Ativo, line.IdentificacaoNoConvite };
+            var newValues = new { line.QuantidadeAdultos, line.QuantidadeCriancas, line.Ativo, line.IdentificacaoNoConvite };
 
             await auditService.LogAsync(
                 action: "Update",
@@ -252,6 +259,7 @@ public static class AdminInvitationLineEndpoints
         line.Id,
         line.IdentificacaoNoConvite,
         line.QuantidadeAdultos,
+        line.QuantidadeCriancas,
         line.Ativo,
         line.CriadoEm,
         line.AtualizadoEm,
