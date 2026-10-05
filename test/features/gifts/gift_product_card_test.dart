@@ -70,7 +70,6 @@ void main() {
     ));
     expect(find.text('R\$ 43,21'), findsOneWidget);
     expect(find.text('Presentear os Noivos'), findsOneWidget);
-    expect(find.text('Inclui cartão de felicitações'), findsOneWidget);
     await tester.tap(find.text('Presentear os Noivos'));
     expect(presses, 1);
   });

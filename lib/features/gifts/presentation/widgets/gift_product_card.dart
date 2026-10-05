@@ -393,19 +393,6 @@ class _GiftProductCardState extends State<GiftProductCard> {
                         fontFamily: 'Plus Jakarta Sans',
                         fontSize: compact ? 12 : 13)),
               ]))),
-      const SizedBox(height: 8),
-      Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            Icon(Icons.chat_bubble_outline, size: 14, color: colors.secondary),
-            Text('Inclui cartão de felicitações',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: compact ? 10 : 11,
-                    color: colors.onSurfaceVariant)),
-          ]),
     ]);
   }
 
