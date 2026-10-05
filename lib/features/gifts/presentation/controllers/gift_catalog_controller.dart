@@ -14,7 +14,7 @@ class GiftCatalogController extends ChangeNotifier {
   GiftFilter currentFilter = GiftFilter();
   String searchQuery = '';
   int currentPage = 1;
-  final int limit = 10;
+  final int limit = 12;
   bool hasMore = true;
   int totalResults = 0;
   int _request = 0;

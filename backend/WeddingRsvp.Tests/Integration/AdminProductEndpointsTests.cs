@@ -55,6 +55,20 @@ public class AdminProductEndpointsTests : IClassFixture<CustomWebApplicationFact
     }
 
     [Fact]
+    public async Task POST_BasicCategory_AcceptsSatiricalPrice()
+    {
+        var client = await GetAuthenticatedClientAsync();
+        var response = await client.PostAsJsonAsync("/api/admin/products", new
+        {
+            name = "Apenas o básico", category = " Apenas o Básico ",
+            priceCents = 12_000_000_000L
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var product = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        Assert.Equal(12_000_000_000L, product.GetProperty("priceCents").GetInt64());
+    }
+
+    [Fact]
     public async Task POST_Product_Valid_CreatesProduct()
     {
         var client = await GetAuthenticatedClientAsync();

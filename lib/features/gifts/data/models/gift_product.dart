@@ -11,6 +11,8 @@ class GiftProduct {
   final String? description;
   final String? fullDescription;
 
+  bool get directPixOnly => category.trim().toLowerCase() == 'apenas o básico';
+
   GiftProduct({
     required this.id,
     required this.name,

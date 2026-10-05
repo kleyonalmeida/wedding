@@ -66,6 +66,10 @@ public static class GiftOrderEndpoints
             {
                 return Results.BadRequest("One or more gifts are invalid, inactive, or not found.");
             }
+            if (gifts.Any(g => g.Category.Trim().Equals("Apenas o Básico", StringComparison.OrdinalIgnoreCase)))
+            {
+                return Results.BadRequest(new { code = "DIRECT_PIX_ONLY", message = "Presentes da categoria Apenas o Básico aceitam somente Pix direto." });
+            }
             await using var stockTransaction = db.Database.IsRelational()
                 ? await db.Database.BeginTransactionAsync() : null;
 

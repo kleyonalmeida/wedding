@@ -30,7 +30,8 @@ void main() {
     await repository.getCategories();
     await Future<void>.delayed(Duration.zero);
     expect(requests, 1);
-    expect(controller.products.length, 10);
+    expect(controller.products.length, 12);
+    expect(controller.hasMore, isTrue);
     await controller.loadProducts();
     expect(controller.products.length, 20);
     expect(controller.hasMore, isFalse);

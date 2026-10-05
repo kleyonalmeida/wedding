@@ -6,6 +6,7 @@ import '../../data/repositories/payment_repository.dart';
 import '../../../../core/network/api_client.dart';
 import 'gift_price.dart';
 import 'gift_dedication_modal.dart';
+import 'direct_pix_cart_notice.dart';
 
 class CheckoutDialog extends StatefulWidget {
   final CartController cartController;
@@ -87,6 +88,11 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       }
     } on ApiException catch (e) {
       if (mounted) {
+        if (e.code == 'DIRECT_PIX_ONLY') {
+          Navigator.of(context).pop();
+          showDirectPixCartNotice(context);
+          return;
+        }
         if (e.statusCode == 409) widget.onCatalogChanged?.call();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

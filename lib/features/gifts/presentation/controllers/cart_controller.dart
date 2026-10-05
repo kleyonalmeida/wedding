@@ -21,6 +21,8 @@ class CartController extends ChangeNotifier {
   int get totalCents => _items.fold(
       0, (total, item) => total + item.product.priceCents * item.quantity);
 
+  bool get hasDirectPixOnly => _items.any((item) => item.product.directPixOnly);
+
   void addItem(GiftProduct product) {
     if (!product.available) return;
     final existingIndex =

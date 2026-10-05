@@ -5,6 +5,8 @@ import 'package:wedding_app/features/gifts/presentation/controllers/cart_control
 import 'package:wedding_app/features/gifts/presentation/widgets/gift_product_card.dart';
 import 'package:wedding_app/features/gifts/presentation/widgets/gift_product_grid.dart';
 import 'package:wedding_app/features/gifts/presentation/widgets/gift_checkout_flow.dart';
+import 'package:wedding_app/features/gifts/presentation/widgets/cart_dialog.dart';
+import 'package:wedding_app/features/gifts/presentation/widgets/checkout_dialog.dart';
 import 'package:wedding_app/features/gifts/presentation/widgets/gifts_theme.dart';
 
 GiftProduct product(int id) => GiftProduct(
@@ -80,5 +82,89 @@ void main() {
     await tester.tap(find.text('Adicionar ao carrinho'));
     await tester.pumpAndSettle();
     expect(cart.itemCount, 2);
+  });
+
+  testWidgets('Apenas o Básico mostra a chave Pix sem abrir checkout',
+      (tester) async {
+    final cart = CartController();
+    addTearDown(cart.dispose);
+    final basic = GiftProduct(
+      id: 'basic',
+      name: 'Presente satírico',
+      imageUrl: '',
+      category: ' Apenas o Básico ',
+      occasion: 'Todas',
+      priceCents: 12000000000,
+      isBestSeller: false,
+      available: true,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => showProductCheckout(context, basic, cart, () {}),
+            child: const Text('Escolher'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('Escolher'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'Opaa, não pague por aqui não que tem imposto, aceitamos o pix, a chave é essa papai - 75991801820 :)',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Presentear com Amor'), findsNothing);
+    await tester.tap(find.text('Adicionar ao carrinho'));
+    await tester.pumpAndSettle();
+    expect(cart.hasDirectPixOnly, isTrue);
+  });
+
+  testWidgets('carrinho bloqueado fecha e mantém aviso até clicar no X',
+      (tester) async {
+    final cart = CartController()
+      ..addItem(GiftProduct(
+        id: 'basic',
+        name: 'Presente satírico',
+        imageUrl: '',
+        category: 'Apenas o Básico',
+        occasion: 'Todas',
+        priceCents: 12000000000,
+        isBestSeller: false,
+        available: true,
+      ))
+      ..addItem(product(2));
+    addTearDown(cart.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => showGiftCart(context, cart, () {}),
+            child: const Text('Abrir carrinho'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('Abrir carrinho'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Finalizar compra'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CartDialog), findsNothing);
+    expect(find.byType(CheckoutDialog), findsNothing);
+    expect(find.textContaining('75991801820'), findsOneWidget);
+    await tester.pump(const Duration(minutes: 5));
+    expect(find.textContaining('75991801820'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fechar aviso'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('75991801820'), findsNothing);
+
+    cart.removeItem('basic');
+    await tester.tap(find.text('Abrir carrinho'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Finalizar compra'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckoutDialog), findsOneWidget);
   });
 }

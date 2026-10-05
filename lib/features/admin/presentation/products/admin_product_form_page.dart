@@ -8,6 +8,21 @@ import '../shell/admin_session_controller.dart';
 import '../widgets/admin_page_header.dart';
 import '../widgets/admin_state_widgets.dart';
 
+int? _parsePriceCents(String value) {
+  final text = value.trim();
+  final grouped = RegExp(r'^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$');
+  final plain = RegExp(r'^\d+(?:[,.]\d{1,2})?$');
+  if (!grouped.hasMatch(text) && !plain.hasMatch(text)) return null;
+  final normalized = grouped.hasMatch(text)
+      ? text.replaceAll('.', '').replaceAll(',', '.')
+      : text.replaceAll(',', '.');
+  final parts = normalized.split('.');
+  final whole = int.tryParse(parts.first);
+  if (whole == null) return null;
+  return whole * 100 +
+      (parts.length == 2 ? int.parse(parts.last.padRight(2, '0')) : 0);
+}
+
 class AdminProductFormPage extends StatefulWidget {
   final String? productId; // se nulo, cria novo.
 
@@ -125,11 +140,7 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
     });
 
     try {
-      final priceParts = _price.text.trim().replaceAll(',', '.').split('.');
-      final priceCents = int.parse(priceParts.first) * 100 +
-          (priceParts.length == 2
-              ? int.parse(priceParts.last.padRight(2, '0'))
-              : 0);
+      final priceCents = _parsePriceCents(_price.text)!;
 
       final data = {
         'name': _name.text,
@@ -305,19 +316,21 @@ class _AdminProductFormPageState extends State<AdminProductFormPage> {
                                                     border:
                                                         OutlineInputBorder()),
                                                 validator: (v) {
-                                                  final value = v?.trim() ?? '';
-                                                  if (!RegExp(
-                                                          r'^\d+([,.]\d{1,2})?$')
-                                                      .hasMatch(value)) {
+                                                  final priceCents =
+                                                      _parsePriceCents(v ?? '');
+                                                  if (priceCents == null) {
                                                     return 'Informe um preço válido';
                                                   }
-                                                  final amount =
-                                                      double.tryParse(
-                                                              value.replaceAll(
-                                                                  ',', '.')) ??
-                                                          0;
-                                                  return amount > 0 &&
-                                                          amount <= 100000
+                                                  final directPixOnly =
+                                                      _category.text
+                                                              .trim()
+                                                              .toLowerCase() ==
+                                                          'apenas o básico';
+                                                  final maxCents = directPixOnly
+                                                      ? 12000000000
+                                                      : 10000000;
+                                                  return priceCents > 0 &&
+                                                          priceCents <= maxCents
                                                       ? null
                                                       : 'Preço fora do limite';
                                                 },

@@ -211,7 +211,9 @@ public static class AdminProductEndpoints
     private static bool ValidProduct(string name, string? slug, string category, long priceCents, int? stockRemaining, string? externalUrl) =>
         !string.IsNullOrWhiteSpace(name) && name.Length <= 150 &&
         (string.IsNullOrWhiteSpace(slug) || slug.Trim().Length <= 150) &&
-        !string.IsNullOrWhiteSpace(category) && priceCents > 0 && priceCents <= 10_000_000 &&
+        !string.IsNullOrWhiteSpace(category) && priceCents > 0 &&
+        priceCents <= (category.Trim().Equals("Apenas o Básico", StringComparison.OrdinalIgnoreCase)
+            ? 12_000_000_000L : 10_000_000L) &&
         (stockRemaining == null || stockRemaining is >= 0 and <= 1_000_000) &&
         (string.IsNullOrWhiteSpace(externalUrl) ||
          (externalUrl.Length <= 2048 && Uri.TryCreate(externalUrl.Trim(), UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps));

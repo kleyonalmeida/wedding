@@ -13,6 +13,38 @@ namespace WeddingRsvp.Tests.Integration;
 public class GiftOrderEndpointsTests
 {
     [Fact]
+    public async Task BasicCategoryCannotCreateCheckoutEvenInMixedOrder()
+    {
+        using var factory = new Factory();
+        using var client = factory.CreateClient();
+        var basicId = Guid.NewGuid();
+        var regularId = Guid.NewGuid();
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Gifts.AddRange(
+                new Gift { Id = basicId, Name = "Básico", Slug = "basic-direct-pix", Category = " Apenas o Básico ", PriceCents = 12_000_000_000, Active = true, StockRemaining = 1 },
+                new Gift { Id = regularId, Name = "Regular", Slug = "regular-mixed", Category = "Casa", PriceCents = 1000, Active = true, StockRemaining = 1 }
+            );
+            await db.SaveChangesAsync();
+        }
+        var response = await client.PostAsJsonAsync("/api/gift-orders", new
+        {
+            senderName = "Convidado",
+            items = new[] { new { giftId = basicId, quantity = 1 }, new { giftId = regularId, quantity = 1 } },
+            idempotencyKey = new string('F', 64)
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        Assert.Equal("DIRECT_PIX_ONLY", error.GetProperty("code").GetString());
+        using var verifyScope = factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Assert.Empty(verifyDb.GiftOrders);
+        Assert.Equal(1, verifyDb.Gifts.Single(g => g.Id == basicId).StockRemaining);
+        Assert.Equal(1, verifyDb.Gifts.Single(g => g.Id == regularId).StockRemaining);
+    }
+
+    [Fact]
     public async Task RepeatedRequestReturnsSameCheckoutAndRequiresAccessToken()
     {
         using var factory = new Factory();
