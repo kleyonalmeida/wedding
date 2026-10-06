@@ -59,7 +59,7 @@ class CeremonySection extends StatelessWidget {
                                 icon: Icons.access_time_rounded,
                                 title: 'Data e Horário',
                                 subtitle: 'Sábado, 26 de Dezembro de 2026',
-                                highlight: 'às 15:30 horas',
+                                highlight: 'às 15:00 horas',
                               ),
                               const SizedBox(height: 24),
                               _buildCard(
@@ -85,7 +85,7 @@ class CeremonySection extends StatelessWidget {
                           icon: Icons.access_time_rounded,
                           title: 'Data e Horário',
                           subtitle: 'Sábado, 26 de Dezembro de 2026',
-                          highlight: 'às 15:30 horas',
+                          highlight: 'às 15:00 horas',
                         ),
                         const SizedBox(height: 24),
                         _buildCard(

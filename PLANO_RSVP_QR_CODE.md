@@ -21,7 +21,7 @@
 
 - Usar o HTML enviado como **referência de layout** para a página Flutter: introdução editorial, cartões de data/local, cartão de resposta com faixa superior, etapas visuais, assistência, frase final e `WeddingFooter` atual. Não copiar Tailwind CDN, `onsubmit`, links `#`, dados falsos nem sucesso simulado.
 - Remover FAQ, restrições alimentares, mensagem aos noivos e o rodapé proposto no HTML. O formulário terá apenas identificação do convite, contatos, presença, crianças condicionais e envio, além de campos obrigatórios já existentes que continuem pertinentes, como aceite de termos.
-- Mostrar **Casa da Mangueira Eventos, Feira de Santana/BA**, em **26/12/2026 às 15h30**. Corrigir `WeddingConstants`, que ainda registra 16h00. Não usar local, horário, dress code ou protocolo inventados.
+- Mostrar **Casa da Mangueira Eventos, Feira de Santana/BA**, em **26/12/2026 às 15h00**. Não usar local, horário, dress code ou protocolo inventados.
 - Manter o bloco de assistência. O número de WhatsApp será informado depois: até lá, mostrar orientação de contato **sem botão/link falso**. Quando o número existir, habilitar **“Falar no WhatsApp”** via `url_launcher` e tratar falha ao abrir. Não prometer envio de QR ou protocolo por WhatsApp/e-mail sem essa funcionalidade.
 
 ## Estado atual confirmado no repositório
@@ -88,7 +88,7 @@ Em cada sprint: **(1) escrever testes do comportamento esperado, (2) executá-lo
 - Presença Sim mostra **“Levarão crianças?”**; Não envia zero, Sim exige quantidade de 1–10. Recusa esconde a pergunta e envia zero crianças. Alternância entre estados não envia dados ocultos.
 - A API é chamada **uma vez no clique de confirmar**, nunca durante digitação/abertura da tela. O payload não inclui quantidade de adultos nem tenta dividir `Jorge e Amanda` em pessoas separadas.
 - `INVITATION_NOT_FOUND` abre o modal com o texto digitado; fechá-lo preserva os dados e foca o campo. Linha já respondida recebe aviso específico. Sucesso mostra a mensagem correspondente à presença ou recusa. Erro de rede não apaga dados e permite nova tentativa; botão fica desabilitado durante envio.
-- Cartões mostram **15h30** e **Casa da Mangueira Eventos**; usar a frase final e o rodapé existente. Assistência não abre link falso enquanto o número do WhatsApp não existir. Acesso direto ao formulário passa primeiro pelo aviso nesta sessão; isso é apenas UX, não autorização da API.
+- Cartões mostram **15h00** e **Casa da Mangueira Eventos**; usar a frase final e o rodapé existente. Assistência não abre link falso enquanto o número do WhatsApp não existir. Acesso direto ao formulário passa primeiro pelo aviso nesta sessão; isso é apenas UX, não autorização da API.
 
 **Implementação após testes vermelhos:**
 

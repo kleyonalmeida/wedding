@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/wedding_constants.dart';
 
 OverlayEntry? _activeDirectPixNotice;
 
@@ -55,8 +56,8 @@ void showDirectPixCartNotice(BuildContext context) {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'O presente de preço elevado é uma brincadeira, não um produto de verdade. Se quiser mesmo presentear com esse valor, envie um Pix para 75991801820. Caso contrário, remova-o do carrinho e a compra seguirá normalmente. :)',
+                      Text(
+                        'O presente de preço elevado é uma brincadeira, não um produto de verdade. Se quiser mesmo presentear com esse valor, envie um Pix para ${WeddingConstants.pixKey}. Caso contrário, remova-o do carrinho e a compra seguirá normalmente. :)',
                       ),
                     ],
                   ),

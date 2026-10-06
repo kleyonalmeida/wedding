@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/wedding_constants.dart';
 import '../../data/models/gift_product.dart';
 import '../controllers/cart_controller.dart';
 import 'cart_dialog.dart';
@@ -15,8 +16,8 @@ Future<void> showProductCheckout(BuildContext context, GiftProduct product,
       builder: (dialogContext) => Theme(
         data: giftsTheme(context),
         child: AlertDialog(
-          content: const Text(
-            'Opaa, não pague por aqui não que tem imposto, aceitamos o pix, a chave é essa papai - 75991801820 :)',
+          content: Text(
+            'Opaa, não pague por aqui não que tem imposto, aceitamos o pix, a chave é essa papai - ${WeddingConstants.pixKey} :)',
           ),
           actions: [
             TextButton(

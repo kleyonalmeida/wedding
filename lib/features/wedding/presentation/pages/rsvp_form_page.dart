@@ -301,7 +301,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                           Icons.calendar_today_outlined,
                           'DATA E HORÁRIO',
                           '26 de dezembro de 2026',
-                          'Às 15h30'),
+                          'Às 15h00'),
                       _eventCard(Icons.location_on_outlined, 'LOCAL',
                           'Casa da Mangueira Eventos', 'Feira de Santana • BA'),
                     ]),

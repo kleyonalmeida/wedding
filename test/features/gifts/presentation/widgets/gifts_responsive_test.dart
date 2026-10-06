@@ -112,7 +112,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.text(
-        'Opaa, não pague por aqui não que tem imposto, aceitamos o pix, a chave é essa papai - 75991801820 :)',
+        'Opaa, não pague por aqui não que tem imposto, aceitamos o pix, a chave é essa papai - c9388c93-cbed-4564-8b9d-bcb7f132e168 :)',
       ),
       findsOneWidget,
     );
@@ -153,12 +153,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CartDialog), findsNothing);
     expect(find.byType(CheckoutDialog), findsNothing);
-    expect(find.textContaining('75991801820'), findsOneWidget);
+    expect(find.textContaining('c9388c93-cbed-4564-8b9d-bcb7f132e168'),
+        findsOneWidget);
     await tester.pump(const Duration(minutes: 5));
-    expect(find.textContaining('75991801820'), findsOneWidget);
+    expect(find.textContaining('c9388c93-cbed-4564-8b9d-bcb7f132e168'),
+        findsOneWidget);
     await tester.tap(find.byTooltip('Fechar aviso'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('75991801820'), findsNothing);
+    expect(find.textContaining('c9388c93-cbed-4564-8b9d-bcb7f132e168'),
+        findsNothing);
 
     cart.removeItem('basic');
     await tester.tap(find.text('Abrir carrinho'));
