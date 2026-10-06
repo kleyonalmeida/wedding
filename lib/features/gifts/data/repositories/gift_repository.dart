@@ -1,6 +1,5 @@
 import '../models/gift_product.dart';
 import '../models/gift_filter.dart';
-import '../models/gift_category.dart';
 import '../../../../core/network/api_client.dart';
 
 class GiftRepository {
@@ -81,8 +80,7 @@ class GiftRepository {
       catalog
           .where((p) =>
               filter.categories.isEmpty ||
-              filter.categories
-                  .any((c) => giftCategoryId(c) == giftCategoryId(p.category)))
+              filter.categories.contains(p.category))
           .toList();
 
   void dispose() => _apiClient.dispose();

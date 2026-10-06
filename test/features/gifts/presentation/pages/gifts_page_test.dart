@@ -16,16 +16,45 @@ import 'package:wedding_app/features/wedding/presentation/widgets/wedding_footer
 import 'package:wedding_app/core/widgets/smooth_web_scroll.dart';
 
 void main() {
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest([List<Map<String, Object>> catalog = const []]) {
     return MaterialApp(
         home: GiftsPage(
             repository: GiftRepository(
                 apiClient: ApiClient(
-                    client: MockClient(
-                        (_) async => http.Response(jsonEncode([]), 200))))));
+                    client: MockClient((_) async =>
+                        http.Response(jsonEncode(catalog), 200))))));
   }
 
   group('GiftsPage', () {
+    testWidgets('filtros mostram e aplicam categorias do catálogo',
+        (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest([
+        {
+          'id': '1',
+          'name': 'Presente 1',
+          'category': 'Apenas o Básico',
+          'priceCents': 1000,
+        },
+        {
+          'id': '2',
+          'name': 'Presente 2',
+          'category': 'Viagem espacial',
+          'priceCents': 2000,
+        },
+      ]));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.byType(GiftsCategoryChips), 500,
+          scrollable: find.byType(Scrollable).first);
+      expect(find.text('Apenas o Básico'), findsOneWidget);
+      expect(find.text('Viagem espacial'), findsOneWidget);
+      expect(find.text('Nosso Novo Lar'), findsNothing);
+
+      await tester.tap(find.text('Viagem espacial'));
+      await tester.pumpAndSettle();
+      final grid = tester.widget<GiftProductGrid>(find.byType(GiftProductGrid));
+      expect(grid.products.map((p) => p.name), ['Presente 2']);
+    });
+
     testWidgets('renders all expected new sections and removes old ones',
         (tester) async {
       // For network images in tests we just let flutter handle them since they just return 400.

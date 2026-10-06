@@ -47,7 +47,7 @@ void main() {
     expect(find.text('PRESENTEADO'), findsOneWidget);
     expect(find.byType(ColorFiltered), findsWidgets);
     expect(find.text('R\$ 43,21'), findsOneWidget);
-    expect(find.text('NOSSO NOVO LAR'), findsOneWidget);
+    expect(find.text('CASA'), findsOneWidget);
     expect(find.text('Um belo presente para os noivos'), findsOneWidget);
     await tester.tap(find.text('PRESENTEADO'));
     expect(presses, 0);
@@ -205,8 +205,8 @@ void main() {
     ));
 
     final sizes = find.byType(GiftProductCard);
-    expect(tester.getSize(sizes.at(0)).height,
-        tester.getSize(sizes.at(1)).height);
+    expect(
+        tester.getSize(sizes.at(0)).height, tester.getSize(sizes.at(1)).height);
     expect(tester.takeException(), isNull);
   });
 

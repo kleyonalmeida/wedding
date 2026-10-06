@@ -30,12 +30,13 @@ void main() {
     await repository.getCategories();
     await Future<void>.delayed(Duration.zero);
     expect(requests, 1);
+    expect(controller.categories, ['Casa', 'Lua de Mel']);
     expect(controller.products.length, 12);
     expect(controller.hasMore, isTrue);
     await controller.loadProducts();
     expect(controller.products.length, 20);
     expect(controller.hasMore, isFalse);
-    controller.selectCategory('lar');
+    controller.selectCategory('Casa');
     await Future<void>.delayed(Duration.zero);
     expect(controller.totalResults, 12);
     controller.updateSearch('cafe');
@@ -43,7 +44,7 @@ void main() {
     expect(controller.products.single.name, 'Cafeteira');
     expect(
         controller.products.single.imageUrl, 'https://example.com/image.jpg');
-    controller.selectCategory('luademel');
+    controller.selectCategory('Lua de Mel');
     await Future<void>.delayed(Duration.zero);
     expect(controller.products, isEmpty);
     expect(requests, 1);
@@ -61,8 +62,8 @@ void main() {
       return response.future;
     })));
     final controller = GiftCatalogController(repository: repository);
-    controller.selectCategory('lar');
-    controller.selectCategory('luademel');
+    controller.selectCategory('Casa');
+    controller.selectCategory('Lua de Mel');
     response
         .complete(http.Response(jsonEncode(List.generate(20, product)), 200));
     await Future<void>.delayed(Duration.zero);
@@ -83,5 +84,26 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(
         controller.isLoading, isTrue); // disposed state is no longer observed
+  });
+
+  test('categorias com nomes diferentes não compartilham resultados', () async {
+    final repository = GiftRepository(
+        apiClient: ApiClient(
+            client: MockClient((_) async => http.Response(
+                jsonEncode([
+                  {...product(0), 'category': 'Casa'},
+                  {...product(1), 'category': 'Nosso Novo Lar'},
+                ]),
+                200))));
+    final controller = GiftCatalogController(repository: repository);
+    addTearDown(controller.dispose);
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.categories, ['Casa', 'Nosso Novo Lar']);
+    controller.selectCategory('Casa');
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.products.map((p) => p.name), ['Cafeteira']);
+    controller.selectCategory(null);
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.products.length, 2);
   });
 }

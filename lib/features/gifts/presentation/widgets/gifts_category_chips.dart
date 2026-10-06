@@ -2,24 +2,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class GiftsCategoryChips extends StatelessWidget {
-  final String selectedCategory;
-  final ValueChanged<String> onCategoryChanged;
+  final List<String> categories;
+  final String? selectedCategory;
+  final ValueChanged<String?> onCategoryChanged;
   final ValueChanged<String> onSearchChanged;
 
   const GiftsCategoryChips({
     super.key,
+    required this.categories,
     required this.selectedCategory,
     required this.onCategoryChanged,
     required this.onSearchChanged,
   });
-
-  static const _categories = [
-    {'id': 'todas', 'label': 'Todas as Lembranças'},
-    {'id': 'luademel', 'label': 'Lua de Mel & Experiências'},
-    {'id': 'lar', 'label': 'Nosso Novo Lar'},
-    {'id': 'momentos', 'label': 'Jantares & Momentos'},
-    {'id': 'cotas', 'label': 'Cotas Flexíveis'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +28,7 @@ class GiftsCategoryChips extends StatelessWidget {
           child: TextField(
             onChanged: onSearchChanged,
             decoration: InputDecoration(
-              hintText: 'Buscar lembrança ou cota...',
+              hintText: 'Buscar presente...',
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -68,15 +62,19 @@ class GiftsCategoryChips extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (var index = 0; index < _categories.length; index++) ...[
-                  if (index > 0) const SizedBox(width: 8),
+                _CategoryChip(
+                  label: 'Todas as Lembranças',
+                  selected: selectedCategory == null,
+                  onSelected: () => onCategoryChanged(null),
+                ),
+                for (final category in categories) ...[
+                  const SizedBox(width: 8),
                   _CategoryChip(
-                    label: _categories[index]['label']!,
-                    selected: selectedCategory == _categories[index]['id'],
-                    onSelected: () =>
-                        onCategoryChanged(_categories[index]['id']!),
+                    label: category,
+                    selected: selectedCategory == category,
+                    onSelected: () => onCategoryChanged(category),
                   ),
-                ],
+                ]
               ],
             ),
           ),

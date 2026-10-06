@@ -47,8 +47,7 @@ class GiftCatalogController extends ChangeNotifier {
       final filtered = catalog
           .where((p) =>
               (currentFilter.categories.isEmpty ||
-                  currentFilter.categories.any((c) =>
-                      giftCategoryId(c) == giftCategoryId(p.category))) &&
+                  currentFilter.categories.contains(p.category)) &&
               (term.isEmpty ||
                   normalizeGiftText('${p.name} ${p.description ?? ''}')
                       .contains(term)))
@@ -79,8 +78,8 @@ class GiftCatalogController extends ChangeNotifier {
     });
   }
 
-  void selectCategory(String category) => updateFilter(currentFilter.copyWith(
-      categories: category == 'todas' ? [] : [category]));
+  void selectCategory(String? category) => updateFilter(
+      currentFilter.copyWith(categories: category == null ? [] : [category]));
 
   void updateFilter(GiftFilter filter) {
     currentFilter = filter;

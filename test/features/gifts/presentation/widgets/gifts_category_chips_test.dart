@@ -4,14 +4,15 @@ import 'package:wedding_app/features/gifts/presentation/widgets/gifts_category_c
 
 void main() {
   group('GiftsCategoryChips', () {
-    testWidgets('should render all chips and a search field',
+    testWidgets('mostra apenas as categorias cadastradas e a busca',
         (WidgetTester tester) async {
-      String selected = 'todas';
+      String? selected;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: GiftsCategoryChips(
+              categories: const ['Apenas o Básico', 'Viagem espacial'],
               selectedCategory: selected,
               onCategoryChanged: (v) => selected = v,
               onSearchChanged: (_) {},
@@ -20,28 +21,25 @@ void main() {
         ),
       );
 
-      // Verify Chips
       expect(find.text('Todas as Lembranças'), findsOneWidget);
-      expect(find.text('Lua de Mel & Experiências'), findsOneWidget);
-      expect(find.text('Nosso Novo Lar'), findsOneWidget);
-      expect(find.text('Jantares & Momentos'), findsOneWidget);
-      expect(find.text('Cotas Flexíveis'), findsOneWidget);
+      expect(find.text('Apenas o Básico'), findsOneWidget);
+      expect(find.text('Viagem espacial'), findsOneWidget);
+      expect(find.text('Nosso Novo Lar'), findsNothing);
 
-      // Verify Search Field
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Buscar lembrança ou cota...'),
-          findsOneWidget); // Hint text
+      expect(find.text('Buscar presente...'), findsOneWidget);
     });
 
     testWidgets('should call callbacks on interaction',
         (WidgetTester tester) async {
-      String selected = 'todas';
+      String? selected;
       String search = '';
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: GiftsCategoryChips(
+              categories: const ['Casa', 'Apenas o Básico'],
               selectedCategory: selected,
               onCategoryChanged: (v) => selected = v,
               onSearchChanged: (v) => search = v,
@@ -50,12 +48,14 @@ void main() {
         ),
       );
 
-      // Tap on a different chip
-      await tester.tap(find.text('Nosso Novo Lar'));
+      await tester.tap(find.text('Apenas o Básico'));
       await tester.pumpAndSettle();
-      expect(selected, 'lar');
+      expect(selected, 'Apenas o Básico');
 
-      // Enter text in search field
+      await tester.tap(find.text('Todas as Lembranças'));
+      await tester.pumpAndSettle();
+      expect(selected, isNull);
+
       await tester.enterText(find.byType(TextField), 'Panela');
       await tester.pumpAndSettle();
       expect(search, 'Panela');

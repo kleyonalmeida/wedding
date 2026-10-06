@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/gift_product.dart';
 import 'gift_price.dart';
-import '../../data/models/gift_category.dart';
 
 double giftCardImageHeightFor(double cardWidth) {
   if (cardWidth < 200) return 92;
@@ -217,7 +216,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    giftCategoryLabel(widget.product.category).toUpperCase(),
+                    widget.product.category.toUpperCase(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

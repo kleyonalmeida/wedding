@@ -32,7 +32,6 @@ class _GiftsPageState extends State<GiftsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final GiftCatalogController _catalogController;
   final CartController _cartController = CartController();
-  String _selectedCategory = 'todas';
 
   @override
   void initState() {
@@ -111,16 +110,20 @@ class _GiftsPageState extends State<GiftsPage> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
-                child: Theme(
-                    data: catalogTheme,
-                    child: GiftsCategoryChips(
-                      selectedCategory: _selectedCategory,
-                      onCategoryChanged: (category) {
-                        setState(() => _selectedCategory = category);
-                        _catalogController.selectCategory(category);
-                      },
-                      onSearchChanged: _catalogController.updateSearch,
-                    )),
+                child: ListenableBuilder(
+                    listenable: _catalogController,
+                    builder: (context, _) => Theme(
+                        data: catalogTheme,
+                        child: GiftsCategoryChips(
+                          categories: _catalogController.categories,
+                          selectedCategory: _catalogController
+                                  .currentFilter.categories.isEmpty
+                              ? null
+                              : _catalogController
+                                  .currentFilter.categories.first,
+                          onCategoryChanged: _catalogController.selectCategory,
+                          onSearchChanged: _catalogController.updateSearch,
+                        ))),
               ),
             ),
           ),
