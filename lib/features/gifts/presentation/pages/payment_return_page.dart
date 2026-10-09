@@ -88,9 +88,10 @@ class _PaymentReturnPageState extends State<PaymentReturnPage>
             onCasalTap: () => _go('/'),
             onRecepcaoTap: () => _go('/'),
             onListaTap: () => _go('/presentes'),
-            onRsvpTap: () => _go('/')),
+            onRsvpTap: () => _go('/confirmar-presenca')),
         body: Stack(children: [
           Scrollbar(
+              interactive: true,
               controller: _scroll,
               child: CustomScrollView(controller: _scroll, slivers: [
                 SliverToBoxAdapter(
@@ -124,7 +125,7 @@ class _PaymentReturnPageState extends State<PaymentReturnPage>
               onCasalTap: () => _go('/'),
               onRecepcaoTap: () => _go('/'),
               onListaTap: () => _go('/presentes'),
-              onRsvpTap: () => _go('/'),
+              onRsvpTap: () => _go('/confirmar-presenca'),
               onMenuTap: () => _scaffoldKey.currentState?.openDrawer()),
         ]));
   }

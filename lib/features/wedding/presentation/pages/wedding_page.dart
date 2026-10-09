@@ -2,8 +2,6 @@ import 'package:wedding_app/app_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import '../../../../core/widgets/smooth_web_scroll.dart';
-import '../../../../core/widgets/web_scroll_mode.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/wedding_header.dart';
 import '../widgets/hero_section.dart';
@@ -23,7 +21,7 @@ class WeddingPage extends StatefulWidget {
 }
 
 class _WeddingPageState extends State<WeddingPage> {
-  // Controlador único: compartilhado entre WebSmoothScroll e CustomScrollView
+  // Controlador compartilhado entre a barra lateral e CustomScrollView
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _scrollProgressNotifier =
       ValueNotifier<double>(0.0);
@@ -94,22 +92,17 @@ class _WeddingPageState extends State<WeddingPage> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isDesktopWeb = kIsWeb && !isMobile;
-    final useSmoothWebScroll =
-        isDesktopWeb && resolveWebScrollMode() == WebScrollMode.smooth;
 
-    // Widget de rolagem interno — usa NeverScrollableScrollPhysics no desktop web
-    // para que o WebSmoothScroll assuma o controle exclusivo do scroll.
+    // A rolagem nativa permite usar a roda do mouse e arrastar a barra lateral.
     final Widget innerScrollView = CustomScrollView(
       controller: _scrollController,
-      physics: useSmoothWebScroll
-          ? const NeverScrollableScrollPhysics()
-          : isDesktopWeb
-              ? const ClampingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                )
-              : const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
+      physics: isDesktopWeb
+          ? const ClampingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            )
+          : const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
       slivers: [
         SliverToBoxAdapter(
           key: _homeKey,
@@ -174,18 +167,6 @@ class _WeddingPageState extends State<WeddingPage> {
       ],
     );
 
-    // Widget pai de scroll: no desktop web usa SmoothWebScroll,
-    // no mobile usa o CustomScrollView diretamente (física nativa já é suave).
-    final Widget scrollArea = useSmoothWebScroll
-        ? SmoothWebScroll(
-            controller: _scrollController,
-            scrollAmount: 80, // Distância reduzida por tick do mouse
-            animationDuration:
-                const Duration(milliseconds: 500), // Duração da inércia
-            child: innerScrollView,
-          )
-        : innerScrollView;
-
     return Scaffold(
       key: _scaffoldKey,
       drawer: WeddingSideMenu(
@@ -204,10 +185,11 @@ class _WeddingPageState extends State<WeddingPage> {
       body: Stack(
         children: [
           Scrollbar(
+            interactive: true,
             controller: _scrollController,
             thumbVisibility: !isMobile,
             trackVisibility: !isMobile,
-            child: scrollArea,
+            child: innerScrollView,
           ),
           WeddingHeader(
             isScrolled: _isScrolled,
@@ -215,7 +197,8 @@ class _WeddingPageState extends State<WeddingPage> {
             onCasalTap: () => _scrollTo(_casalKey),
             onRecepcaoTap: () => _scrollTo(_recepcaoKey),
             onListaTap: () => AppNavigation.go(context, '/presentes'),
-            onRsvpTap: () => AppNavigation.go(context, AppRouterDelegate.rsvpNotice),
+            onRsvpTap: () =>
+                AppNavigation.go(context, AppRouterDelegate.rsvpNotice),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           if (isMobile)

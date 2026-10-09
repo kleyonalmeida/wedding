@@ -14,6 +14,17 @@ class WeddingScrollBehavior extends MaterialScrollBehavior {
       };
 
   @override
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    // Páginas com barra própria já compartilham o controlador com a rolagem.
+    if (context.findAncestorWidgetOfExactType<Scrollbar>() != null ||
+        context.findAncestorWidgetOfExactType<RawScrollbar>() != null) {
+      return child;
+    }
+    return super.buildScrollbar(context, child, details);
+  }
+
+  @override
   Widget buildOverscrollIndicator(
           BuildContext context, Widget child, ScrollableDetails details) =>
       child;

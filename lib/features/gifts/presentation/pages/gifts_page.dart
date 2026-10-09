@@ -1,4 +1,5 @@
 import 'package:wedding_app/app_navigation.dart';
+import 'package:wedding_app/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../core/constants/wedding_constants.dart';
@@ -184,7 +185,8 @@ class _GiftsPageState extends State<GiftsPage> {
         onCasalTap: () => _navigateHome(context),
         onRecepcaoTap: () => _navigateHome(context),
         onListaTap: () {}, // Already here
-        onRsvpTap: () => _navigateHome(context),
+        onRsvpTap: () =>
+            AppNavigation.go(context, AppRouterDelegate.rsvpNotice),
       ),
       floatingActionButton: ListenableBuilder(
         listenable: _cartController,
@@ -213,12 +215,14 @@ class _GiftsPageState extends State<GiftsPage> {
             onCasalTap: () => _navigateHome(context),
             onRecepcaoTap: () => _navigateHome(context),
             onListaTap: () {}, // Already here
-            onRsvpTap: () => _navigateHome(context),
+            onRsvpTap: () =>
+                AppNavigation.go(context, AppRouterDelegate.rsvpNotice),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           Expanded(
             child: TexturedBackground(
               child: Scrollbar(
+                interactive: true,
                 controller: _scrollController,
                 thumbVisibility: !isMobile,
                 trackVisibility: !isMobile,

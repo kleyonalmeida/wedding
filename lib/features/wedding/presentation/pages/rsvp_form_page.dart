@@ -282,7 +282,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: const Text(
-                    'Sua presença é muito especial para nós. Confirme até 01 de novembro de 2026 para que possamos preparar cada detalhe.',
+                    'Sua presença é muito especial para nós. Confirme até 01 de dezembro de 2026 para que possamos preparar cada detalhe.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 16,
@@ -353,7 +353,7 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'POR FAVOR, CONFIRME ATÉ O DIA 01/11/2026',
+                              'POR FAVOR, CONFIRME ATÉ O DIA 01/12/2026',
                               style: AppTextStyles.sans.copyWith(
                                 fontSize: 12,
                                 letterSpacing: 2.0,
@@ -567,7 +567,9 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                             const SizedBox(height: 48),
                             Center(
                               child: FractionallySizedBox(
-                                widthFactor: 0.5,
+                                widthFactor: MediaQuery.sizeOf(context).width < 600
+                                    ? 1
+                                    : 0.5,
                                 child: SizedBox(
                                   height: 56,
                                   child: ElevatedButton(
@@ -580,7 +582,13 @@ class _RsvpFormPageState extends State<RsvpFormPage> {
                                     child: _isLoading
                                         ? const CircularProgressIndicator(
                                             color: AppColors.white)
-                                        : const Text('CONFIRMAR PRESENÇA'),
+                                        : const FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              'CONFIRMAR PRESENÇA',
+                                              maxLines: 1,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ),

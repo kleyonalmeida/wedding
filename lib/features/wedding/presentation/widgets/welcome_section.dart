@@ -14,7 +14,7 @@ class WelcomeSection extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 800),
             child: Text(
-              'CRIAMOS ESSE SITE PARA COMPARTILHAR COM VOCÊS OS DETALHES DA ORGANIZAÇÃO DO NOSSO CASAMENTO. ESTAMOS MUITO FELIZES E CONTAMOS COM A SUA PRESENÇA NO NOSSO GRANDE DIA!',
+              'Sejam bem-vindos! Criamos este cantinho especial para dividir a nossa felicidade e os preparativos para o dia 26 de dezembro com vocês. A presença de cada um de vocês tornará o nosso grande dia ainda mais inesquecível!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,

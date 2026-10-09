@@ -16,7 +16,7 @@ class RsvpNoticePage extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 500),
             child: Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 48.0),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -103,12 +103,16 @@ class RsvpNoticePage extends StatelessWidget {
                         foregroundColor: AppColors.white,
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'ENTENDI, CONFIRMAR PRESENÇA',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1,
+                      child: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'ENTENDI, CONFIRMAR PRESENÇA',
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
                     ),

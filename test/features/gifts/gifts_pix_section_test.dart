@@ -4,6 +4,31 @@ import 'package:flutter/services.dart';
 import 'package:wedding_app/features/gifts/presentation/widgets/gifts_pix_section.dart';
 
 void main() {
+  for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets('PIX cabe no celular com largura $width', (tester) async {
+      tester.view.physicalSize = Size(width, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: SingleChildScrollView(
+            child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GiftsPixSection(
+            pixKey: 'chave-pix-comprida@example.com',
+            beneficiary: 'Beneficiário do casamento',
+            onAddMessage: () {},
+          ),
+        )),
+      )));
+      expect(tester.takeException(), isNull);
+      final card = tester.getRect(find.byType(GiftsPixSection));
+      final copy = tester.getRect(find.byIcon(Icons.content_copy));
+      expect(copy.right, lessThanOrEqualTo(card.right));
+    });
+  }
+
   testWidgets('PIX sem configuração fica oculto', (tester) async {
     await tester
         .pumpWidget(const MaterialApp(home: Scaffold(body: GiftsPixSection())));

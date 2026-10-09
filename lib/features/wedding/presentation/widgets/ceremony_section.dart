@@ -5,9 +5,9 @@ import '../../../../core/theme/app_text_styles.dart';
 
 const String _locationName = 'Casa da Mangueira Eventos';
 const String _locationAddress =
-    'Rua Itaucu, 92, Feira de Santana, Bahia, 44065-618';
+    'R. Ituaçu, 92 - Conceição, Feira de Santana - BA, 44065-618, Brazil';
 const String _locationQuery =
-    'Casa da Mangueira Eventos, Rua Itaucu, 92, Feira de Santana, Bahia, 44065-618';
+    'Casa da Mangueira Eventos, R. Ituaçu, 92 - Conceição, Feira de Santana - BA, 44065-618, Brazil';
 
 class CeremonySection extends StatelessWidget {
   const CeremonySection({super.key});
@@ -125,7 +125,7 @@ class CeremonySection extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 4 / 3,
           child: Image.asset(
-            'assets/images/ceremony.png',
+            'assets/images/aquarela.jpeg',
             fit: BoxFit.cover,
             cacheWidth: 1200,
             filterQuality: FilterQuality.medium,
@@ -240,16 +240,14 @@ class _NavigationBottomSheet extends StatelessWidget {
       if (!launched && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content:
-                  Text('Não foi possível abrir o app de navegação.')),
+              content: Text('Não foi possível abrir o app de navegação.')),
         );
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content:
-                  Text('Não foi possível abrir o app de navegação.')),
+              content: Text('Não foi possível abrir o app de navegação.')),
         );
       }
     }
@@ -480,8 +478,8 @@ class _GoogleMapsLogo extends StatelessWidget {
         color: const Color(0xFF4285F4),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(Icons.location_on_rounded,
-          color: Colors.white, size: 18),
+      child:
+          const Icon(Icons.location_on_rounded, color: Colors.white, size: 18),
     );
   }
 }

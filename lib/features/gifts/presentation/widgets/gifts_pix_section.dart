@@ -45,7 +45,7 @@ class GiftsPixSection extends StatelessWidget {
         final desktop = constraints.maxWidth >= 1024;
         return Container(
           padding: EdgeInsets.symmetric(
-            horizontal: desktop ? 48 : 32,
+            horizontal: desktop ? 48 : 20,
             vertical: desktop ? 48 : 32,
           ),
           decoration: BoxDecoration(
@@ -147,12 +147,14 @@ class GiftsPixSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+              child: const Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Icon(Icons.edit_note, size: 18),
                   SizedBox(width: 8),
-                  Text('ENVIAR RECADO COM PRESENTE'),
+                  Text('ENVIAR RECADO COM PRESENTE',
+                      textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -182,38 +184,40 @@ class GiftsPixSection extends StatelessWidget {
         children: [
           Icon(Icons.qr_code_2, color: colors.secondary),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CHAVE PIX (CASAMENTO)',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 11,
-                  letterSpacing: 0.6,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 2),
-              SelectableText(
-                pixKey!,
-                style: TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: colors.primary,
-                ),
-              ),
-              if (beneficiary?.trim().isNotEmpty == true)
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  beneficiary!,
+                  'CHAVE PIX (CASAMENTO)',
                   style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 12,
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 11,
+                    letterSpacing: 0.6,
                     color: colors.onSurfaceVariant,
                   ),
                 ),
-            ],
+                const SizedBox(height: 2),
+                SelectableText(
+                  pixKey!,
+                  style: TextStyle(
+                    fontFamily: 'Work Sans',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colors.primary,
+                  ),
+                ),
+                if (beneficiary?.trim().isNotEmpty == true)
+                  Text(
+                    beneficiary!,
+                    style: TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
           ),
           IconButton(
             tooltip: 'Copiar chave PIX',

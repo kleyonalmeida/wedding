@@ -82,6 +82,7 @@ class _GiftProductCardState extends State<GiftProductCard> {
     )..layout(maxWidth: maxWidth);
 
     final result = painter.didExceedMaxLines;
+    painter.dispose();
     if (_textMeasurementCache.length > 1000) {
       _textMeasurementCache.clear();
     }
@@ -146,7 +147,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
           ),
         ),
       );
-      return card;
+      // A animação ou a imagem de um cartão não repinta os demais da linha.
+      return RepaintBoundary(child: card);
     });
   }
 
@@ -179,8 +181,8 @@ class _GiftProductCardState extends State<GiftProductCard> {
                       color: AppColors.outlineVariant,
                       size: 48,
                     ),
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
+                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                      if (wasSynchronouslyLoaded || frame != null) return child;
                       return const Center(
                           child: Icon(Icons.image_outlined, size: 48));
                     },
